@@ -1,11 +1,11 @@
 from cadCAD_tools.types import Signal, VariableUpdate
-from prey_predator_model.types import PreyPredatorModelParams, PreyPredatorModelState
+from aztec_gddt.types import AztecModelParams, AztecModelState
 
-def p_evolve_time(params: PreyPredatorModelParams, _2, _3, _4) -> Signal:
+def p_evolve_time(params: AztecModelParams, _2, _3, _4) -> Signal:
     return {'delta_days': params['timestep_in_days']}
 
 def s_days_passed(_1, _2, _3,
-                  state: PreyPredatorModelState,
+                  state: AztecModelState,
                   signal: Signal) -> VariableUpdate:
     return ('days_passed', state['days_passed'] + signal['delta_days'])
 
