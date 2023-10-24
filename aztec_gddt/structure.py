@@ -10,8 +10,8 @@ AZTEC_MODEL_BLOCKS = [
             'evolve_time': p_evolve_time
         },
         'variables': {
-            'days_passed': s_days_passed,
-            'delta_days': s_delta_days
+            'block_time': s_block_time,
+            'delta_blocks': s_delta_blocks
         }
     }
 ]
