@@ -13,6 +13,16 @@ AZTEC_MODEL_BLOCKS = [
             'block_time': s_block_time,
             'delta_blocks': s_delta_blocks
         }
+    }, {
+       'label': 'Pre-phase: Stake / Unstake'
+       # TODO 
+    },
+    {
+        'label': 'Proposal Phase: Submit Proposal Transactions'
+        # TODO
+    },
+    {
+        'label': 'Reveal Phase: Submit Reveal Transactions'
     }
 ]
 

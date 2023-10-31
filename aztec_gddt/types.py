@@ -2,8 +2,8 @@ from typing import Annotated, TypedDict, Union
 from dataclasses import dataclass
 from enum import Enum, auto
 
-L1Blocks = Annotated[float, 'blocks']  # Number of L1 Blocks
-L2Blocks = Annotated[float, 'blocks'] # Number of L2 Blocks
+L1Blocks = Annotated[int, 'blocks']  # Number of L1 Blocks (time dimension)
+L2Blocks = Annotated[int, 'blocks'] # Number of L2 Blocks (time dimension)
 
 Probability = Annotated[float, 'probability']
 Tokens = Annotated[float, 'tokens'] # Amount of slashable tokens
@@ -28,6 +28,7 @@ class SelectionProcess:
 @dataclass
 class Sequencer():
     stake_amount: Tokens
+    # TODO: discuss what is an Sequencer on our model
 
 @dataclass
 class Proposal():
