@@ -25,18 +25,18 @@ class Events(Enum):
     RT: Real Time
     L1T: L1 Blocks Time
     """
-    L1T_protocol_init_block_process = auto() # ST: 0->1
-    L1T_protocol_finish_proposal_phase = auto() # ST: 1->2
+    L1T_protocol_init_block_process = auto() # Triggers block process transition from 0->1
+    L1T_protocol_finish_proposal_phase = auto() # Triggers block process transition 1->2
 
     # Proposal related events
     L1T_proposer_submit_proposal = auto() # OK 
 
     # Leading sequencer related events
-    L1T_lead_submit_block_content = auto() # ST 2-> 3 or -1
+    L1T_lead_submit_block_content = auto() # Triggers block process transition from 2-> 3 or -1
     RT_lead_reveal_tx_proofs = auto() 
     RT_prover_submit_rollup_proof = auto() # Proving Network sends rollup proof to lead
-    L1T_lead_submit_rollup_proof = auto()  # ST 3-> 4 or -2
-    L1T_lead_submit_finalization_tx = auto() # ST 4-> 5 or -3 
+    L1T_lead_submit_rollup_proof = auto()  # Triggers block process transition from  3-> 4 or -2
+    L1T_lead_submit_finalization_tx = auto() # Triggers block process transition from  4-> 5 or -3 
 
     # Misc
     RT_nonlead_transition_state = auto() 
