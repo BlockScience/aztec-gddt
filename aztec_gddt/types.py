@@ -1,4 +1,4 @@
-from typing import Annotated, TypedDict, Union, NamedTuple
+from typing import Annotated, TypedDict, Union, NamedTuple, Optional
 from dataclasses import dataclass
 from enum import IntEnum, Enum, auto
 from math import floor
@@ -64,11 +64,11 @@ class SelectionPhase(IntEnum): # XXX
     finalized_without_rewards = -3 # XXX
 
 @dataclass
-class SelectionProcess:
+class Process:
     uuid: ProcessUUID 
     current_phase: SelectionPhase
-    leading_sequencer: SequencerUUID
-    uncle_sequencers: set[SequencerUUID]
+    leading_sequencer: Optional[SequencerUUID]
+    uncle_sequencers: Optional[set[SequencerUUID]]
 
     current_phase_init_time: L1Blocks
     duration_in_current_phase: L1Blocks
@@ -116,7 +116,7 @@ class AztecModelState(TypedDict):
     # Global State
     interacting_users: list[Sequencer]
     # Order matters. lastest elements are newer processes
-    block_processes: list[SelectionProcess] 
+    processes: list[Process] 
 
     # Flattened Meso State
     proposals: dict[ProcessUUID, list[Proposal]]
@@ -129,6 +129,9 @@ class AztecModelState(TypedDict):
 class AztecModelParams(TypedDict):
     label: str# XXX
     timestep_in_blocks: L1Blocks# XXX
+
+    proposal_duration: L1Blocks
+    uncle_count: int
 
     stake_activation_period: L1Blocks# XXX
     unstake_cooldown_period: L1Blocks# XXX

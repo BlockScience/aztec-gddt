@@ -62,16 +62,16 @@ def p_init_process(params: AztecModelParams,
                    _2,
                    _3,
                    state: AztecModelState) -> Signal:
+    """
     
-    last_process = last_active_process(state['block_processes'])
-
-
+    """
+    last_process = last_active_process(state['processes'])
     do_init_process = last_process.current_phase == SelectionPhase.pending_rollup_proof
     do_init_process |= last_process.current_phase == SelectionPhase.skipped
     do_init_process |= last_process.current_phase == SelectionPhase.reorg
 
     if do_init_process:
-        new_process = SelectionProcess(uuid=uuid4(),
+        new_process = Process(uuid=uuid4(),
                                        current_phase=SelectionPhase.pending_proposals,
                                        leading_sequencer=None,
                                        uncle_sequencers=None,
@@ -84,18 +84,52 @@ def p_init_process(params: AztecModelParams,
 
     return {'new_process': new_process}
 
+def p_select_sequencer(params: AztecModelParams,
+                   _2,
+                   _3,
+                   state: AztecModelState) -> Signal:
+    """
+    
+    """
+    processes_to_transition = [p for p in state['processes']
+                               if p.current_phase == SelectionPhase.pending_proposals
+                               and p.duration_in_current_phase >= params['proposal_duration']]
+    
+    # selection_results: process_uuid -> (winner_proposal, uncle_proposal_list)
+    selection_results: dict[ProcessUUID, tuple[Proposal, list[Proposal]]] = {}
+    for process in processes_to_transition:
+        proposals = state['proposals'].get(process.uuid, [])
+        if len(proposals) > 0:
 
-def s_block_processes(params: AztecModelParams,
+            # TODO: check if true
+            number_uncles = min(len(proposals) - 1, params['uncle_count'])
+
+            ranked_proposals = sorted(proposals, 
+                                      key=lambda p: p.score,
+                                      reverse=True)
+            
+            winner_proposal = ranked_proposals[0]
+            uncle_proposals = ranked_proposals[1:number_uncles+1]
+            selection_results[process.uuid] = (winner_proposal, uncle_proposals)
+        else:
+            pass
+
+    return {'selection_results': selection_results}
+    
+
+def s_processes(params: AztecModelParams,
                       _2,
                       _3,
                       state: AztecModelState,
                       signal: Signal) -> VariableUpdate:
-    updated_processes = deepcopy(state['block_processes'])
-
+    """
+    
+    """
+    updated_processes = deepcopy(state['processes'])
 
 
     new_process = signal.get('new_process', None)
     if new_process != None:
         updated_processes.append(new_process)
 
-    return ('block_processes', updated_processes)
+    return ('processes', updated_processes)
