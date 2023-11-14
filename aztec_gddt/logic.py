@@ -3,7 +3,7 @@ from aztec_gddt.helper import *
 from aztec_gddt.types import *
 from typing import Callable
 from uuid import uuid4
-from copy import deepcopy
+from copy import deepcopy, copy
 
 def generic_policy(_1, _2, _3, _4) -> dict:
     """Function to generate pass through policy
@@ -96,8 +96,9 @@ def p_select_sequencer(params: AztecModelParams,
                                and p.duration_in_current_phase >= params['proposal_duration']]
     
     # selection_results: process_uuid -> (winner_proposal, uncle_proposal_list)
-    selection_results: dict[ProcessUUID, tuple[Proposal, list[Proposal]]] = {}
+    updated_processes: dict[ProcessUUID, Process] = {}
     for process in processes_to_transition:
+        # TODO: filter out invalid proposals
         proposals = state['proposals'].get(process.uuid, [])
         if len(proposals) > 0:
 
@@ -110,11 +111,16 @@ def p_select_sequencer(params: AztecModelParams,
             
             winner_proposal = ranked_proposals[0]
             uncle_proposals = ranked_proposals[1:number_uncles+1]
-            selection_results[process.uuid] = (winner_proposal, uncle_proposals)
+            
+            updated_process = copy(process)
+            updated_process.current_phase = SelectionPhase.pending_reveal
+            updated_process.leading_sequencer = winner_proposal.uuid
+            updated_process.uncle_sequencers = [p.uuid for p in uncle_proposals]
+            updated_processes[process.uuid] = updated_process
         else:
             pass
 
-    return {'selection_results': selection_results}
+    return {'update_processes': updated_processes}
     
 
 def s_processes(params: AztecModelParams,
@@ -125,11 +131,15 @@ def s_processes(params: AztecModelParams,
     """
     
     """
-    updated_processes = deepcopy(state['processes'])
+    processes = deepcopy(state['processes'])
+
+    processes_to_update = signal.get('updated_processes', {}),
+    for process_uuid, updated_process in processes_to_update.items():
+        pass # TODO   
 
 
     new_process = signal.get('new_process', None)
     if new_process != None:
-        updated_processes.append(new_process)
+        processes.append(new_process)
 
-    return ('processes', updated_processes)
+    return ('processes', processes)

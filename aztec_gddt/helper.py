@@ -19,3 +19,4 @@ def most_advanced_active_process(processes: list[Process]) -> Process:
 def last_active_process(processes: list[Process]) -> Process:
     # XXX: this assumes that the process list is ordered correctly
     return active_processes(processes)[-1]
+
