@@ -3,6 +3,7 @@ from aztec_gddt.helper import *
 from aztec_gddt.types import *
 from typing import Callable
 from uuid import uuid4
+from copy import deepcopy
 
 def generic_policy(_1, _2, _3, _4) -> dict:
     """Function to generate pass through policy
@@ -82,3 +83,19 @@ def p_init_process(params: AztecModelParams,
         new_process = None
 
     return {'new_process': new_process}
+
+
+def s_block_processes(params: AztecModelParams,
+                      _2,
+                      _3,
+                      state: AztecModelState,
+                      signal: Signal) -> VariableUpdate:
+    updated_processes = deepcopy(state['block_processes'])
+
+
+
+    new_process = signal.get('new_process', None)
+    if new_process != None:
+        updated_processes.append(new_process)
+
+    return ('block_processes', updated_processes)

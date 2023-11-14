@@ -25,13 +25,12 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
             'finalize_block': None
         },
         'variables': {
-            'block_processes': None
+            'block_processes': s_block_processes
         }
     },
     {
         'label': 'Handle L2 reorgs'
     }
-
 ]
 
 
