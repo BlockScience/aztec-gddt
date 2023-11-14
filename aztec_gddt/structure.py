@@ -18,7 +18,7 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
     {
         'label': 'Advance Block Process Phases',
         'policies': {
-            'init_process': None,
+            'init_process': p_init_process,
             'select_sequencer': None,
             'reveal_block_content': None,
             'reveal_block_proofs': None,
