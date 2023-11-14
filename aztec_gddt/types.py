@@ -15,7 +15,6 @@ Tokens = Annotated[float, 'tokens'] # Amount of slashable tokens
 ProcessUUID = Annotated[object, 'uuid']
 SequencerUUID = Annotated[object, 'uuid']
 ProposalUUID = Annotated[object, 'uuid']
-
 class EventCategories(Enum):
     """
     Pattern for event naming: {time}_{agent}_{desc}
@@ -68,7 +67,7 @@ class Process:
     uuid: ProcessUUID 
     current_phase: SelectionPhase
     leading_sequencer: Optional[SequencerUUID]
-    uncle_sequencers: Optional[set[SequencerUUID]]
+    uncle_sequencers: Optional[list[SequencerUUID]]
 
     current_phase_init_time: L1Blocks
     duration_in_current_phase: L1Blocks
@@ -102,6 +101,9 @@ class Proposal():
     proposer_uuid: SequencerUUID
     score: float
     submission_time: ContinuousL1Blocks 
+
+
+SelectionResults = dict[ProcessUUID, tuple[Proposal, list[Proposal]]]
 
 
 ## Definition for simulation-specific types
