@@ -1,6 +1,6 @@
 from typing import Annotated, TypedDict, Union, NamedTuple
 from dataclasses import dataclass
-from enum import Enum, auto
+from enum import IntEnum, Enum, auto
 from math import floor
 
 ## Units
@@ -50,7 +50,7 @@ class Event(NamedTuple):
     type: EventCategories
 
 ## Types for representing entities
-class SelectionPhase(Enum): # XXX
+class SelectionPhase(IntEnum): # XXX
     # Expected phases
     pending_proposals = 1
     pending_reveal = 2

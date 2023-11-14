@@ -1,6 +1,8 @@
 from cadCAD_tools.types import Signal, VariableUpdate # type: ignore
-from aztec_gddt.types import AztecModelParams, AztecModelState
+from aztec_gddt.helper import *
+from aztec_gddt.types import *
 from typing import Callable
+from uuid import uuid4
 
 def generic_policy(_1, _2, _3, _4) -> dict:
     """Function to generate pass through policy
@@ -53,3 +55,30 @@ def s_block_time(params: AztecModelParams, _2, _3,
 
 def s_delta_blocks(_1, _2, _3, _4, signal: Signal) -> VariableUpdate:
     return ('delta_blocks', signal['delta_blocks'])
+
+
+def p_init_process(params: AztecModelParams,
+                   _2,
+                   _3,
+                   state: AztecModelState) -> Signal:
+    
+    last_process = last_active_process(state['block_processes'])
+
+
+    do_init_process = last_process.current_phase == SelectionPhase.pending_rollup_proof
+    do_init_process |= last_process.current_phase == SelectionPhase.skipped
+    do_init_process |= last_process.current_phase == SelectionPhase.reorg
+
+    if do_init_process:
+        new_process = SelectionProcess(uuid=uuid4(),
+                                       current_phase=SelectionPhase.pending_proposals,
+                                       leading_sequencer=None,
+                                       uncle_sequencers=None,
+                                       current_phase_init_time=state['time_l1'],
+                                       duration_in_current_phase=0,
+                                       proofs_are_public=False,
+                                       process_aborted=False)
+    else:
+        new_process = None
+
+    return {'new_process': new_process}
