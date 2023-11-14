@@ -16,14 +16,18 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
         }
     },
     {
-        'label': 'Onboards and/or Offboards users ?'
+        'label': 'Advance Block Process Phases',
+        'policies': {
+            'init_process': None,
+            'select_sequencer': None,
+            'reveal_block_content': None,
+            'reveal_block_proofs': None,
+            'finalize_block': None
+        },
+        'variables': {
+            'block_processes': None
+        }
     },
-    {
-        'label': 'Submit Proposals'
-    }
-    {
-        'label': 'Advance Block Process Phases'
-    }, 
     {
         'label': 'Handle L2 reorgs'
     }
