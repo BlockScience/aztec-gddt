@@ -121,7 +121,59 @@ def p_select_sequencer(params: AztecModelParams,
             pass
 
     return {'update_processes': updated_processes}
+
+
+def p_reveal_block_content(params: AztecModelParams,
+                   _2,
+                   _3,
+                   state: AztecModelState) -> Signal:
+    """
     
+    """
+    updated_processes: dict = {}
+    # TODO
+    # For every process on the `pending_reveal` phase, do:
+    # - If the process has blown the phase duration, 
+    # then transition to skipped. 
+    # - Else, check if the the block content was revealed for that process.
+    # If yes, advance to the next phase. Else, nothing happens.
+    return {'update_processes': updated_processes}
+
+
+def p_submit_block_proofs(params: AztecModelParams,
+                   _2,
+                   _3,
+                   state: AztecModelState) -> Signal:
+    """
+    
+    """
+    updated_processes: dict = {}
+    # TODO
+    # For every process on the `pending_rollup_proof` phase, do:
+    # - If the process has blown the phase duration, 
+    # then transition to / trigger reorg.
+    # - Else, check if a **valid** rollup proof was submitted for that process.
+    # If yes, advance to the next phase. Else, nothing happens.
+    return {'update_processes': updated_processes}
+
+
+def p_finalize_block(params: AztecModelParams,
+                   _2,
+                   _3,
+                   state: AztecModelState) -> Signal:
+    """
+    
+    """
+    updated_processes: dict = {}
+    # TODO
+    # For every process on the `pending_finalization` phase, do:
+    # - If the process has blown the phase duration, 
+    # then transition to finalized w/o rewards. 
+    # - Else, check if the finalize transaction was submitted.
+    # If yes, advance to the next phase. Else, nothing happens
+    return {'update_processes': updated_processes}
+
+
 
 def s_processes(params: AztecModelParams,
                       _2,
