@@ -216,7 +216,7 @@ def p_reveal_block_content(params: AztecModelParams,
                    _3,
                    state: AztecModelState) -> Signal:
     """
-    Advances state of Processes that have revealed block content, skips those that haven't. 
+    Advances state of Processes that have revealed block content.
     """
 
     # TODO: Create select_processes_by_state
@@ -225,30 +225,27 @@ def p_reveal_block_content(params: AztecModelParams,
     current_processes = state['processes'] #TODO: Type of current_processes: ?
     updated_processes: dict[ProcessUUID, Process] = {}
 
-
-    #######################################
-    ## Among processes that are pending  ##
-    ## reveal, determine which ones have ##
-    ## blown the phase duration.         ##
-    ## Skip those that have,             ##
-    ## advance those that haven't.       ##
-    #######################################
+    ##################################################################
+    ## For every process on the pending_finalization phase, do:     ##
+    ## If the process has blown the phase duration,                 ##
+    ## then transition to finalized w/o rewards.                    ##
+    ## Else, check if the finalize transaction was submitted.       ##
+    ## If yes, advance to the next phase. Else, nothing happens     ##
+    ###################################################################
 
     pending_reveal_processes  = select_processes_by_state(processes = current_processes,
-                                                state = SelectionPhase.pending_reveal)
+                                                state = SelectionPhase.pending_finalization)
 
     for process in pending_reveal_processes:     # For each process on  `pending_reveal` phase
         updated_process = copy(process)
 
-
         if has_blown_phase_duration(process):    # If the process has blown the phase duration
-            updated_process = current_phase = SelectionPhase.skipped # Transition process to skipped phase.
+            updated_process. current_phase = SelectionPhase.finalized_without_rewards # Transition process to skipped phase.
         else:
-            if has_revealed_block_content(process): #If block content revealed
+            if finalized_transaction_submitted(process): #If finalized transaction was submitted.
                 updated_process.current_phase = process.current_phase + 1 #Advance current phase to next phase
             else: # If block content not revealed 
                 pass # Nothing happens 
-
 
         updated_processes[process.uuid] = updated_process #Assign to place in dictionary
 
@@ -259,8 +256,9 @@ def p_submit_block_proofs(params: AztecModelParams,
                    _3,
                    state: AztecModelState) -> Signal:
     """
-    
+    Advances state of Processes that have submitted valid proofs.
     """
+
     current_processes = state['processes'] #TODO: Type of current_processes: ?
     updated_processes: dict[ProcessUUID, Process] = {}
 
