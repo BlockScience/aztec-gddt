@@ -1,9 +1,13 @@
-from cadCAD_tools.types import Signal, VariableUpdate # type: ignore
-from aztec_gddt.helper import *
-from aztec_gddt.types import *
+from copy import deepcopy, copy
 from typing import Callable
 from uuid import uuid4
-from copy import deepcopy, copy
+
+from cadCAD_tools.types import Signal, VariableUpdate # type: ignore
+
+from aztec_gddt.helper import *
+from aztec_gddt.types import *
+
+
 
 def generic_policy(_1, _2, _3, _4) -> dict:
     """Function to generate pass through policy
@@ -19,6 +23,9 @@ def generic_policy(_1, _2, _3, _4) -> dict:
     """
     return {}
 
+#######################################
+## General helper functions.         ##
+#######################################
 
 def replace_suf(variable: str, default_value=0.0) -> Callable:
     """Creates replacing function for state update from string
@@ -44,7 +51,10 @@ def add_suf(variable: str, default_value=0.0) -> Callable:
     return lambda _1, _2, _3, state, signal: (variable, signal.get(variable, default_value) + state[variable])
 
 
-
+#######################################
+## Overall functions, not attached   ##
+## to any particular phase.          ##
+#######################################
 
 def p_evolve_time(params: AztecModelParams, _2, _3, _4) -> Signal:
     return {'delta_blocks': params['timestep_in_blocks']}
@@ -84,11 +94,16 @@ def p_init_process(params: AztecModelParams,
 
     return {'new_process': new_process}
 
+#######################################
+##         Selection Phase           ##
+#######################################                
+
 def p_select_sequencer(params: AztecModelParams,
                    _2,
                    _3,
                    state: AztecModelState) -> Signal:
     """
+    Select a sequencer from list of eligible sequencers. 
     
     """
     processes_to_transition = [p for p in state['processes']
@@ -128,10 +143,10 @@ def p_reveal_block_content(params: AztecModelParams,
                    _3,
                    state: AztecModelState) -> Signal:
     """
-    
+    Reveals the
     """
     updated_processes: dict = {}
-    # TODO
+    pending_reveal_processes = state[]
     # For every process on the `pending_reveal` phase, do:
     # - If the process has blown the phase duration, 
     # then transition to skipped. 
