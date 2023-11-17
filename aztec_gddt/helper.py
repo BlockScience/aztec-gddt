@@ -20,3 +20,14 @@ def last_active_process(processes: list[Process]) -> Process:
     # XXX: this assumes that the process list is ordered correctly
     return active_processes(processes)[-1]
 
+#######################################
+## Helper functions for Selection    ##
+#######################################
+
+def select_processes_by_state(processes, state):
+    # TODO: For a collection of processes, return only those that have specific state. 
+    pass
+
+def has_blown_phase_duration(process):
+    # TODO: Determine if a process has blown its phase duration. (Not sure what this means or how to calculate at moment.)
+    pass 

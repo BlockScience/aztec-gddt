@@ -24,7 +24,7 @@ def generic_policy(_1, _2, _3, _4) -> dict:
     return {}
 
 #######################################
-## General helper functions.         ##
+## General system helper functions.  ##
 #######################################
 
 def replace_suf(variable: str, default_value=0.0) -> Callable:
@@ -56,8 +56,6 @@ def add_suf(variable: str, default_value=0.0) -> Callable:
 ## to any particular phase.          ##
 #######################################
 
-# TODO: Determine the type of params in cadCAD.
-
 def p_evolve_time(params: AztecModelParams, _2, _3, _4) -> Signal:
     """Policy function giving the change in number of blocks. 
 
@@ -73,18 +71,45 @@ def p_evolve_time(params: AztecModelParams, _2, _3, _4) -> Signal:
 def s_block_time(params: AztecModelParams, _2, _3,
                   state: AztecModelState,
                   signal: Signal) -> VariableUpdate:
+    """State update function advancing block time.  
+
+    Args:
+         params (AztecModelParams): The current parameters of the model.
+         state (AztecModelState): The current state of the model.
+         signal (Signal): The Signal, generated in p_evolve_time, of how many blocks to advance time. 
+
+    Returns:
+        VariableUpdate:
+        TODO: Clarify my understanding of VariableUpdate in cadCAD. - Octopus 
+    """
     return ('block_time', state['time_l1'] + signal['delta_blocks'])
 
 def s_delta_blocks(_1, _2, _3, _4, signal: Signal) -> VariableUpdate:
+    """
+    State update function for change in block number. 
+
+    Args: 
+        signal (Signal): The Signal, generated in p_evolve_time, of how many blocks to advance time. 
+
+    Returns: 
+        VariableUpdate
+    """
     return ('delta_blocks', signal['delta_blocks'])
+
+
 
 
 def p_init_process(params: AztecModelParams,
                    _2,
                    _3,
-                   state: AztecModelState) -> Signal:
+                   state: AztecModelState) -> Process:
     """
+    Args:
+         params (AztecModelParams): The current parameters of the model.
+         state (AztecModelState): The current state of the model.
 
+    Returns:
+         Signal: The new process to be considered in the system. 
     
     """
 
@@ -122,16 +147,38 @@ def p_init_process(params: AztecModelParams,
 
 #######################################
 ##         Selection Phase           ##
-#######################################                
+#######################################  
+
+
+#######################################
+## Policy and state update functions ##
+## for selection.                    ##
+#######################################
 
 def p_select_sequencer(params: AztecModelParams,
                    _2,
                    _3,
                    state: AztecModelState) -> Signal:
     """
-    Select a sequencer from list of eligible sequencers. 
+    Select a sequencer from list of eligible sequencers, and
+    determine uncle sequencers. 
+
+    Args:
+        params (AztecModelParams): The current parameters of the model.
+        state (AztecModelState): The current state of the model.
     
+    Returns:
+         Signal: The new process to be considered in the system. 
     """
+
+    #######################################
+    ## Decide which processes are valid  ##
+    ## 1. current phase of process must  ##
+    ##    be pending proposals           ##
+    ## 2. the duration is greater than   ##
+    ##    proposal duration.             ##
+    #######################################
+
     processes_to_transition = [p for p in state['processes']
                                if p.current_phase == SelectionPhase.pending_proposals
                                and p.duration_in_current_phase >= params['proposal_duration']]
@@ -169,17 +216,43 @@ def p_reveal_block_content(params: AztecModelParams,
                    _3,
                    state: AztecModelState) -> Signal:
     """
-    Reveals the
+    Advances state of Processes that have revealed block content, skips those that haven't. 
     """
-    updated_processes: dict = {}
-    pending_reveal_processes = state[]
-    # For every process on the `pending_reveal` phase, do:
-    # - If the process has blown the phase duration, 
-    # then transition to skipped. 
-    # - Else, check if the the block content was revealed for that process.
-    # If yes, advance to the next phase. Else, nothing happens.
-    return {'update_processes': updated_processes}
 
+    # TODO: Create select_processes_by_state
+    # TODO: How to check if block content was revealed for process? (Add this as a field for the class?)
+
+    current_processes = state['processes'] #TODO: Type of current_processes: ?
+    updated_processes: dict[ProcessUUID, Process] = {}
+
+
+    #######################################
+    ## Among processes that are pending  ##
+    ## reveal, determine which ones have ##
+    ## blown the phase duration.         ##
+    ## Skip those that have,             ##
+    ## advance those that haven't.       ##
+    #######################################
+
+    pending_reveal_processes  = select_processes_by_state(processes = current_processes,
+                                                state = SelectionPhase.pending_reveal)
+
+    for process in pending_reveal_processes:     # For each process on  `pending_reveal` phase
+        updated_process = copy(process)
+
+
+        if has_blown_phase_duration(process):    # If the process has blown the phase duration
+            updated_process = current_phase = SelectionPhase.skipped # Transition process to skipped phase.
+        else:
+            if has_revealed_block_content(process): #If block content revealed
+                updated_process.current_phase = process.current_phase + 1 #Advance current phase to next phase
+            else: # If block content not revealed 
+                pass # Nothing happens 
+
+
+        updated_processes[process.uuid] = updated_process #Assign to place in dictionary
+
+    return {'update_processes': updated_processes}
 
 def p_submit_block_proofs(params: AztecModelParams,
                    _2,
@@ -188,13 +261,26 @@ def p_submit_block_proofs(params: AztecModelParams,
     """
     
     """
-    updated_processes: dict = {}
-    # TODO
-    # For every process on the `pending_rollup_proof` phase, do:
-    # - If the process has blown the phase duration, 
-    # then transition to / trigger reorg.
-    # - Else, check if a **valid** rollup proof was submitted for that process.
-    # If yes, advance to the next phase. Else, nothing happens.
+    current_processes = state['processes'] #TODO: Type of current_processes: ?
+    updated_processes: dict[ProcessUUID, Process] = {}
+
+    pending_rollup_proof_processes  = select_processes_by_state(processes = current_processes,
+                                            state = SelectionPhase.pending_rollup_proof) 
+
+    for process in pending_rollup_proof_processes:
+        updated_process = copy(process)
+
+        if has_blown_phase_duration(process):
+            # TODO: Trigger reorg. (Ock: not sure how to implement this.)
+            trigger_reorg(something)
+        else: 
+            if did_submit_valid_rollup_proof(process): #TODO: Check if a valid rollup proof was submitted (Ock: How to determine?)
+                updated_process.current_phase = process.current_phase + 1 #Advance to next phase
+            else: # If no valid rollup
+                pass  #Nothing changes
+        
+        updated_processes[process.uuid] = updated_process #Assign to place in dictionary
+
     return {'update_processes': updated_processes}
 
 
