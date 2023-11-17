@@ -187,6 +187,7 @@ def p_select_sequencer(params: AztecModelParams,
     updated_processes: dict[ProcessUUID, Process] = {}
     for process in processes_to_transition:
         # TODO: filter out invalid proposals
+        # J: Which invalid proposals are we expecting here? Anything "spam/invalid" would just be ignored, not sure we need to sim that, unless for blockspace 
         proposals = state['proposals'].get(process.uuid, [])
         if len(proposals) > 0:
 
