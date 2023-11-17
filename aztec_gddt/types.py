@@ -86,7 +86,9 @@ class Sequencer(): # XXX
 
 
 
-    # TODO: discuss what is an Sequencer on our model
+    # TODO: 
+    # discuss what is an Sequencer on our model
+    # discuss how to derive proposal scores - each sequencer a random value and calculate score for each per round? 
 
 
 @dataclass
@@ -139,7 +141,9 @@ class AztecModelParams(TypedDict):
     unstake_cooldown_period: L1Blocks# XXX
 
     # Behavioral Parameters
-    block_reveal_probability: Probability# XXX
+    block_content_reveal_probability: Probability # XXX In reveal phase, lead might not reveal content
+    tx_proof_reveal_probability: Probability  # XXX If lead does not reveal tx proofs, Provers can't do their work
+    rollup_proof_reveal_probability: Probability # XXX If Provers don't send back rollup proof, lead can't submit
 
 
 
