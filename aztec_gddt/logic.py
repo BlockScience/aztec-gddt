@@ -56,7 +56,18 @@ def add_suf(variable: str, default_value=0.0) -> Callable:
 ## to any particular phase.          ##
 #######################################
 
+# TODO: Determine the type of params in cadCAD.
+
 def p_evolve_time(params: AztecModelParams, _2, _3, _4) -> Signal:
+    """Policy function giving the change in number of blocks. 
+
+    Args:
+         params (AztecModelParams): The current parameters of the model.
+
+    Returns:
+        Signal: 
+        TODO: Clarify my understanding of Signal in cadCAD. - Octopus 
+    """
     return {'delta_blocks': params['timestep_in_blocks']}
 
 def s_block_time(params: AztecModelParams, _2, _3,
@@ -73,12 +84,27 @@ def p_init_process(params: AztecModelParams,
                    _3,
                    state: AztecModelState) -> Signal:
     """
+
     
     """
+
+   #######################################
+   ## Logical check to determine if     ##
+   ## a new process will be  initiated. ##
+   ## Checks to see if current phase    ##
+   ## of last process is one of         ##
+   ## pending_rollup_proof, skipped,    ##
+   ## or reorg.                         ##
+   #######################################
+
     last_process = last_active_process(state['processes'])
     do_init_process = last_process.current_phase == SelectionPhase.pending_rollup_proof
     do_init_process |= last_process.current_phase == SelectionPhase.skipped
     do_init_process |= last_process.current_phase == SelectionPhase.reorg
+
+    #######################################
+    ## Logic to create new process       ##
+    #######################################
 
     if do_init_process:
         new_process = Process(uuid=uuid4(),
