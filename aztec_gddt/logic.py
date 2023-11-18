@@ -102,7 +102,7 @@ def s_delta_blocks(_1, _2, _3, _4, signal: Signal) -> VariableUpdate:
 def p_init_process(params: AztecModelParams,
                    _2,
                    _3,
-                   state: AztecModelState) -> Process:
+                   state: AztecModelState) -> Signal:
     """
     Args:
          params (AztecModelParams): The current parameters of the model.
