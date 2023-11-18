@@ -64,7 +64,7 @@ def p_evolve_time(params: AztecModelParams, _2, _3, _4) -> Signal:
 
     Returns:
         Signal: 
-        TODO: Clarify my understanding of Signal in cadCAD. - Octopus 
+            a dictionary of variables that can be used in an update
     """
     return {'delta_blocks': params['timestep_in_blocks']}
 
