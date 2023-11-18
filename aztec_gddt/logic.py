@@ -80,7 +80,7 @@ def s_block_time(params: AztecModelParams, _2, _3,
 
     Returns:
         VariableUpdate:
-        TODO: Clarify my understanding of VariableUpdate in cadCAD. - Octopus 
+            A two-element tuple that all state update functions must return.
     """
     return ('block_time', state['time_l1'] + signal['delta_blocks'])
 
