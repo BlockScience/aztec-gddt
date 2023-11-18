@@ -1,9 +1,6 @@
 # Aztec Granular Design Digital Twin Model
 
-**Last Updated:** Nov 17 2023 by Octopus :octopus:
-
-**INTERNAL:** This document is intended for partial fulfillment of the first deliverable [here](https://hackmd.io/@blockscience/r1AXUlQb6?type=view) for Aztec Network: "Documentation on the modeling approach and decisions."  
-
+his document is intended to provide additional documentation on the approach and decisions behind our model of the Aztec network. 
 
 ## Overview 
  
@@ -15,10 +12,7 @@ The stated goal of [Aztec Network](https://aztec.network/) is "A no-compromises 
 
 ### Description of System
 
-**Internal Note:** :octopus: My description of the system is based on:
-* [this document](https://hackmd.io/@aztec-network/fernet)
-* conversations with Jakob
-* the November 13 Slack communication from Jakob regarding updates to system design. 
+Our description of the system is based on [the Fernet documentation](https://hackmd.io/@aztec-network/fernet) and discussions with colleagues. 
 
 #### Actions
 
@@ -57,7 +51,6 @@ The process of performing Aztec's fundamental activities proceeds in a few well-
 
 **Phase 2 (Reveal Phase)**
 The Sequencer reveals the contents of the block. This is necessary for the block to be valid.
-:octopus: :question: If the contents are not revealed, how are potential uncles involved here?
 
 **Phase 3 (Proving Phase)**
 Provers are able to provide proofs necessary for completion of the block. 
@@ -79,7 +72,7 @@ At the end of this process, there are two possible outcomes.
 
 ## Overview of System
 
-**Internal Note:** These are largely :octopus: own personal thoughts that are intended as a starting point with the other team members. 
+This section is in progress.
 
 ### System Goals 
 
@@ -92,12 +85,7 @@ These are the sliders (continuous) and switches (discrete) that can impact the s
 
 ### KPIs
 
-:octopus: All of the KPIs I have are related to performance. Other KPIs could be developed related to 
-
-* Number of Sequencers available overall 
-* Number of Sequencers available per session (probability distribution or statistical knowledge)
-* Rate of Failed Blocks
-* Distribution of Failed Block Runs (consecutive blocks which are not produced)
+TODO: Describe KPIs. Be sure that they are not exogeneous variables. 
 
 ## Modeling and Simulation
 
