@@ -223,7 +223,7 @@ def p_reveal_block_content(params: AztecModelParams,
     # TODO: Create select_processes_by_state
     # TODO: How to check if block content was revealed for process? (Add this as a field for the class?)
 
-    current_processes = state['processes'] #TODO: Type of current_processes: ?
+    current_processes = state['processes'] 
     updated_processes: dict[ProcessUUID, Process] = {}
 
     ##################################################################
