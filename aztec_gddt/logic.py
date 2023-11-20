@@ -167,6 +167,7 @@ def p_init_process(params: AztecModelParams,
                                        current_phase_init_time=state['time_l1'],
                                        duration_in_current_phase=0,
                                        proofs_are_public=False,
+                                       block_content_is_public=False,
                                        process_aborted=False)
     else:
         new_process = None
@@ -183,7 +184,7 @@ def p_init_process(params: AztecModelParams,
 ## for selection.                    ##
 #######################################
 
-def p_select_sequencer(params: AztecModelParams,
+def p_select_proposal(params: AztecModelParams,
                    _2,
                    _3,
                    state: AztecModelState) -> Signal:
@@ -247,8 +248,6 @@ def p_reveal_block_content(params: AztecModelParams,
     """
     Advances state of Processes that have revealed block content.
     """
-
-    # TODO: Create select_processes_by_state
     # TODO: How to check if block content was revealed for process? (Add this as a field for the class?)
     # Note: Advances state of Process in reveal phase that have revealed block content.                    
 
@@ -329,6 +328,19 @@ def p_finalize_block(params: AztecModelParams,
     return {'update_processes': updated_processes}
 
 
+def s_sequencer(params: AztecModelParams,
+                      _2,
+                      _3,
+                      state: AztecModelState,
+                      signal: Signal) -> VariableUpdate:
+    """
+    
+    """
+    # TODO: Logic for updating the sequencer
+    # Signal comes from p_select_sequencer
+
+
+    return ('sequencer', sequencer)
 
 def s_processes(params: AztecModelParams,
                       _2,
