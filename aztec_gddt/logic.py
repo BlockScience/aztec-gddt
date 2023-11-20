@@ -96,6 +96,18 @@ def s_delta_blocks(_1, _2, _3, _4, signal: Signal) -> VariableUpdate:
     """
     return ('delta_blocks', signal['delta_blocks'])
 
+##############################
+## Selection Phase          ##
+##############################
+
+
+#############################
+## First step: determine   ##
+## who drops in and drops  ##
+## out of the interacting  ##
+## users.                  ##
+#############################
+
 
 def p_update_interacting_users(params: AztecModelParams,
                    _2,
