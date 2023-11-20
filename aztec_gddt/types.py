@@ -71,8 +71,9 @@ class Process:
 
     current_phase_init_time: L1Blocks
     duration_in_current_phase: L1Blocks
-
+    
     proofs_are_public: bool
+    block_content_is_revealed: bool
     process_aborted: bool
     
 
