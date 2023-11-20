@@ -97,8 +97,24 @@ def s_delta_blocks(_1, _2, _3, _4, signal: Signal) -> VariableUpdate:
     return ('delta_blocks', signal['delta_blocks'])
 
 
+def p_update_interacting_users(params: AztecModelParams,
+                   _2,
+                   _3,
+                   state: AztecModelState) -> Signal:
+    """
+    Args:
+         params (AztecModelParams): The current parameters of the model.
+         state (AztecModelState): The current state of the model.
 
+    Returns:
+         Signal: The new process to be considered in the system. 
+    
+    """
+    #TODO: logic for updating interacting users
 
+    return {"new_interacting_users": new_interacting_users}
+
+   
 def p_init_process(params: AztecModelParams,
                    _2,
                    _3,
@@ -322,3 +338,23 @@ def s_processes(params: AztecModelParams,
         processes.append(new_process)
 
     return ('processes', processes)
+
+
+###########################
+## Overall steps         ## 
+###########################
+
+###########################
+## Phases                ##
+## A new process starts  ##
+## Question:             ##
+## When should Sequencers ##
+## be updated? At the beginning ##
+## of a new process?            ##
+##################################
+
+# First phase of new process:
+# which Sequencers drop in or drop out? 
+# Decision: Danilo will make. 
+
+
