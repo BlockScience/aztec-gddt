@@ -255,23 +255,21 @@ def p_reveal_block_content(params: AztecModelParams,
     updated_processes: dict[ProcessUUID, Process] = {}
 
     ##################################################################
-    ## For every process on the pending_finalization phase, do:     ##
-    ## If the process has blown the phase duration,                 ##
-    ## then transition to finalized w/o rewards.                    ##
-    ## Else, check if the finalize transaction was submitted.       ##
-    ## If yes, advance to the next phase. Else, nothing happens     ##
+    ## For every process in the reveal content phase, run           ##
+    ## a Bernoulli trial and determine whether this proposal        ##
+    ## reveals block content or now.                                ##
     ###################################################################
 
     pending_reveal_processes  = select_processes_by_state(processes = current_processes,
-                                                state = SelectionPhase.pending_finalization)
+                                                state = SelectionPhase.pending_reveal)
 
     for process in pending_reveal_processes:     # For each process on  `pending_reveal` phase
         updated_process = copy(process)
 
         if has_blown_phase_duration(process):    # If the process has blown the phase duration
-            updated_process. current_phase = SelectionPhase.finalized_without_rewards # Transition process to skipped phase.
+            updated_process.current_phase = SelectionPhase.finalized_without_rewards # Transition process to skipped phase.
         else:
-            if finalized_transaction_submitted(process): #If finalized transaction was submitted.
+            if block_content_is_revealed(process): #If finalized transaction was submitted.
                 updated_process.current_phase = process.current_phase + 1 #Advance current phase to next phase
             else: # If block content not revealed 
                 pass # Nothing happens 
