@@ -222,6 +222,7 @@ def p_reveal_block_content(params: AztecModelParams,
 
     # TODO: Create select_processes_by_state
     # TODO: How to check if block content was revealed for process? (Add this as a field for the class?)
+    # Note: Advances state of Process in reveal phase that have revealed block content.                    
 
     current_processes = state['processes'] 
     updated_processes: dict[ProcessUUID, Process] = {}
@@ -273,7 +274,7 @@ def p_submit_block_proofs(params: AztecModelParams,
             # TODO: Trigger reorg. (Ock: not sure how to implement this.)
             trigger_reorg(something)
         else: 
-            if did_submit_valid_rollup_proof(process): #TODO: Check if a valid rollup proof was submitted (Ock: How to determine?)
+            if did_submit_valid_rollup_proof(process): #TODO: Check if a valid rollup proof was submitted (Ock: How to determine?) 
                 updated_process.current_phase = process.current_phase + 1 #Advance to next phase
             else: # If no valid rollup
                 pass  #Nothing changes
