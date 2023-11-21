@@ -96,9 +96,37 @@ def s_delta_blocks(_1, _2, _3, _4, signal: Signal) -> VariableUpdate:
     """
     return ('delta_blocks', signal['delta_blocks'])
 
+##############################
+## Selection Phase          ##
+##############################
 
 
+#############################
+## First step: determine   ##
+## who drops in and drops  ##
+## out of the interacting  ##
+## users.                  ##
+#############################
 
+
+def p_update_interacting_users(params: AztecModelParams,
+                   _2,
+                   _3,
+                   state: AztecModelState) -> Signal:
+    """
+    Args:
+         params (AztecModelParams): The current parameters of the model.
+         state (AztecModelState): The current state of the model.
+
+    Returns:
+         Signal: The new process to be considered in the system. 
+    
+    """
+    #TODO: logic for updating interacting users
+
+    return {"new_interacting_users": new_interacting_users}
+
+   
 def p_init_process(params: AztecModelParams,
                    _2,
                    _3,
@@ -139,6 +167,7 @@ def p_init_process(params: AztecModelParams,
                                        current_phase_init_time=state['time_l1'],
                                        duration_in_current_phase=0,
                                        proofs_are_public=False,
+                                       block_content_is_public=False,
                                        process_aborted=False)
     else:
         new_process = None
@@ -155,7 +184,7 @@ def p_init_process(params: AztecModelParams,
 ## for selection.                    ##
 #######################################
 
-def p_select_sequencer(params: AztecModelParams,
+def p_select_proposal(params: AztecModelParams,
                    _2,
                    _3,
                    state: AztecModelState) -> Signal:
@@ -219,31 +248,28 @@ def p_reveal_block_content(params: AztecModelParams,
     """
     Advances state of Processes that have revealed block content.
     """
-
-    # TODO: Create select_processes_by_state
     # TODO: How to check if block content was revealed for process? (Add this as a field for the class?)
+    # Note: Advances state of Process in reveal phase that have revealed block content.                    
 
     current_processes = state['processes'] 
     updated_processes: dict[ProcessUUID, Process] = {}
 
     ##################################################################
-    ## For every process on the pending_finalization phase, do:     ##
-    ## If the process has blown the phase duration,                 ##
-    ## then transition to finalized w/o rewards.                    ##
-    ## Else, check if the finalize transaction was submitted.       ##
-    ## If yes, advance to the next phase. Else, nothing happens     ##
+    ## For every process in the reveal content phase, run           ##
+    ## a Bernoulli trial and determine whether this proposal        ##
+    ## reveals block content or now.                                ##
     ###################################################################
 
     pending_reveal_processes  = select_processes_by_state(processes = current_processes,
-                                                state = SelectionPhase.pending_finalization)
+                                                state = SelectionPhase.pending_reveal)
 
     for process in pending_reveal_processes:     # For each process on  `pending_reveal` phase
         updated_process = copy(process)
 
         if has_blown_phase_duration(process):    # If the process has blown the phase duration
-            updated_process. current_phase = SelectionPhase.finalized_without_rewards # Transition process to skipped phase.
+            updated_process.current_phase = SelectionPhase.finalized_without_rewards # Transition process to skipped phase.
         else:
-            if finalized_transaction_submitted(process): #If finalized transaction was submitted.
+            if block_content_is_revealed(process): #If finalized transaction was submitted.
                 updated_process.current_phase = process.current_phase + 1 #Advance current phase to next phase
             else: # If block content not revealed 
                 pass # Nothing happens 
@@ -273,7 +299,7 @@ def p_submit_block_proofs(params: AztecModelParams,
             # TODO: Trigger reorg. (Ock: not sure how to implement this.)
             trigger_reorg(something)
         else: 
-            if did_submit_valid_rollup_proof(process): #TODO: Check if a valid rollup proof was submitted (Ock: How to determine?)
+            if did_submit_valid_rollup_proof(process): #TODO: Check if a valid rollup proof was submitted (Ock: How to determine?) 
                 updated_process.current_phase = process.current_phase + 1 #Advance to next phase
             else: # If no valid rollup
                 pass  #Nothing changes
@@ -300,6 +326,19 @@ def p_finalize_block(params: AztecModelParams,
     return {'update_processes': updated_processes}
 
 
+def s_sequencer(params: AztecModelParams,
+                      _2,
+                      _3,
+                      state: AztecModelState,
+                      signal: Signal) -> VariableUpdate:
+    """
+    
+    """
+    # TODO: Logic for updating the sequencer
+    # Signal comes from p_select_sequencer
+
+
+    return ('sequencer', sequencer)
 
 def s_processes(params: AztecModelParams,
                       _2,
@@ -321,3 +360,23 @@ def s_processes(params: AztecModelParams,
         processes.append(new_process)
 
     return ('processes', processes)
+
+
+###########################
+## Overall steps         ## 
+###########################
+
+###########################
+## Phases                ##
+## A new process starts  ##
+## Question:             ##
+## When should Sequencers ##
+## be updated? At the beginning ##
+## of a new process?            ##
+##################################
+
+# First phase of new process:
+# which Sequencers drop in or drop out? 
+# Decision: Danilo will make. 
+
+
