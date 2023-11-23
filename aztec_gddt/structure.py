@@ -32,7 +32,6 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
 ]
 
 
-
 blocks: list[dict] = []
 for block in [b for b in AZTEC_MODEL_BLOCKS if b.get('ignore', False) != True]:
     _block = deepcopy(block)
@@ -46,4 +45,4 @@ for block in [b for b in AZTEC_MODEL_BLOCKS if b.get('ignore', False) != True]:
     blocks.append(_block)
 
 AZTEC_MODEL_BLOCKS = [block for block in AZTEC_MODEL_BLOCKS
-                              if block.get('ignore', False) is False]
+                      if block.get('ignore', False) is False]
