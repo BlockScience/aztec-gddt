@@ -124,7 +124,7 @@ def p_update_interacting_users(params: AztecModelParams,
     """
     #TODO: logic for updating interacting users
 
-    return {"new_interacting_users": new_interacting_users}
+    return {"new_interacting_users": None}
 
    
 def p_init_process(params: AztecModelParams,
@@ -167,7 +167,7 @@ def p_init_process(params: AztecModelParams,
                                        current_phase_init_time=state['time_l1'],
                                        duration_in_current_phase=0,
                                        proofs_are_public=False,
-                                       block_content_is_public=False,
+                                       block_content_is_revealed=False,
                                        process_aborted=False)
     else:
         new_process = None
@@ -260,8 +260,8 @@ def p_reveal_block_content(params: AztecModelParams,
     ## reveals block content or now.                                ##
     ###################################################################
 
-    pending_reveal_processes  = select_processes_by_state(processes = current_processes,
-                                                state = SelectionPhase.pending_reveal)
+    pending_reveal_processes  = select_processes_by_state(current_processes,
+                                                SelectionPhase.pending_reveal)
 
     for process in pending_reveal_processes:     # For each process on  `pending_reveal` phase
         updated_process = copy(process)
@@ -269,8 +269,8 @@ def p_reveal_block_content(params: AztecModelParams,
         if has_blown_phase_duration(process):    # If the process has blown the phase duration
             updated_process.current_phase = SelectionPhase.finalized_without_rewards # Transition process to skipped phase.
         else:
-            if block_content_is_revealed(process): #If finalized transaction was submitted.
-                updated_process.current_phase = process.current_phase + 1 #Advance current phase to next phase
+            if process.block_content_is_revealed: #If finalized transaction was submitted.
+                updated_process.current_phase = SelectionPhase.pending_rollup_proof
             else: # If block content not revealed 
                 pass # Nothing happens 
 
@@ -286,23 +286,24 @@ def p_submit_block_proofs(params: AztecModelParams,
     Advances state of Processes that have submitted valid proofs.
     """
 
-    current_processes = state['processes'] #TODO: Type of current_processes: ?
+    current_processes: list[Process] = state['processes']
     updated_processes: dict[ProcessUUID, Process] = {}
 
-    pending_rollup_proof_processes  = select_processes_by_state(processes = current_processes,
-                                            state = SelectionPhase.pending_rollup_proof) 
+    pending_rollup_proof_processes  = select_processes_by_state(current_processes,
+                                            SelectionPhase.pending_rollup_proof) 
 
     for process in pending_rollup_proof_processes:
         updated_process = copy(process)
 
         if has_blown_phase_duration(process):
-            # TODO: Trigger reorg. (Ock: not sure how to implement this.)
-            trigger_reorg(something)
+            process.current_phase = SelectionPhase.reorg
+            updated_processes[process.uuid] = updated_process
         else: 
-            if did_submit_valid_rollup_proof(process): #TODO: Check if a valid rollup proof was submitted (Ock: How to determine?) 
-                updated_process.current_phase = process.current_phase + 1 #Advance to next phase
+            if process.proofs_are_public:
+                updated_process.current_phase = SelectionPhase.pending_finalization
+                updated_processes[process.uuid] = updated_process
             else: # If no valid rollup
-                pass  #Nothing changes
+                pass  # Nothing changes
         
         updated_processes[process.uuid] = updated_process #Assign to place in dictionary
 
@@ -338,7 +339,7 @@ def s_sequencer(params: AztecModelParams,
     # Signal comes from p_select_sequencer
 
 
-    return ('sequencer', sequencer)
+    return ('sequencer', None)
 
 def s_processes(params: AztecModelParams,
                       _2,
@@ -349,8 +350,7 @@ def s_processes(params: AztecModelParams,
     
     """
     processes = deepcopy(state['processes'])
-
-    processes_to_update = signal.get('updated_processes', {}),
+    processes_to_update: dict[ProcessUUID, Process] = signal.get('updated_processes', {})
     for process_uuid, updated_process in processes_to_update.items():
         pass # TODO   
 
