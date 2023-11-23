@@ -70,7 +70,7 @@ class SelectionPhase(IntEnum):  # XXX
     # Non-expected phases
     skipped = -1
     finalized_without_rewards = -2  # XXX
-    proof_racing_mode = -3
+    proof_race = -3
 
 
 @dataclass
@@ -153,6 +153,7 @@ class AztecModelParams(TypedDict):
     phase_duration_commit_proof: L1Blocks
     phase_duration_rollup: L1Blocks
     phase_duration_finalize: L1Blocks
+    phase_duration_race: L1Blocks
 
     stake_activation_period: L1Blocks  # XXX
     unstake_cooldown_period: L1Blocks  # XXX
