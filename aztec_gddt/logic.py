@@ -168,6 +168,8 @@ def p_init_process(params: AztecModelParams,
                               duration_in_current_phase=0,
                               proofs_are_public=False,
                               block_content_is_revealed=False,
+                              rollup_proof_is_commited=False,
+                              finalization_tx_is_submitted=False,
                               process_aborted=False)
     else:
         new_process = None
@@ -208,38 +210,40 @@ def p_select_proposal(params: AztecModelParams,
     ##    proposal duration.             ##
     #######################################
     process = state['current_process']
-    do_select_process = process.phase == SelectionPhase.pending_proposals
-    do_select_process &= process.duration_in_current_phase >= params['proposal_duration']
+    updated_process: Optional[Process] = None
 
-    if do_select_process:
-        # TODO: filter out invalid proposals
-        # J: Which invalid proposals are we expecting here? Anything "spam/invalid" would just be ignored, not sure we need to sim that, unless for blockspace
-        proposals = state['proposals'].get(process.uuid, [])
-        if len(proposals) > 0:
-            # TODO: check if true
-            number_uncles = min(len(proposals) - 1, params['uncle_count'])
+    if process.phase == SelectionPhase.pending_proposals:
+        if process.duration_in_current_phase > params['phase_duration_proposal']:
+            # TODO: filter out invalid proposals
+            # J: Which invalid proposals are we expecting here? Anything "spam/invalid" would just be ignored, not sure we need to sim that, unless for blockspace
+            proposals = state['proposals'].get(process.uuid, [])
+            if len(proposals) > 0:
+                # TODO: check if true
+                number_uncles = min(len(proposals) - 1, params['uncle_count'])
 
-            ranked_proposals = sorted(proposals,
-                                        key=lambda p: p.score,
-                                        reverse=True)
+                ranked_proposals = sorted(proposals,
+                                            key=lambda p: p.score,
+                                            reverse=True)
 
-            winner_proposal = ranked_proposals[0]
-            uncle_proposals = ranked_proposals[1:number_uncles+1]
+                winner_proposal = ranked_proposals[0]
+                uncle_proposals = ranked_proposals[1:number_uncles+1]
 
-            updated_process = copy(state['current_process'])
-            updated_process.phase = SelectionPhase.pending_reveal
-            updated_process.leading_sequencer = winner_proposal.uuid
-            updated_process.uncle_sequencers = [p.uuid for p in uncle_proposals]
+                updated_process = copy(state['current_process'])
+                updated_process.phase = SelectionPhase.pending_reveal
+                updated_process.leading_sequencer = winner_proposal.uuid
+                updated_process.uncle_sequencers = [p.uuid for p in uncle_proposals]
+            else:
+                pass
         else:
-            updated_process = None
+            pass
     else:
-        updated_process = None
+        pass
         
 
     return {'update_process': updated_process}
 
 
-def p_reveal_block_content(params: AztecModelParams,
+def p_reveal_content(params: AztecModelParams,
                            _2,
                            _3,
                            state: AztecModelState) -> Signal:
@@ -248,69 +252,72 @@ def p_reveal_block_content(params: AztecModelParams,
     """
     # TODO: How to check if block content was revealed for process? (Add this as a field for the class?)
     # Note: Advances state of Process in reveal phase that have revealed block content.
+    process = state['current_process']
+    updated_process: Optional[Process] = None
 
-    current_processes = state['processes']
-    updated_processes: dict[ProcessUUID, Process] = {}
-
-    ##################################################################
-    ## For every process in the reveal content phase, run           ##
-    ## a Bernoulli trial and determine whether this proposal        ##
-    ## reveals block content or now.                                ##
-    ###################################################################
-
-    pending_reveal_processes = select_processes_by_state(current_processes,
-                                                         SelectionPhase.pending_reveal)
-
-    for process in pending_reveal_processes:     # For each process on  `pending_reveal` phase
-        updated_process = copy(process)
-
+    if process.phase == SelectionPhase.pending_reveal:
         # If the process has blown the phase duration
-        if has_blown_phase_duration(process):
-            # Transition process to skipped phase.
-            updated_process.current_phase = SelectionPhase.finalized_without_rewards
+        if process.duration_in_current_phase > params['phase_duration_reveal']:
+            updated_process = copy(process)
+            updated_process.phase = SelectionPhase.proof_racing_mode
         else:
             if process.block_content_is_revealed:  # If finalized transaction was submitted.
-                updated_process.current_phase = SelectionPhase.pending_rollup_proof
+                updated_process = copy(process)
+                updated_process.phase = SelectionPhase.pending_rollup_proof
             else:  # If block content not revealed
-                pass  # Nothing happens
+                pass
+    else:
+        pass
 
-        # Assign to place in dictionary
-        updated_processes[process.uuid] = updated_process
+    return {'update_process': updated_process}
 
-    return {'update_processes': updated_processes}
+def p_commit_proof(params: AztecModelParams,
+                           _2,
+                           _3,
+                           state: AztecModelState) -> Signal:
+    process = state['current_process']
+    updated_process: Optional[Process] = None
 
+    if process.phase == SelectionPhase.pending_commit_proof:
+        if process.duration_in_current_phase > params['phase_duration_commit_proof']:
+            updated_process = copy(process)
+            updated_process.phase = SelectionPhase.proof_racing_mode
+        else:
+            if process.rollup_proof_is_commited:
+                updated_process = copy(process)
+                updated_process.phase = SelectionPhase.pending_rollup_proof
+            else:
+                pass
+    else:
+        pass
 
-def p_submit_block_proofs(params: AztecModelParams,
+    return {'update_process': updated_process}
+    
+
+def p_submit_proof(params: AztecModelParams,
                           _2,
                           _3,
                           state: AztecModelState) -> Signal:
     """
     Advances state of Processes that have submitted valid proofs.
     """
+    process = state['current_process']
+    updated_process: Optional[Process] = None
 
-    current_processes: list[Process] = state['processes']
-    updated_processes: dict[ProcessUUID, Process] = {}
-
-    pending_rollup_proof_processes = select_processes_by_state(current_processes,
-                                                               SelectionPhase.pending_rollup_proof)
-
-    for process in pending_rollup_proof_processes:
-        updated_process = copy(process)
-
-        if has_blown_phase_duration(process):
-            process.current_phase = SelectionPhase.reorg
-            updated_processes[process.uuid] = updated_process
+    if process.phase == SelectionPhase.pending_reveal:
+        if process.duration_in_current_phase > params['phase_duration_rollup']:
+            updated_process = copy(process)
+            updated_process.phase = SelectionPhase.skipped # TODO: confirm
         else:
             if process.proofs_are_public:
-                updated_process.current_phase = SelectionPhase.pending_finalization
-                updated_processes[process.uuid] = updated_process
-            else:  # If no valid rollup
-                pass  # Nothing changes
+                updated_process = copy(process)
+                updated_process.phase = SelectionPhase.pending_finalization
+            else: 
+                pass  # Nothing changes if no valid rollup
+    else:
+        pass
 
-        # Assign to place in dictionary
-        updated_processes[process.uuid] = updated_process
-
-    return {'update_processes': updated_processes}
+    return {'update_processes': updated_process}
 
 
 def p_finalize_block(params: AztecModelParams,
@@ -320,14 +327,31 @@ def p_finalize_block(params: AztecModelParams,
     """
 
     """
-    updated_processes: dict = {}
     # TODO
     # For every process on the `pending_finalization` phase, do:
     # - If the process has blown the phase duration,
     # then transition to finalized w/o rewards.
     # - Else, check if the finalize transaction was submitted.
     # If yes, advance to the next phase. Else, nothing happens
-    return {'update_processes': updated_processes}
+
+    process = state['current_process']
+    updated_process: Optional[Process] = None
+
+    if process.phase == SelectionPhase.pending_finalization:
+        if process.duration_in_current_phase > params['phase_duration_finalize']:
+            updated_process = copy(process)
+            updated_process.phase = SelectionPhase.finalized_without_rewards
+        else:
+            if process.finalization_tx_is_submitted:
+                updated_process = copy(process)
+                updated_process.phase = SelectionPhase.finalized
+                # TODO: may add reward logic?
+            else:
+                pass
+    else:
+        pass
+
+    return {'update_processes': updated_process}
 
 
 def s_sequencer(params: AztecModelParams,
