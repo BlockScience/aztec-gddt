@@ -259,7 +259,7 @@ def p_reveal_content(params: AztecModelParams,
         # If the process has blown the phase duration
         if process.duration_in_current_phase > params['phase_duration_reveal']:
             updated_process = copy(process)
-            updated_process.phase = SelectionPhase.proof_racing_mode
+            updated_process.phase = SelectionPhase.proof_race
         else:
             if process.block_content_is_revealed:  # If finalized transaction was submitted.
                 updated_process = copy(process)
@@ -281,7 +281,7 @@ def p_commit_proof(params: AztecModelParams,
     if process.phase == SelectionPhase.pending_commit_proof:
         if process.duration_in_current_phase > params['phase_duration_commit_proof']:
             updated_process = copy(process)
-            updated_process.phase = SelectionPhase.proof_racing_mode
+            updated_process.phase = SelectionPhase.proof_race
         else:
             if process.rollup_proof_is_commited:
                 updated_process = copy(process)
@@ -352,6 +352,29 @@ def p_finalize_block(params: AztecModelParams,
         pass
 
     return {'update_processes': updated_process}
+
+
+def p_race_mode(params: AztecModelParams,
+                     _2,
+                     _3,
+                     state: AztecModelState) -> Signal:
+    process = state['current_process']
+    updated_process: Optional[Process] = None
+
+    if process.phase == SelectionPhase.proof_race:
+        if process.duration_in_current_phase > params['phase_duration_race']:
+            updated_process = copy(process)
+            updated_process.phase = SelectionPhase.skipped
+        else:
+            if process.block_content_is_revealed & process.proofs_are_public:
+                updated_process = copy(process)
+                updated_process.phase = SelectionPhase.pending_finalization
+                # NOTE: this logic may be changed in the future
+                # to take into account the racing dynamics
+            else:
+                pass
+    else:
+        pass
 
 
 def s_sequencer(params: AztecModelParams,

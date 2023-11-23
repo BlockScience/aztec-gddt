@@ -23,8 +23,9 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
             'select_sequencer': p_select_proposal,
             'reveal_block_content': p_reveal_content,
             'commit_block_proof': p_commit_proof,
-            'submit_block_proofs': p_submit_proof,
-            'finalize_block': p_finalize_block
+            'submit_block_proof': p_submit_proof,
+            'finalize_block': p_finalize_block,
+            'submit_block_proof_content_race': p_race_mode
         },
         'variables': {
             'process': s_process
