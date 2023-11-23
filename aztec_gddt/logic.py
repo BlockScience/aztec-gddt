@@ -344,25 +344,24 @@ def s_sequencer(params: AztecModelParams,
     return ('sequencer', None)
 
 
-def s_processes(params: AztecModelParams,
-                _2,
-                _3,
-                state: AztecModelState,
-                signal: Signal) -> VariableUpdate:
-    """
-    NOTE: this SUF is depreciated
-    """
-    processes = deepcopy(state['processes'])
-    processes_to_update: dict[ProcessUUID,
-                              Process] = signal.get('updated_processes', {})
-    for process_uuid, updated_process in processes_to_update.items():
-        pass  # TODO
+# def s_processes(params: AztecModelParams,
+#                 _2,
+#                 _3,
+#                 state: AztecModelState,
+#                 signal: Signal) -> VariableUpdate:
+#     """
+#     NOTE: this SUF is depreciated
+#     """
+#     processes = deepcopy(state['processes'])
+#     processes_to_update: dict[ProcessUUID,
+#                               Process] = signal.get('updated_processes', {})
+#     for process_uuid, updated_process in processes_to_update.items():
+#         pass  # TODO
 
-    new_process = signal.get('new_process', None)
-    if new_process != None:
-        processes.append(new_process)
-
-    return ('processes', processes)
+#     new_process = signal.get('new_process', None)
+#     if new_process != None:
+#         processes.append(new_process)
+#     return ('processes', processes)
 
 def s_process(params: AztecModelParams,
                 _2,
@@ -372,7 +371,8 @@ def s_process(params: AztecModelParams,
     """
     
     """
-    return ('process', signal.get('update_process', state['current_process']))
+    updated_process = signal.get('update_process', state['current_process'])
+    return ('process', updated_process)
 
 
 
