@@ -62,20 +62,20 @@ class SelectionPhase(IntEnum):  # XXX
     # Expected phases
     pending_proposals = 1
     pending_reveal = 2
-    pending_rollup_proof = 3
-    pending_finalization = 4
-    finalized = 5
+    pending_commit_proof = 3
+    pending_rollup_proof = 4
+    pending_finalization = 5
+    finalized = 6
 
     # Non-expected phases
     skipped = -1
-    reorg = -2
-    finalized_without_rewards = -3  # XXX
+    finalized_without_rewards = -2  # XXX
 
 
 @dataclass
 class Process:
     uuid: ProcessUUID
-    current_phase: SelectionPhase
+    phase: SelectionPhase
     leading_sequencer: Optional[SequencerUUID]
     uncle_sequencers: Optional[list[SequencerUUID]]
 
@@ -127,8 +127,7 @@ class AztecModelState(TypedDict):
 
     # Global State
     interacting_users: list[Sequencer]
-    # Order matters. lastest elements are newer processes
-    processes: list[Process]
+    current_process: Process
 
     # Flattened Meso State
     proposals: dict[ProcessUUID, list[Proposal]]

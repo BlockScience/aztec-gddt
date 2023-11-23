@@ -26,7 +26,7 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
             'finalize_block': p_finalize_block
         },
         'variables': {
-            'processes': s_processes
+            'process': s_process
         }
     }
 ]
