@@ -16,10 +16,11 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
         }
     },
     {
-        'label': 'Advance Block Process Phases',
+        'label': 'Block Process',
+        'ignore': False,
         'policies': {
             'init_process': p_init_process,
-            'select_sequencer': p_select_sequencer,
+            'select_sequencer': p_select_proposal,
             'reveal_block_content': p_reveal_block_content,
             'submit_block_proofs': p_submit_block_proofs,
             'finalize_block': p_finalize_block
@@ -27,9 +28,6 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
         'variables': {
             'processes': s_processes
         }
-    },
-    {
-        'label': 'Handle L2 reorgs'
     }
 ]
 
