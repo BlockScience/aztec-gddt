@@ -216,6 +216,7 @@ def p_select_proposal(params: AztecModelParams,
         if process.duration_in_current_phase > params['phase_duration_proposal']:
             # TODO: filter out invalid proposals
             # J: Which invalid proposals are we expecting here? Anything "spam/invalid" would just be ignored, not sure we need to sim that, unless for blockspace
+            # TODO: Above seems incorrect - if duration of phase exceeds duration, the next phase starts. 
             proposals = state['proposals'].get(process.uuid, [])
             if len(proposals) > 0:
                 # TODO: check if true
@@ -260,6 +261,7 @@ def p_reveal_content(params: AztecModelParams,
         if process.duration_in_current_phase > params['phase_duration_reveal']:
             updated_process = copy(process)
             updated_process.phase = SelectionPhase.proof_race
+            # TODO: To allow for fixed phase time, we might just add another check here - if duration > params and if content is not revealed -> proof_race
         else:
             if process.block_content_is_revealed:  # If finalized transaction was submitted.
                 updated_process = copy(process)
