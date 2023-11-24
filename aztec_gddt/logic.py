@@ -304,7 +304,7 @@ def p_submit_proof(params: AztecModelParams,
     process = state['current_process']
     updated_process: Optional[Process] = None
 
-    if process.phase == SelectionPhase.pending_reveal:
+    if process.phase == SelectionPhase.pending_rollup_proof:
         if process.duration_in_current_phase > params['phase_duration_rollup']:
             updated_process = copy(process)
             updated_process.phase = SelectionPhase.skipped # TODO: confirm
