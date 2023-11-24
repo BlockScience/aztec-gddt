@@ -172,6 +172,7 @@ def p_init_process(params: AztecModelParams,
                               duration_in_current_phase=0,
                               proofs_are_public=False,
                               block_content_is_revealed=False,
+                              commit_proof_is_put_down=False, 
                               rollup_proof_is_commited=False,
                               finalization_tx_is_submitted=False,
                               process_aborted=False)
