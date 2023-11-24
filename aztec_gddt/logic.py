@@ -309,7 +309,7 @@ def p_submit_proof(params: AztecModelParams,
             updated_process = copy(process)
             updated_process.phase = SelectionPhase.skipped # TODO: confirm
         else:
-            if process.proofs_are_public:
+            if process.rollup_proof_is_commited:
                 updated_process = copy(process)
                 updated_process.phase = SelectionPhase.pending_finalization
             else: 
