@@ -265,7 +265,7 @@ def p_reveal_content(params: AztecModelParams,
         else:
             if process.block_content_is_revealed:  # If finalized transaction was submitted.
                 updated_process = copy(process)
-                updated_process.phase = SelectionPhase.pending_rollup_proof
+                updated_process.phase = SelectionPhase.pending_commit_proof
             else:  # If block content not revealed
                 pass
     else:
