@@ -117,10 +117,12 @@ class Proposal():
     proposer_uuid: SequencerUUID
     score: float
     submission_time: ContinuousL1Blocks
+    #TODO: add bond_uiid: /generaluserUUID 
 
 
 SelectionResults = dict[ProcessUUID, tuple[Proposal, list[Proposal]]]
 
+# TODO: commit_proof aka Prover Commitment Bond Object -> tracking bond UUID (might be different from sequencer UUID, bond amount) 
 
 # Definition for simulation-specific types
 class AztecModelState(TypedDict):
@@ -168,3 +170,4 @@ class AztecModelParams(TypedDict):
     tx_proof_reveal_probability: Probability
     # XXX If Provers don't send back rollup proof, lead can't submit
     rollup_proof_reveal_probability: Probability
+    #TODO: probability that a bond is put up for a proposal 
