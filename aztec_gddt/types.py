@@ -85,6 +85,7 @@ class Process:
 
     proofs_are_public: bool
     block_content_is_revealed: bool
+    commit_proof_is_put_down: bool #Commitment bond is put down / rename from proof 
     rollup_proof_is_commited: bool
     finalization_tx_is_submitted: bool
     process_aborted: bool
