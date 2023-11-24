@@ -125,6 +125,10 @@ def p_update_interacting_users(params: AztecModelParams,
 
     """
     # TODO: logic for updating interacting users
+    # TODO: Logic: staked_amount > min_stake 
+    # staked_amount is updated at end of process due to rewards and slashing
+    # right now we only have sequencers -> with the introduction of commitment bond we might introduce second class 
+    # commitment bond could be put up by lead sequencer, or by anyone else (e.g. 3rd party marketplace)
 
     return {"new_interacting_users": None}
 
