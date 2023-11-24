@@ -366,7 +366,7 @@ def p_race_mode(params: AztecModelParams,
             updated_process = copy(process)
             updated_process.phase = SelectionPhase.skipped
         else:
-            if process.block_content_is_revealed & process.proofs_are_public:
+            if process.block_content_is_revealed & process.rollup_proof_is_commited:
                 updated_process = copy(process)
                 updated_process.phase = SelectionPhase.pending_finalization
                 # NOTE: this logic may be changed in the future
