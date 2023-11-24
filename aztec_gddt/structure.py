@@ -16,23 +16,22 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
         }
     },
     {
-        'label': 'Advance Block Process Phases',
+        'label': 'Block Process',
+        'ignore': False,
         'policies': {
             'init_process': p_init_process,
-            'select_sequencer': p_select_sequencer,
-            'reveal_block_content': p_reveal_block_content,
-            'submit_block_proofs': p_submit_block_proofs,
-            'finalize_block': p_finalize_block
+            'select_sequencer': p_select_proposal,
+            'reveal_block_content': p_reveal_content,
+            'commit_block_proof': p_commit_proof,
+            'submit_block_proof': p_submit_proof,
+            'finalize_block': p_finalize_block,
+            'submit_block_proof_content_race': p_race_mode
         },
         'variables': {
-            'processes': s_processes
+            'process': s_process
         }
-    },
-    {
-        'label': 'Handle L2 reorgs'
     }
 ]
-
 
 
 blocks: list[dict] = []
@@ -48,4 +47,4 @@ for block in [b for b in AZTEC_MODEL_BLOCKS if b.get('ignore', False) != True]:
     blocks.append(_block)
 
 AZTEC_MODEL_BLOCKS = [block for block in AZTEC_MODEL_BLOCKS
-                              if block.get('ignore', False) is False]
+                      if block.get('ignore', False) is False]

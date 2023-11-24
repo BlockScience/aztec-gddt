@@ -2,11 +2,10 @@ from copy import deepcopy, copy
 from typing import Callable
 from uuid import uuid4
 
-from cadCAD_tools.types import Signal, VariableUpdate # type: ignore
+from cadCAD_tools.types import Signal, VariableUpdate  # type: ignore
 
 from aztec_gddt.helper import *
 from aztec_gddt.types import *
-
 
 
 def generic_policy(_1, _2, _3, _4) -> dict:
@@ -26,6 +25,7 @@ def generic_policy(_1, _2, _3, _4) -> dict:
 #######################################
 ## General system helper functions.  ##
 #######################################
+
 
 def replace_suf(variable: str, default_value=0.0) -> Callable:
     """Creates replacing function for state update from string
@@ -68,9 +68,10 @@ def p_evolve_time(params: AztecModelParams, _2, _3, _4) -> Signal:
     """
     return {'delta_blocks': params['timestep_in_blocks']}
 
+
 def s_block_time(params: AztecModelParams, _2, _3,
-                  state: AztecModelState,
-                  signal: Signal) -> VariableUpdate:
+                 state: AztecModelState,
+                 signal: Signal) -> VariableUpdate:
     """State update function advancing block time.  
 
     Args:
@@ -83,6 +84,7 @@ def s_block_time(params: AztecModelParams, _2, _3,
             A two-element tuple that all state update functions must return.
     """
     return ('block_time', state['time_l1'] + signal['delta_blocks'])
+
 
 def s_delta_blocks(_1, _2, _3, _4, signal: Signal) -> VariableUpdate:
     """
@@ -110,9 +112,9 @@ def s_delta_blocks(_1, _2, _3, _4, signal: Signal) -> VariableUpdate:
 
 
 def p_update_interacting_users(params: AztecModelParams,
-                   _2,
-                   _3,
-                   state: AztecModelState) -> Signal:
+                               _2,
+                               _3,
+                               state: AztecModelState) -> Signal:
     """
     Args:
          params (AztecModelParams): The current parameters of the model.
@@ -120,13 +122,13 @@ def p_update_interacting_users(params: AztecModelParams,
 
     Returns:
          Signal: The new process to be considered in the system. 
-    
+
     """
-    #TODO: logic for updating interacting users
+    # TODO: logic for updating interacting users
 
-    return {"new_interacting_users": new_interacting_users}
+    return {"new_interacting_users": None}
 
-   
+
 def p_init_process(params: AztecModelParams,
                    _2,
                    _3,
@@ -138,22 +140,20 @@ def p_init_process(params: AztecModelParams,
 
     Returns:
          Signal: The new process to be considered in the system. 
-    
+
     """
 
-   #######################################
-   ## Logical check to determine if     ##
-   ## a new process will be  initiated. ##
-   ## Checks to see if current phase    ##
-   ## of last process is one of         ##
-   ## pending_rollup_proof, skipped,    ##
-   ## or reorg.                         ##
-   #######################################
-
-    last_process = last_active_process(state['processes'])
-    do_init_process = last_process.current_phase == SelectionPhase.pending_rollup_proof
-    do_init_process |= last_process.current_phase == SelectionPhase.skipped
-    do_init_process |= last_process.current_phase == SelectionPhase.reorg
+    #######################################
+    ## Logical check to determine if     ##
+    ## a new process will be  initiated. ##
+    ## Checks to see if current phase    ##
+    ## of last process is one of         ##
+    ## pending_rollup_proof, skipped,    ##
+    ## or reorg.                         ##
+    #######################################
+    do_init_process = state['current_process'].phase == SelectionPhase.finalized
+    do_init_process |= state['current_process'].phase == SelectionPhase.finalized_without_rewards
+    do_init_process |= state['current_process'].phase == SelectionPhase.skipped
 
     #######################################
     ## Logic to create new process       ##
@@ -161,22 +161,24 @@ def p_init_process(params: AztecModelParams,
 
     if do_init_process:
         new_process = Process(uuid=uuid4(),
-                                       current_phase=SelectionPhase.pending_proposals,
-                                       leading_sequencer=None,
-                                       uncle_sequencers=None,
-                                       current_phase_init_time=state['time_l1'],
-                                       duration_in_current_phase=0,
-                                       proofs_are_public=False,
-                                       block_content_is_public=False,
-                                       process_aborted=False)
+                              phase=SelectionPhase.pending_proposals,
+                              leading_sequencer=None,
+                              uncle_sequencers=None,
+                              current_phase_init_time=state['time_l1'],
+                              duration_in_current_phase=0,
+                              proofs_are_public=False,
+                              block_content_is_revealed=False,
+                              rollup_proof_is_commited=False,
+                              finalization_tx_is_submitted=False,
+                              process_aborted=False)
     else:
         new_process = None
 
-    return {'new_process': new_process}
+    return {'update_process': new_process}
 
 #######################################
 ##         Selection Phase           ##
-#######################################  
+#######################################
 
 
 #######################################
@@ -185,9 +187,9 @@ def p_init_process(params: AztecModelParams,
 #######################################
 
 def p_select_proposal(params: AztecModelParams,
-                   _2,
-                   _3,
-                   state: AztecModelState) -> Signal:
+                      _2,
+                      _3,
+                      state: AztecModelState) -> Signal:
     """
     Select a sequencer from list of eligible sequencers, and
     determine uncle sequencers. 
@@ -195,7 +197,7 @@ def p_select_proposal(params: AztecModelParams,
     Args:
         params (AztecModelParams): The current parameters of the model.
         state (AztecModelState): The current state of the model.
-    
+
     Returns:
          Signal: The new process to be considered in the system. 
     """
@@ -207,163 +209,222 @@ def p_select_proposal(params: AztecModelParams,
     ## 2. the duration is greater than   ##
     ##    proposal duration.             ##
     #######################################
+    process = state['current_process']
+    updated_process: Optional[Process] = None
 
-    processes_to_transition = [p for p in state['processes']
-                               if p.current_phase == SelectionPhase.pending_proposals
-                               and p.duration_in_current_phase >= params['proposal_duration']]
-    
-    # selection_results: process_uuid -> (winner_proposal, uncle_proposal_list)
-    updated_processes: dict[ProcessUUID, Process] = {}
-    for process in processes_to_transition:
-        # TODO: filter out invalid proposals
-        # J: Which invalid proposals are we expecting here? Anything "spam/invalid" would just be ignored, not sure we need to sim that, unless for blockspace 
-        proposals = state['proposals'].get(process.uuid, [])
-        if len(proposals) > 0:
+    if process.phase == SelectionPhase.pending_proposals:
+        if process.duration_in_current_phase > params['phase_duration_proposal']:
+            # TODO: filter out invalid proposals
+            # J: Which invalid proposals are we expecting here? Anything "spam/invalid" would just be ignored, not sure we need to sim that, unless for blockspace
+            proposals = state['proposals'].get(process.uuid, [])
+            if len(proposals) > 0:
+                # TODO: check if true
+                number_uncles = min(len(proposals) - 1, params['uncle_count'])
 
-            # TODO: check if true
-            number_uncles = min(len(proposals) - 1, params['uncle_count'])
+                ranked_proposals = sorted(proposals,
+                                            key=lambda p: p.score,
+                                            reverse=True)
 
-            ranked_proposals = sorted(proposals, 
-                                      key=lambda p: p.score,
-                                      reverse=True)
-            
-            winner_proposal = ranked_proposals[0]
-            uncle_proposals = ranked_proposals[1:number_uncles+1]
-            
-            updated_process = copy(process)
-            updated_process.current_phase = SelectionPhase.pending_reveal
-            updated_process.leading_sequencer = winner_proposal.uuid
-            updated_process.uncle_sequencers = [p.uuid for p in uncle_proposals]
-            updated_processes[process.uuid] = updated_process
+                winner_proposal = ranked_proposals[0]
+                uncle_proposals = ranked_proposals[1:number_uncles+1]
+
+                updated_process = copy(state['current_process'])
+                updated_process.phase = SelectionPhase.pending_reveal
+                updated_process.leading_sequencer = winner_proposal.uuid
+                updated_process.uncle_sequencers = [p.uuid for p in uncle_proposals]
+            else:
+                pass
         else:
             pass
+    else:
+        pass
+        
 
-    return {'update_processes': updated_processes}
+    return {'update_process': updated_process}
 
 
-def p_reveal_block_content(params: AztecModelParams,
-                   _2,
-                   _3,
-                   state: AztecModelState) -> Signal:
+def p_reveal_content(params: AztecModelParams,
+                           _2,
+                           _3,
+                           state: AztecModelState) -> Signal:
     """
     Advances state of Processes that have revealed block content.
     """
     # TODO: How to check if block content was revealed for process? (Add this as a field for the class?)
-    # Note: Advances state of Process in reveal phase that have revealed block content.                    
+    # Note: Advances state of Process in reveal phase that have revealed block content.
+    process = state['current_process']
+    updated_process: Optional[Process] = None
 
-    current_processes = state['processes'] 
-    updated_processes: dict[ProcessUUID, Process] = {}
-
-    ##################################################################
-    ## For every process in the reveal content phase, run           ##
-    ## a Bernoulli trial and determine whether this proposal        ##
-    ## reveals block content or now.                                ##
-    ###################################################################
-
-    pending_reveal_processes  = select_processes_by_state(processes = current_processes,
-                                                state = SelectionPhase.pending_reveal)
-
-    for process in pending_reveal_processes:     # For each process on  `pending_reveal` phase
-        updated_process = copy(process)
-
-        if has_blown_phase_duration(process):    # If the process has blown the phase duration
-            updated_process.current_phase = SelectionPhase.finalized_without_rewards # Transition process to skipped phase.
+    if process.phase == SelectionPhase.pending_reveal:
+        # If the process has blown the phase duration
+        if process.duration_in_current_phase > params['phase_duration_reveal']:
+            updated_process = copy(process)
+            updated_process.phase = SelectionPhase.proof_race
         else:
-            if block_content_is_revealed(process): #If finalized transaction was submitted.
-                updated_process.current_phase = process.current_phase + 1 #Advance current phase to next phase
-            else: # If block content not revealed 
-                pass # Nothing happens 
+            if process.block_content_is_revealed:  # If finalized transaction was submitted.
+                updated_process = copy(process)
+                updated_process.phase = SelectionPhase.pending_rollup_proof
+            else:  # If block content not revealed
+                pass
+    else:
+        pass
 
-        updated_processes[process.uuid] = updated_process #Assign to place in dictionary
+    return {'update_process': updated_process}
 
-    return {'update_processes': updated_processes}
+def p_commit_proof(params: AztecModelParams,
+                           _2,
+                           _3,
+                           state: AztecModelState) -> Signal:
+    process = state['current_process']
+    updated_process: Optional[Process] = None
 
-def p_submit_block_proofs(params: AztecModelParams,
-                   _2,
-                   _3,
-                   state: AztecModelState) -> Signal:
+    if process.phase == SelectionPhase.pending_commit_proof:
+        if process.duration_in_current_phase > params['phase_duration_commit_proof']:
+            updated_process = copy(process)
+            updated_process.phase = SelectionPhase.proof_race
+        else:
+            if process.rollup_proof_is_commited:
+                updated_process = copy(process)
+                updated_process.phase = SelectionPhase.pending_rollup_proof
+            else:
+                pass
+    else:
+        pass
+
+    return {'update_process': updated_process}
+    
+
+def p_submit_proof(params: AztecModelParams,
+                          _2,
+                          _3,
+                          state: AztecModelState) -> Signal:
     """
     Advances state of Processes that have submitted valid proofs.
     """
+    process = state['current_process']
+    updated_process: Optional[Process] = None
 
-    current_processes = state['processes'] #TODO: Type of current_processes: ?
-    updated_processes: dict[ProcessUUID, Process] = {}
+    if process.phase == SelectionPhase.pending_reveal:
+        if process.duration_in_current_phase > params['phase_duration_rollup']:
+            updated_process = copy(process)
+            updated_process.phase = SelectionPhase.skipped # TODO: confirm
+        else:
+            if process.proofs_are_public:
+                updated_process = copy(process)
+                updated_process.phase = SelectionPhase.pending_finalization
+            else: 
+                pass  # Nothing changes if no valid rollup
+    else:
+        pass
 
-    pending_rollup_proof_processes  = select_processes_by_state(processes = current_processes,
-                                            state = SelectionPhase.pending_rollup_proof) 
-
-    for process in pending_rollup_proof_processes:
-        updated_process = copy(process)
-
-        if has_blown_phase_duration(process):
-            # TODO: Trigger reorg. (Ock: not sure how to implement this.)
-            trigger_reorg(something)
-        else: 
-            if did_submit_valid_rollup_proof(process): #TODO: Check if a valid rollup proof was submitted (Ock: How to determine?) 
-                updated_process.current_phase = process.current_phase + 1 #Advance to next phase
-            else: # If no valid rollup
-                pass  #Nothing changes
-        
-        updated_processes[process.uuid] = updated_process #Assign to place in dictionary
-
-    return {'update_processes': updated_processes}
+    return {'update_processes': updated_process}
 
 
 def p_finalize_block(params: AztecModelParams,
-                   _2,
-                   _3,
-                   state: AztecModelState) -> Signal:
+                     _2,
+                     _3,
+                     state: AztecModelState) -> Signal:
     """
-    
+
     """
-    updated_processes: dict = {}
     # TODO
     # For every process on the `pending_finalization` phase, do:
-    # - If the process has blown the phase duration, 
-    # then transition to finalized w/o rewards. 
+    # - If the process has blown the phase duration,
+    # then transition to finalized w/o rewards.
     # - Else, check if the finalize transaction was submitted.
     # If yes, advance to the next phase. Else, nothing happens
-    return {'update_processes': updated_processes}
+
+    process = state['current_process']
+    updated_process: Optional[Process] = None
+
+    if process.phase == SelectionPhase.pending_finalization:
+        if process.duration_in_current_phase > params['phase_duration_finalize']:
+            updated_process = copy(process)
+            updated_process.phase = SelectionPhase.finalized_without_rewards
+        else:
+            if process.finalization_tx_is_submitted:
+                updated_process = copy(process)
+                updated_process.phase = SelectionPhase.finalized
+                # TODO: may add reward logic?
+            else:
+                pass
+    else:
+        pass
+
+    return {'update_processes': updated_process}
+
+
+def p_race_mode(params: AztecModelParams,
+                     _2,
+                     _3,
+                     state: AztecModelState) -> Signal:
+    process = state['current_process']
+    updated_process: Optional[Process] = None
+
+    if process.phase == SelectionPhase.proof_race:
+        if process.duration_in_current_phase > params['phase_duration_race']:
+            updated_process = copy(process)
+            updated_process.phase = SelectionPhase.skipped
+        else:
+            if process.block_content_is_revealed & process.proofs_are_public:
+                updated_process = copy(process)
+                updated_process.phase = SelectionPhase.pending_finalization
+                # NOTE: this logic may be changed in the future
+                # to take into account the racing dynamics
+            else:
+                pass
+    else:
+        pass
 
 
 def s_sequencer(params: AztecModelParams,
-                      _2,
-                      _3,
-                      state: AztecModelState,
-                      signal: Signal) -> VariableUpdate:
+                _2,
+                _3,
+                state: AztecModelState,
+                signal: Signal) -> VariableUpdate:
     """
-    
+
     """
     # TODO: Logic for updating the sequencer
     # Signal comes from p_select_sequencer
 
+    return ('sequencer', None)
 
-    return ('sequencer', sequencer)
 
-def s_processes(params: AztecModelParams,
-                      _2,
-                      _3,
-                      state: AztecModelState,
-                      signal: Signal) -> VariableUpdate:
+# def s_processes(params: AztecModelParams,
+#                 _2,
+#                 _3,
+#                 state: AztecModelState,
+#                 signal: Signal) -> VariableUpdate:
+#     """
+#     NOTE: this SUF is depreciated
+#     """
+#     processes = deepcopy(state['processes'])
+#     processes_to_update: dict[ProcessUUID,
+#                               Process] = signal.get('updated_processes', {})
+#     for process_uuid, updated_process in processes_to_update.items():
+#         pass  # TODO
+
+#     new_process = signal.get('new_process', None)
+#     if new_process != None:
+#         processes.append(new_process)
+#     return ('processes', processes)
+
+def s_process(params: AztecModelParams,
+                _2,
+                _3,
+                state: AztecModelState,
+                signal: Signal) -> VariableUpdate:
     """
     
     """
-    processes = deepcopy(state['processes'])
+    updated_process = signal.get('update_process', state['current_process'])
+    return ('process', updated_process)
 
-    processes_to_update = signal.get('updated_processes', {}),
-    for process_uuid, updated_process in processes_to_update.items():
-        pass # TODO   
-
-
-    new_process = signal.get('new_process', None)
-    if new_process != None:
-        processes.append(new_process)
-
-    return ('processes', processes)
 
 
 ###########################
-## Overall steps         ## 
+## Overall steps         ##
 ###########################
 
 ###########################
@@ -376,7 +437,5 @@ def s_processes(params: AztecModelParams,
 ##################################
 
 # First phase of new process:
-# which Sequencers drop in or drop out? 
-# Decision: Danilo will make. 
-
-
+# which Sequencers drop in or drop out?
+# Decision: Danilo will make.
