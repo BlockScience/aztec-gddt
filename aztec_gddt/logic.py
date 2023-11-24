@@ -289,7 +289,7 @@ def p_commit_proof(params: AztecModelParams,
             updated_process = copy(process)
             updated_process.phase = SelectionPhase.proof_race
         else:
-            if process.rollup_proof_is_commited:
+            if process.commit_proof_is_put_down:
                 updated_process = copy(process)
                 updated_process.phase = SelectionPhase.pending_rollup_proof
             else:
