@@ -88,6 +88,7 @@ class Process:
     rollup_proof_is_commited: bool
     finalization_tx_is_submitted: bool
     process_aborted: bool
+    #TODO: Think about having "global" param for minimum stake in here to make it dynamically updateable per L2 block 
 
 
 @dataclass
@@ -100,6 +101,7 @@ class Sequencer():  # XXX
     # TODO:
     # discuss what is an Sequencer on our model
     # discuss how to derive proposal scores - each sequencer a random value and calculate score for each per round?
+    # discuss how to separate general users (Provers mainly) and sequencers -> general class -> sequencers inherit from it 
 
 
 @dataclass
