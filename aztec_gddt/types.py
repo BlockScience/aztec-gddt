@@ -146,6 +146,8 @@ class AztecModelState(TypedDict):
 
 
 class AztecModelParams(TypedDict):
+    random_seed: int #Random seed for simulation model variation. 
+    
     label: str  # XXX
     timestep_in_blocks: L1Blocks  # XXX
 
