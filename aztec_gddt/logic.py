@@ -103,12 +103,14 @@ def s_delta_blocks(_1, _2, _3, _4, signal: Signal) -> VariableUpdate:
 ##############################
 
 
-#############################
-## First step: determine   ##
-## who drops in and drops  ##
-## out of the interacting  ##
-## users.                  ##
-#############################
+
+##############################
+## Completed  (no TODOs)    ##
+##############################
+
+##############################
+## In progress              ##
+##############################
 
 
 def p_update_interacting_users(params: AztecModelParams,
@@ -116,6 +118,8 @@ def p_update_interacting_users(params: AztecModelParams,
                                _3,
                                state: AztecModelState) -> Signal:
     """
+    Used to determine who drops in and out of interacting users.
+
     Args:
          params (AztecModelParams): The current parameters of the model.
          state (AztecModelState): The current state of the model.
@@ -138,6 +142,8 @@ def p_init_process(params: AztecModelParams,
                    _3,
                    state: AztecModelState) -> Signal:
     """
+    Initializes a specific process. 
+
     Args:
          params (AztecModelParams): The current parameters of the model.
          state (AztecModelState): The current state of the model.
@@ -181,15 +187,23 @@ def p_init_process(params: AztecModelParams,
 
     return {'update_process': new_process}
 
+##############################
+## Needed, but Not Started  ##
+##############################
+
+
 #######################################
 ##         Selection Phase           ##
 #######################################
 
 
-#######################################
-## Policy and state update functions ##
-## for selection.                    ##
-#######################################
+##############################
+## Completed (no TODOs)     ##
+##############################
+
+##############################
+## In progress              ##
+##############################
 
 def p_select_proposal(params: AztecModelParams,
                       _2,
@@ -430,19 +444,12 @@ def s_process(params: AztecModelParams,
 
 
 
-###########################
-## Overall steps         ##
-###########################
+##############################
+## In progress              ##
+##############################
 
-###########################
-## Phases                ##
-## A new process starts  ##
-## Question:             ##
-## When should Sequencers ##
-## be updated? At the beginning ##
-## of a new process?            ##
-##################################
+##############################
+## Needed, but Not Started  ##
+##############################
 
-# First phase of new process:
-# which Sequencers drop in or drop out?
-# Decision: Danilo will make.
+
