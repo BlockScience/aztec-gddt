@@ -15,6 +15,8 @@ Tokens = Annotated[float, 'tokens']  # Amount of slashable tokens
 ProcessUUID = Annotated[object, 'uuid']
 SequencerUUID = Annotated[object, 'uuid']
 ProposalUUID = Annotated[object, 'uuid']
+BondUUID = Annotated[object, 'uuid']
+UserUUID = Annotated[object, 'uuid']
 
 
 class EventCategories(Enum):
@@ -93,6 +95,12 @@ class Process:
 
 
 @dataclass
+class User():  # XXX
+    balance: Tokens
+    # General User Class from which Sequencer inherits?
+    # Benefits: We can clearly distuingish who is a sequencer (moves tokens from balance to stake), while also letting us draw Provers from non-sequencer users (anyone can be Prover, only needs a UUID and enough balance to put up bond)
+
+@dataclass
 class Sequencer():  # XXX
     staked_amount: Tokens
 
@@ -118,6 +126,20 @@ class Proposal():
     score: float
     submission_time: ContinuousL1Blocks
     #TODO: add bond_uiid: /generaluserUUID 
+
+
+@dataclass
+class CommitmentBond():
+    """
+    NOTE: Instantiation of this class can be understood as a 
+    L1T_proposer_submit_proposal event.
+    """
+
+    uuid:  BondUUID
+    proposal_uuid: ProposalUUID #gives us sequencerUUID
+    prover_uuid: UserUUID #can be the same as sequencerUUID, but doesnt have to be
+    bond_amount: float
+    submission_time: ContinuousL1Blocks
 
 
 SelectionResults = dict[ProcessUUID, tuple[Proposal, list[Proposal]]]
