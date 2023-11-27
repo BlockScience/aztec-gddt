@@ -62,7 +62,7 @@ class SelectionPhase(IntEnum):  # XXX
     # Expected phases
     pending_proposals = 1
     pending_reveal = 2
-    pending_commit_proof = 3
+    pending_commit_bond = 3
     pending_rollup_proof = 4
     pending_finalization = 5
     finalized = 6
@@ -85,7 +85,7 @@ class Process:
 
     proofs_are_public: bool
     block_content_is_revealed: bool
-    commit_proof_is_put_down: bool #Commitment bond is put down / rename from proof 
+    commit_bond_is_put_down: bool #Commitment bond is put down / rename from proof 
     rollup_proof_is_commited: bool
     finalization_tx_is_submitted: bool
     process_aborted: bool
@@ -122,7 +122,7 @@ class Proposal():
 
 SelectionResults = dict[ProcessUUID, tuple[Proposal, list[Proposal]]]
 
-# TODO: commit_proof aka Prover Commitment Bond Object -> tracking bond UUID (might be different from sequencer UUID, bond amount) 
+# TODO: commit_bond aka Prover Commitment Bond Object -> tracking bond UUID (might be different from sequencer UUID, bond amount) 
 
 # Definition for simulation-specific types
 class AztecModelState(TypedDict):
