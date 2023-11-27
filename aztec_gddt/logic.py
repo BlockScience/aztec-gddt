@@ -178,7 +178,7 @@ def p_init_process(params: AztecModelParams,
                               duration_in_current_phase=0,
                               proofs_are_public=False,
                               block_content_is_revealed=False,
-                              commit_proof_is_put_down=False, 
+                              commit_bond_is_put_down=False, 
                               rollup_proof_is_commited=False,
                               finalization_tx_is_submitted=False,
                               process_aborted=False)
@@ -284,7 +284,7 @@ def p_reveal_content(params: AztecModelParams,
         else:
             if process.block_content_is_revealed:  # If finalized transaction was submitted.
                 updated_process = copy(process)
-                updated_process.phase = SelectionPhase.pending_commit_proof
+                updated_process.phase = SelectionPhase.pending_commit_bond
             else:  # If block content not revealed
                 pass
     else:
@@ -292,19 +292,19 @@ def p_reveal_content(params: AztecModelParams,
 
     return {'update_process': updated_process}
 
-def p_commit_proof(params: AztecModelParams,
+def p_commit_bond(params: AztecModelParams,
                            _2,
                            _3,
                            state: AztecModelState) -> Signal:
     process = state['current_process']
     updated_process: Optional[Process] = None
 
-    if process.phase == SelectionPhase.pending_commit_proof:
-        if process.duration_in_current_phase > params['phase_duration_commit_proof']:
+    if process.phase == SelectionPhase.pending_commit_bond:
+        if process.duration_in_current_phase > params['phase_duration_commit_bond']:
             updated_process = copy(process)
             updated_process.phase = SelectionPhase.proof_race
         else:
-            if process.commit_proof_is_put_down:
+            if process.commit_bond_is_put_down:
                 updated_process = copy(process)
                 updated_process.phase = SelectionPhase.pending_rollup_proof
             else:
