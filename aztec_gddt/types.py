@@ -157,7 +157,7 @@ class AztecModelParams(TypedDict):
     # Phase Durations
     phase_duration_proposal: L1Blocks
     phase_duration_reveal: L1Blocks
-    phase_duration_commit_proof: L1Blocks
+    phase_duration_commit_bond: L1Blocks
     phase_duration_rollup: L1Blocks
     phase_duration_finalize: L1Blocks
     phase_duration_race: L1Blocks
@@ -172,4 +172,5 @@ class AztecModelParams(TypedDict):
     tx_proof_reveal_probability: Probability
     # XXX If Provers don't send back rollup proof, lead can't submit
     rollup_proof_reveal_probability: Probability
-    #TODO: probability that a bond is put up for a proposal 
+    # XXX If noone commits to put up a bond for Proving, sequencer loses their privilige to race mode
+    commit_bond_reveal_probability: Probability 
