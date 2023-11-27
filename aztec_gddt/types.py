@@ -38,14 +38,21 @@ class EventCategories(Enum):
 
     # Leading sequencer related events
     # Implemented through the `Process` dataclass
-    # Triggers block process transition from 2-> 3 or -1
-    L1T_lead_submit_block_content = auto()
-    RT_lead_reveal_tx_proofs = auto()
+
     # Proving Network sends rollup proof to lead
-    RT_prover_submit_rollup_proof = auto()
-    # Triggers block process transition from  3-> 4 or -2
+    # RT_prover_submit_rollup_proof = auto()
+    # RT_prover_submit_rollup_proof commented out as currently not needed
+
+    # Triggers block process transition from 2-> 3 or -3
+    L1T_lead_submit_commit_bond = auto()
+    # Triggers block process transition from 3-> 4 or -3
+    L1T_lead_submit_block_content = auto()
+    # RT_lead_reveal_tx_proofs = auto()
+    # RT_lead_reveal_tx_proofs commented out as currently not needed, represented through commit_bond
+
+    # Triggers block process transition from  4-> 5 or -2
     L1T_lead_submit_rollup_proof = auto()
-    # Triggers block process transition from  4-> 5 or -3
+    # Triggers block process transition from  5-> 6 or -2
     L1T_lead_submit_finalization_tx = auto()
 
     # Misc
@@ -63,8 +70,8 @@ class Event(NamedTuple):
 class SelectionPhase(IntEnum):  # XXX
     # Expected phases
     pending_proposals = 1
-    pending_reveal = 2
-    pending_commit_bond = 3
+    pending_commit_bond = 2
+    pending_reveal = 3
     pending_rollup_proof = 4
     pending_finalization = 5
     finalized = 6
