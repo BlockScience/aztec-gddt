@@ -132,26 +132,32 @@ class Proposal():
     proposer_uuid: SequencerUUID
     score: float
     submission_time: ContinuousL1Blocks
-    #TODO: add bond_uiid: /generaluserUUID 
+    gas: float
+    size: float
+    #TODO: add bond_uiid: /generaluserUUID
+    #TODO: before, we only needed to track proposals, as that was the only way a block came into existence. 
+    #Now with race mode, it might be nice to reuse this container - a Proposal with "score: None" could be a block that was made in race mode. Otherwise, nothing really changes.   
 
 
 @dataclass
 class CommitmentBond():
     """
     NOTE: Instantiation of this class can be understood as a 
-    L1T_proposer_submit_proposal event.
+    L1T_lead_submit_commit_bond event.
     """
 
     uuid:  BondUUID
     proposal_uuid: ProposalUUID #gives us sequencerUUID
     prover_uuid: UserUUID #can be the same as sequencerUUID, but doesnt have to be
     bond_amount: float
+    gas: float
     submission_time: ContinuousL1Blocks
 
 
 SelectionResults = dict[ProcessUUID, tuple[Proposal, list[Proposal]]]
 
-# TODO: commit_bond aka Prover Commitment Bond Object -> tracking bond UUID (might be different from sequencer UUID, bond amount) 
+# TODO: commit_bond aka Prover Commitment Bond Object -> tracking bond UUID (might be different from sequencer UUID, bond amount). 
+# Alternative is to include prover UUID and bond amount in proposal class, but to set to "None" when instantiating.  
 
 # Definition for simulation-specific types
 class AztecModelState(TypedDict):
@@ -201,5 +207,5 @@ class AztecModelParams(TypedDict):
     tx_proof_reveal_probability: Probability
     # XXX If Provers don't send back rollup proof, lead can't submit
     rollup_proof_reveal_probability: Probability
-    # XXX If noone commits to put up a bond for Proving, sequencer loses their privilige to race mode
+    # XXX If noone commits to put up a bond for Proving, sequencer loses their privilege and we enter race mode
     commit_bond_reveal_probability: Probability 
