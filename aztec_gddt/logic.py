@@ -263,10 +263,33 @@ def p_select_proposal(params: AztecModelParams,
     return {'update_process': updated_process}
 
 
-def p_reveal_content(params: AztecModelParams,
+def p_commit_bond(params: AztecModelParams,
                            _2,
                            _3,
                            state: AztecModelState) -> Signal:
+    process = state['current_process']
+    updated_process: Optional[Process] = None
+
+    if process.phase == SelectionPhase.pending_commit_bond:
+        if process.duration_in_current_phase > params['phase_duration_commit_bond']:
+            updated_process = copy(process)
+            updated_process.phase = SelectionPhase.proof_race
+        else:
+            if process.commit_bond_is_put_down:
+                updated_process = copy(process)
+                updated_process.phase = SelectionPhase.pending_reveal
+            else:
+                pass
+    else:
+        pass
+
+    return {'update_process': updated_process}
+
+
+def p_reveal_content(params: AztecModelParams,
+                     _2,
+                     _3,
+                     state: AztecModelState) -> Signal:
     """
     Advances state of Processes that have revealed block content.
     """
@@ -284,30 +307,8 @@ def p_reveal_content(params: AztecModelParams,
         else:
             if process.block_content_is_revealed:  # If finalized transaction was submitted.
                 updated_process = copy(process)
-                updated_process.phase = SelectionPhase.pending_commit_bond
-            else:  # If block content not revealed
-                pass
-    else:
-        pass
-
-    return {'update_process': updated_process}
-
-def p_commit_bond(params: AztecModelParams,
-                           _2,
-                           _3,
-                           state: AztecModelState) -> Signal:
-    process = state['current_process']
-    updated_process: Optional[Process] = None
-
-    if process.phase == SelectionPhase.pending_commit_bond:
-        if process.duration_in_current_phase > params['phase_duration_commit_bond']:
-            updated_process = copy(process)
-            updated_process.phase = SelectionPhase.proof_race
-        else:
-            if process.commit_bond_is_put_down:
-                updated_process = copy(process)
                 updated_process.phase = SelectionPhase.pending_rollup_proof
-            else:
+            else:  # If block content not revealed
                 pass
     else:
         pass
