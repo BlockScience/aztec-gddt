@@ -16,10 +16,10 @@ Our description of the system is based on [the Fernet documentation](https://hac
 
 #### Actions
 
-Overall, the system needs to perform the following actions:
+Overall, the real system needs to perform the following actions:
 1. Propagate transaction information amongst network participants. 
 2. Package these transactions into blocks (by selecting and ordering).
-3. Provide zero-knowledge proofs attesting to the validity of the block. 
+3. Provide batch zero-knowledge proofs attesting to the validity of the block. 
 4. Publish the information from Steps 2 and 3 to the Ethereum blockchain. 
 
 #### Agents
@@ -37,23 +37,32 @@ The process of performing Aztec's fundamental activities proceeds in a few well-
 
 **Ongoing Processes**
 * Sequencers make the decision to (un)stake funds with the network, making themselves (in)eligible to be selected in the Selection phase. 
-* Provers make the decision to (un)stake funds with the network, making themselves (in)eligible to do work in the Prover phase.
 * Information propagates through the network, with Nodes distributing information through both public and private mempools.
 
 **For a Specific Block** 
+![Aztec - Spec](https://github.com/BlockScience/aztec-gddt/assets/80513714/05746e08-97c4-46ff-979b-e3af3cd976e0)
 
 **Phase 0: Sequencers Determine Eligibility** 
-**Step 1:** each Sequencer decides whether or not it wishes to make itself available to perform work in this Block.
+**Step 1:** each Sequencer decides whether or not they wish to make themself available to perform work in this Block process.
 
 **Phase 1 (Proposal Phase)**
-**Step 1:** each Sequencer who self-selected in Step 0 commits a **block proposal** consisting of necessary data. 
-**Step 2:** based on the proposals from Step 1, the Protocol selects a Sequencer is selected to perform the work. (It is possible that other Sequencers and their Proposals may continue as **Uncles**, available in case the selected Sequencer does not fulfill work. This is a design choice.)
+**Step 1:** Each Sequencer who self-selected in Step 0 decides whether their score is high enough to commit a **block proposal** consisting of necessary data. 
+**Step 2:** based on the proposals from Step 1, the Protocol selects a Sequencer that is selected to perform the work. (It is possible that other Sequencers and their Proposals may continue as **Uncles**, available in case the selected Sequencer does not fulfill work. This is a design choice.)
 
-**Phase 2 (Reveal Phase)**
+**Phase 2 (Commitment Bond Phase)**
+The Sequencer decides whether they want to prove the block themselves (putting down a bond), or whether they have an agreement with another Prover who commits (and puts down a bond). 
+
+**Phase 3 (Reveal Phase)**
 The Sequencer reveals the contents of the block. This is necessary for the block to be valid.
 
-**Phase 3 (Proving Phase)**
+**Phase 4a (Proving Phase)**
 Provers are able to provide proofs necessary for completion of the block. 
+
+**Phase 4b (Proof Race Phase)**
+If either no bond was put down, or the content was not revealed, the priorly chosen sequencer loses their privilege. Instead of a regular Proving Phase, anyone can now submit a valid rollup proof for any valid block (does not have to be a proof for any priorly committed proposal). First valid rollup proof wins. 
+
+**Phase 5 (Finalization Phase)**
+A final L1 transaction is needed to finalize the rollup block. This pays out rewards to Sequencer and Prover. 
 
 **End Result**
 At the end of this process, there are two possible outcomes.
