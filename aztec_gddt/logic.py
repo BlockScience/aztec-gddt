@@ -246,7 +246,8 @@ def p_select_proposal(params: AztecModelParams,
                                             reverse=True)
 
                 winner_proposal = ranked_proposals[0]
-                uncle_proposals = ranked_proposals[1:number_uncles+1]
+                if len(ranked_proposals) > 1:
+                    uncle_proposals = ranked_proposals[1:number_uncles+1]
 
                 updated_process = copy(state['current_process'])
                 updated_process.phase = SelectionPhase.pending_reveal
