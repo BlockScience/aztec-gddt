@@ -24,9 +24,9 @@ def last_active_process(processes: list[Process]) -> Process:
 #######################################
 
 
-def select_processes_by_state(processes: list[Process], phase: SelectionPhase) -> list[Process]:
-    # TODO: For a collection of processes, return only those that are in a specific phase.
-    return processes
+def select_processes_by_state(processes: list[Process], phase_to_select: SelectionPhase) -> list[Process]:
+    selected_processes = [proc for proc in processes if proc.phase == phase_to_select]
+    return selected_processes
 
 
 def has_blown_phase_duration(process) -> bool:
