@@ -32,3 +32,18 @@ def select_processes_by_state(processes: list[Process], phase_to_select: Selecti
 def has_blown_phase_duration(process) -> bool:
     # TODO: Determine if a process has blown its phase duration. (Not sure what this means or how to calculate at moment.)
     return False
+
+#######################################
+## Helper functions for decisions    ##
+#######################################
+
+def bernoulli_trial(probability: float, random_seed: int ) -> bool:
+    if probability > 1 or probability < 0:
+        raise ValueError(f"Probability must be be between 0 and 1, was given {probability}.")
+
+    rng = np.random.default_rng(seed = random_seed)
+    rand_num = rng.uniform(low = 0, high = 1)
+    hit = (random_num <= probability)
+
+    return hit 
+
