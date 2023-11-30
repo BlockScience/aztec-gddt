@@ -399,7 +399,8 @@ def p_reveal_content(params: AztecModelParams,
                 updated_process.phase = SelectionPhase.pending_rollup_proof
             else:  # If block content not revealed
                 probability_to_use = block_content_reveal_probability
-                content_will_be_revealed = bernoulli_trial(probability = probability_to_use)
+                content_will_be_revealed = bernoulli_trial(probability = probability_to_use,
+                                                          random_seed = params['random_seed'])
                 if content_will_be_revealed:
                     process.block_content_is_revealed = True
                     # XXX: How does time update here? 
