@@ -378,9 +378,14 @@ def p_reveal_content(params: AztecModelParams,
     Advances state of Processes that have revealed block content.
     """
     # TODO: How to check if block content was revealed for process? (Add this as a field for the class?)
+
+
+                         
     # Note: Advances state of Process in reveal phase that have revealed block content.
     process = state['current_process']
     updated_process: Optional[Process] = None
+
+    
 
     if process.phase == SelectionPhase.pending_reveal:
         # If the process has blown the phase duration
@@ -389,11 +394,17 @@ def p_reveal_content(params: AztecModelParams,
             updated_process.phase = SelectionPhase.proof_race
             # TODO: To allow for fixed phase time, we might just add another check here - if duration > params and if content is not revealed -> proof_race
         else:
-            if process.block_content_is_revealed:  # If finalized transaction was submitted.
+            if process.block_content_is_revealed:  # If block content was revealed. 
                 updated_process = copy(process)
                 updated_process.phase = SelectionPhase.pending_rollup_proof
             else:  # If block content not revealed
-                pass
+                probability_to_use = block_content_reveal_probability
+                content_will_be_revealed = bernoulli_trial(probability = probability_to_use)
+                if content_will_be_revealed:
+                    process.block_content_is_revealed = True
+                    # XXX: How does time update here? 
+                else: 
+                    pass
     else:
         pass
 
