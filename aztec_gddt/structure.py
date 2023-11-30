@@ -2,6 +2,57 @@ from aztec_gddt.logic import *
 from typing import Callable
 from copy import deepcopy
 
+{
+        'label': '',
+        'ignore': False,
+        'policies': {
+        },
+        'variables': {
+        }
+    }
+
+PRE_PHASE:list[dict] = [
+        {
+        'label': 'Update Interacting Users',
+        'ignore': False,
+        'policies': {
+            'update_interacting_users': p_update_interacting_users
+        },
+        'variables': {
+            'interacting_users': s_interacting_users  
+        }
+    }
+    # Initialize a new process for a new block.
+    {
+        'label': 'Initialize Process',
+        'ignore': False,
+        'policies': {
+            # TODO
+        },
+        'variables': {
+            # TODO
+        }
+    }
+]
+
+PROPOSAL_PHASE:list[dict] = [
+    
+]
+
+COMMITMENT_BOND_PHASE:list[dict] = [
+]
+
+REVEAL_PHASE: list[dict] = [
+]
+
+PROVING_PHASE: list[dict] = [
+]
+
+FINALIZATION_PHASE: list[dict] = [
+]
+
+
+
 AZTEC_MODEL_BLOCKS: list[dict] = [
     {
         'label': 'Time Tracking',
