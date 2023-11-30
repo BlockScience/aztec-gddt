@@ -2,6 +2,8 @@ from aztec_gddt.logic import *
 from typing import Callable
 from copy import deepcopy
 
+# Temporary Dictionary Template for Copy-Paste
+
 {
         'label': '',
         'ignore': False,
