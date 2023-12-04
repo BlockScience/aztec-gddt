@@ -81,7 +81,7 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
             'submit_block_proof_content_race': p_race_mode
         },
         'variables': {
-            'process': s_process
+            'current_process': s_process
         }
     }
 ]

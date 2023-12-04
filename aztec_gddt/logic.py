@@ -262,9 +262,13 @@ def p_init_process(params: AztecModelParams,
     ## pending_rollup_proof, skipped,    ##
     ## or reorg.                         ##
     #######################################
-    do_init_process = state['current_process'].phase == SelectionPhase.finalized
-    do_init_process |= state['current_process'].phase == SelectionPhase.finalized_without_rewards
-    do_init_process |= state['current_process'].phase == SelectionPhase.skipped
+
+    if state['current_process'] is None:
+        do_init_process = False
+    else:
+        do_init_process = state['current_process'].phase == SelectionPhase.finalized
+        do_init_process |= state['current_process'].phase == SelectionPhase.finalized_without_rewards
+        do_init_process |= state['current_process'].phase == SelectionPhase.skipped
 
     #######################################
     ## Logic to create new process       ##
@@ -314,34 +318,37 @@ def p_select_proposal(params: AztecModelParams,
     process = state['current_process']
     updated_process: Optional[Process] = None
 
-    if process.phase == SelectionPhase.pending_proposals:
-        if process.duration_in_current_phase > params['phase_duration_proposal']:
-            # TODO: filter out invalid proposals
-            # J: Which invalid proposals are we expecting here? Anything "spam/invalid" would just be ignored, not sure we need to sim that, unless for blockspace
-            # TODO: Above seems incorrect - if duration of phase exceeds duration, the next phase starts. 
-            proposals = state['proposals'].get(process.uuid, [])
-            if len(proposals) > 0:
-                # TODO: check if true
-                number_uncles = min(len(proposals) - 1, params['uncle_count'])
+    if process is None:
+        pass
+    else:
+        if process.phase == SelectionPhase.pending_proposals:
+            if process.duration_in_current_phase > params['phase_duration_proposal']:
+                # TODO: filter out invalid proposals
+                # J: Which invalid proposals are we expecting here? Anything "spam/invalid" would just be ignored, not sure we need to sim that, unless for blockspace
+                # TODO: Above seems incorrect - if duration of phase exceeds duration, the next phase starts. 
+                proposals = state['proposals'].get(process.uuid, [])
+                if len(proposals) > 0:
+                    # TODO: check if true
+                    number_uncles = min(len(proposals) - 1, params['uncle_count'])
 
-                ranked_proposals = sorted(proposals,
-                                            key=lambda p: p.score,
-                                            reverse=True)
+                    ranked_proposals = sorted(proposals,
+                                                key=lambda p: p.score,
+                                                reverse=True)
 
-                winner_proposal = ranked_proposals[0]
-                if len(ranked_proposals) > 1:
-                    uncle_proposals = ranked_proposals[1:number_uncles+1]
+                    winner_proposal = ranked_proposals[0]
+                    if len(ranked_proposals) > 1:
+                        uncle_proposals = ranked_proposals[1:number_uncles+1]
 
-                updated_process = copy(state['current_process'])
-                updated_process.phase = SelectionPhase.pending_reveal
-                updated_process.leading_sequencer = winner_proposal.uuid
-                updated_process.uncle_sequencers = [p.uuid for p in uncle_proposals]
+                    updated_process = copy(process)
+                    updated_process.phase = SelectionPhase.pending_reveal
+                    updated_process.leading_sequencer = winner_proposal.uuid
+                    updated_process.uncle_sequencers = [p.uuid for p in uncle_proposals]
+                else:
+                    pass
             else:
                 pass
         else:
             pass
-    else:
-        pass
         
 
     return {'update_process': updated_process}
@@ -354,18 +361,21 @@ def p_commit_bond(params: AztecModelParams,
     process = state['current_process']
     updated_process: Optional[Process] = None
 
-    if process.phase == SelectionPhase.pending_commit_bond:
-        if process.duration_in_current_phase > params['phase_duration_commit_bond']:
-            updated_process = copy(process)
-            updated_process.phase = SelectionPhase.proof_race
-        else:
-            if process.commit_bond_is_put_down:
-                updated_process = copy(process)
-                updated_process.phase = SelectionPhase.pending_reveal
-            else:
-                pass
-    else:
+    if process is None:
         pass
+    else:
+        if process.phase == SelectionPhase.pending_commit_bond:
+            if process.duration_in_current_phase > params['phase_duration_commit_bond']:
+                updated_process = copy(process)
+                updated_process.phase = SelectionPhase.proof_race
+            else:
+                if process.commit_bond_is_put_down:
+                    updated_process = copy(process)
+                    updated_process.phase = SelectionPhase.pending_reveal
+                else:
+                    pass
+        else:
+            pass
 
     return {'update_process': updated_process}
 
@@ -386,28 +396,29 @@ def p_reveal_content(params: AztecModelParams,
     updated_process: Optional[Process] = None
 
     
-
-    if process.phase == SelectionPhase.pending_reveal:
-        # If the process has blown the phase duration
-        if process.duration_in_current_phase > params['phase_duration_reveal']:
-            updated_process = copy(process)
-            updated_process.phase = SelectionPhase.proof_race
-            # TODO: To allow for fixed phase time, we might just add another check here - if duration > params and if content is not revealed -> proof_race
-        else:
-            if process.block_content_is_revealed:  # If block content was revealed. 
-                updated_process = copy(process)
-                updated_process.phase = SelectionPhase.pending_rollup_proof
-            else:  # If block content not revealed
-                probability_to_use = params['block_content_reveal_probability']
-                content_will_be_revealed = bernoulli_trial(probability = probability_to_use,
-                                                          random_seed = params['random_seed'])
-                if content_will_be_revealed:
-                    process.block_content_is_revealed = True
-                    # XXX: How does time update here? 
-                else: 
-                    pass
-    else:
+    if process is None:
         pass
+    else:
+        if process.phase == SelectionPhase.pending_reveal:
+            # If the process has blown the phase duration
+            if process.duration_in_current_phase > params['phase_duration_reveal']:
+                updated_process = copy(process)
+                updated_process.phase = SelectionPhase.proof_race
+                # TODO: To allow for fixed phase time, we might just add another check here - if duration > params and if content is not revealed -> proof_race
+            else:
+                if process.block_content_is_revealed:  # If block content was revealed. 
+                    updated_process = copy(process)
+                    updated_process.phase = SelectionPhase.pending_rollup_proof
+                else:  # If block content not revealed
+                    probability_to_use = params['block_content_reveal_probability']
+                    content_will_be_revealed = bernoulli_trial(probability = probability_to_use)
+                    if content_will_be_revealed:
+                        process.block_content_is_revealed = True
+                        # XXX: How does time update here? 
+                    else: 
+                        pass
+        else:
+            pass
 
     return {'update_process': updated_process}
     
@@ -422,18 +433,21 @@ def p_submit_proof(params: AztecModelParams,
     process = state['current_process']
     updated_process: Optional[Process] = None
 
-    if process.phase == SelectionPhase.pending_rollup_proof:
-        if process.duration_in_current_phase > params['phase_duration_rollup']:
-            updated_process = copy(process)
-            updated_process.phase = SelectionPhase.skipped # TODO: confirm
-        else:
-            if process.rollup_proof_is_commited:
-                updated_process = copy(process)
-                updated_process.phase = SelectionPhase.pending_finalization
-            else: 
-                pass  # Nothing changes if no valid rollup
-    else:
+    if process is None:
         pass
+    else:
+        if process.phase == SelectionPhase.pending_rollup_proof:
+            if process.duration_in_current_phase > params['phase_duration_rollup']:
+                updated_process = copy(process)
+                updated_process.phase = SelectionPhase.skipped # TODO: confirm
+            else:
+                if process.rollup_proof_is_commited:
+                    updated_process = copy(process)
+                    updated_process.phase = SelectionPhase.pending_finalization
+                else: 
+                    pass  # Nothing changes if no valid rollup
+        else:
+            pass
 
     return {'update_processes': updated_process}
 
@@ -455,19 +469,22 @@ def p_finalize_block(params: AztecModelParams,
     process = state['current_process']
     updated_process: Optional[Process] = None
 
-    if process.phase == SelectionPhase.pending_finalization:
-        if process.duration_in_current_phase > params['phase_duration_finalize']:
-            updated_process = copy(process)
-            updated_process.phase = SelectionPhase.finalized_without_rewards
-        else:
-            if process.finalization_tx_is_submitted:
-                updated_process = copy(process)
-                updated_process.phase = SelectionPhase.finalized
-                # TODO: may add reward logic?
-            else:
-                pass
-    else:
+    if process is None:
         pass
+    else:
+        if process.phase == SelectionPhase.pending_finalization:
+            if process.duration_in_current_phase > params['phase_duration_finalize']:
+                updated_process = copy(process)
+                updated_process.phase = SelectionPhase.finalized_without_rewards
+            else:
+                if process.finalization_tx_is_submitted:
+                    updated_process = copy(process)
+                    updated_process.phase = SelectionPhase.finalized
+                    # TODO: may add reward logic?
+                else:
+                    pass
+        else:
+            pass
 
     return {'update_processes': updated_process}
 
@@ -479,20 +496,23 @@ def p_race_mode(params: AztecModelParams,
     process = state['current_process']
     updated_process: Optional[Process] = None
 
-    if process.phase == SelectionPhase.proof_race:
-        if process.duration_in_current_phase > params['phase_duration_race']:
-            updated_process = copy(process)
-            updated_process.phase = SelectionPhase.skipped
-        else:
-            if process.block_content_is_revealed & process.rollup_proof_is_commited:
-                updated_process = copy(process)
-                updated_process.phase = SelectionPhase.pending_finalization
-                # NOTE: this logic may be changed in the future
-                # to take into account the racing dynamics
-            else:
-                pass
-    else:
+    if process is None:
         pass
+    else:
+        if process.phase == SelectionPhase.proof_race:
+            if process.duration_in_current_phase > params['phase_duration_race']:
+                updated_process = copy(process)
+                updated_process.phase = SelectionPhase.skipped
+            else:
+                if process.block_content_is_revealed & process.rollup_proof_is_commited:
+                    updated_process = copy(process)
+                    updated_process.phase = SelectionPhase.pending_finalization
+                    # NOTE: this logic may be changed in the future
+                    # to take into account the racing dynamics
+                else:
+                    pass
+        else:
+            pass
 
 
 def s_sequencer(params: AztecModelParams,
@@ -537,7 +557,7 @@ def s_process(params: AztecModelParams,
     
     """
     updated_process = signal.get('update_process', state['current_process'])
-    return ('process', updated_process)
+    return ('current_process', updated_process)
 
 
 
@@ -550,5 +570,5 @@ def s_interacting_users(params: AztecModelParams,
     """
     TODO
     """
-    return ('process', None)
+    return ('interacting_users', None)
 

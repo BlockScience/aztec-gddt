@@ -183,7 +183,7 @@ class AztecModelState(TypedDict):
 
     # Global State
     interacting_users: list[Sequencer]
-    current_process: Process
+    current_process: Optional[Process]
 
     # Flattened Meso State
     proposals: dict[ProcessUUID, list[Proposal]]
@@ -194,7 +194,7 @@ class AztecModelState(TypedDict):
 
 
 class AztecModelParams(TypedDict):
-    random_seed: int #Random seed for simulation model variation. 
+    # random_seed: int #Random seed for simulation model variation. 
     
     label: str  # XXX
     timestep_in_blocks: L1Blocks  # XXX
