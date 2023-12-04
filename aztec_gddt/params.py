@@ -4,8 +4,13 @@ TIMESTEPS = 5  # TODO
 SAMPLES = 1  # TODO
 
 # TODO: Set default values for initial state. - Ock, 11/29
-INITIAL_STATE = AztecModelState(block_time=0,
-                                delta_blocks=0)
+INITIAL_STATE = AztecModelState(time_l1=0,
+                                delta_l1_blocks=0,
+                                finalized_blocks_count=0,
+                                interacting_users=[],
+                                current_process=None,
+                                proposals={},
+                                events=[])
 
 # NOTE: I set the default parameters below to be completely arbitrary. - Ock, 11/29
 SINGLE_RUN_PARAMS = AztecModelParams(label='default',
