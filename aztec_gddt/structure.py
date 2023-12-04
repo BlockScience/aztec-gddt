@@ -64,7 +64,7 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
             'evolve_time': p_evolve_time
         },
         'variables': {
-            'block_time': s_block_time,
+            'time_l1': s_block_time,
             'delta_blocks': s_delta_blocks
         }
     },

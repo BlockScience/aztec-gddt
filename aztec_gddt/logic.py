@@ -83,7 +83,7 @@ def s_block_time(params: AztecModelParams, _2, _3,
         VariableUpdate:
             A two-element tuple that all state update functions must return.
     """
-    return ('block_time', state['time_l1'] + signal['delta_blocks'])
+    return ('time_l1', state['time_l1'] + signal['delta_blocks'])
 
 
 def s_delta_blocks(_1, _2, _3, _4, signal: Signal) -> VariableUpdate:
@@ -264,7 +264,8 @@ def p_init_process(params: AztecModelParams,
     #######################################
 
     if state['current_process'] is None:
-        do_init_process = False
+        # XXX: Lack of active process implies on a new one being initiated
+        do_init_process = True
     else:
         do_init_process = state['current_process'].phase == SelectionPhase.finalized
         do_init_process |= state['current_process'].phase == SelectionPhase.finalized_without_rewards
@@ -559,7 +560,9 @@ def s_process(params: AztecModelParams,
     
     """
     updated_process = signal.get('update_process', state['current_process'])
-    return ('current_process', updated_process)
+    # Update only if there's an relevant signal.
+    value = updated_process if updated_process is not None else state['current_process']
+    return ('current_process', value)
 
 
 
