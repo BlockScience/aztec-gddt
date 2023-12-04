@@ -23,7 +23,7 @@ PRE_PHASE:list[dict] = [
         'variables': {
             'interacting_users': s_interacting_users  
         }
-    }
+    },
     # Initialize a new process for a new block.
     {
         'label': 'Initialize Process',
@@ -69,7 +69,7 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
         }
     },
     {
-        'label': 'Block Process',
+        'label': 'Evolve Block Process',
         'ignore': False,
         'policies': {
             'init_process': p_init_process,
