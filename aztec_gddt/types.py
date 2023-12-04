@@ -122,6 +122,7 @@ class User():  # XXX
 
 @dataclass
 class Sequencer():  # XXX
+    uuid: SequencerUUID
     staked_amount: Tokens
 
     def slots(self, tokens_per_slot):
@@ -186,7 +187,7 @@ class AztecModelState(TypedDict):
     current_process: Optional[Process]
 
     # Flattened Meso State
-    proposals: dict[ProcessUUID, list[Proposal]]
+    proposals: list[Proposal]
 
     # TODO: should L1/Gossip/RT events be a global or meso state?
     # How are they defined in terms of types?
@@ -214,6 +215,12 @@ class AztecModelParams(TypedDict):
     unstake_cooldown_period: L1Blocks  # XXX
 
     # Behavioral Parameters
+
+    # XXX: assume that each interacting user
+    # has an fixed probability per L1 block
+    # to submit an proposal
+    proposal_probability_per_user_per_block: Probability
+
     # XXX In reveal phase, lead might not reveal content
     block_content_reveal_probability: Probability
     # XXX If lead does not reveal tx proofs, Provers can't do their work

@@ -7,6 +7,7 @@ from cadCAD_tools.types import Signal, VariableUpdate  # type: ignore
 from aztec_gddt.helper import *
 from aztec_gddt.types import *
 
+from scipy.stats import bernoulli, uniform, norm # type: ignore
 
 def generic_policy(_1, _2, _3, _4) -> dict:
     """Function to generate pass through policy
@@ -97,6 +98,25 @@ def s_delta_blocks(_1, _2, _3, _4, signal: Signal) -> VariableUpdate:
         VariableUpdate
     """
     return ('delta_blocks', signal['delta_blocks'])
+
+
+def s_current_process_time(_1, _2, _3, state: AztecModelState, signal: Signal) -> VariableUpdate:
+    """
+    State update function for change in block number. 
+
+    Args: 
+        signal (Signal): The Signal, generated in p_evolve_time, of how many blocks to advance time. 
+
+    Returns: 
+        VariableUpdate
+    """
+    updated_process = copy(state['current_process'])
+    if updated_process is not None:
+        updated_process.duration_in_current_phase += signal['delta_blocks']
+    else:
+        pass
+        
+    return ('current_process', updated_process)
 
 ##############################
 ## Pre-Phase                ##
@@ -327,7 +347,7 @@ def p_select_proposal(params: AztecModelParams,
                 # TODO: filter out invalid proposals
                 # J: Which invalid proposals are we expecting here? Anything "spam/invalid" would just be ignored, not sure we need to sim that, unless for blockspace
                 # TODO: Above seems incorrect - if duration of phase exceeds duration, the next phase starts. 
-                proposals = state['proposals'].get(process.uuid, [])
+                proposals = state['proposals']
                 if len(proposals) > 0:
                     # TODO: check if true
                     number_uncles = min(len(proposals) - 1, params['uncle_count'])
@@ -342,10 +362,14 @@ def p_select_proposal(params: AztecModelParams,
 
                     updated_process = copy(process)
                     updated_process.phase = SelectionPhase.pending_reveal
+                    updated_process.duration_in_current_phase = 0
                     updated_process.leading_sequencer = winner_proposal.uuid
                     updated_process.uncle_sequencers = [p.uuid for p in uncle_proposals]
                 else:
-                    pass
+                    # TODO: check what happens if there are no proposals
+                    updated_process = copy(process)
+                    updated_process.phase = SelectionPhase.skipped
+                    updated_process.duration_in_current_phase = 0
             else:
                 pass
         else:
@@ -369,10 +393,12 @@ def p_commit_bond(params: AztecModelParams,
             if process.duration_in_current_phase > params['phase_duration_commit_bond']:
                 updated_process = copy(process)
                 updated_process.phase = SelectionPhase.proof_race
+                updated_process.duration_in_current_phase = 0
             else:
                 if process.commit_bond_is_put_down:
                     updated_process = copy(process)
                     updated_process.phase = SelectionPhase.pending_reveal
+                    updated_process.duration_in_current_phase = 0
                 else:
                     pass
         else:
@@ -405,11 +431,13 @@ def p_reveal_content(params: AztecModelParams,
             if process.duration_in_current_phase > params['phase_duration_reveal']:
                 updated_process = copy(process)
                 updated_process.phase = SelectionPhase.proof_race
+                updated_process.duration_in_current_phase = 0
                 # TODO: To allow for fixed phase time, we might just add another check here - if duration > params and if content is not revealed -> proof_race
             else:
                 if process.block_content_is_revealed:  # If block content was revealed. 
                     updated_process = copy(process)
                     updated_process.phase = SelectionPhase.pending_rollup_proof
+                    updated_process.duration_in_current_phase = 0
                 else:  # If block content not revealed
                     probability_to_use = params['block_content_reveal_probability']
                     content_will_be_revealed = bernoulli_trial(probability = probability_to_use)
@@ -441,10 +469,12 @@ def p_submit_proof(params: AztecModelParams,
             if process.duration_in_current_phase > params['phase_duration_rollup']:
                 updated_process = copy(process)
                 updated_process.phase = SelectionPhase.skipped # TODO: confirm
+                updated_process.duration_in_current_phase = 0
             else:
                 if process.rollup_proof_is_commited:
                     updated_process = copy(process)
                     updated_process.phase = SelectionPhase.pending_finalization
+                    updated_process.duration_in_current_phase = 0
                 else: 
                     pass  # Nothing changes if no valid rollup
         else:
@@ -477,10 +507,12 @@ def p_finalize_block(params: AztecModelParams,
             if process.duration_in_current_phase > params['phase_duration_finalize']:
                 updated_process = copy(process)
                 updated_process.phase = SelectionPhase.finalized_without_rewards
+                updated_process.duration_in_current_phase = 0
             else:
                 if process.finalization_tx_is_submitted:
                     updated_process = copy(process)
                     updated_process.phase = SelectionPhase.finalized
+                    updated_process.duration_in_current_phase = 0
                     # TODO: may add reward logic?
                 else:
                     pass
@@ -504,10 +536,12 @@ def p_race_mode(params: AztecModelParams,
             if process.duration_in_current_phase > params['phase_duration_race']:
                 updated_process = copy(process)
                 updated_process.phase = SelectionPhase.skipped
+                updated_process.duration_in_current_phase = 0
             else:
                 if process.block_content_is_revealed & process.rollup_proof_is_commited:
                     updated_process = copy(process)
                     updated_process.phase = SelectionPhase.pending_finalization
+                    updated_process.duration_in_current_phase = 0
                     # NOTE: this logic may be changed in the future
                     # to take into account the racing dynamics
                 else:
@@ -565,6 +599,52 @@ def s_process(params: AztecModelParams,
     return ('current_process', value)
 
 
+
+def s_proposals(params: AztecModelParams,
+                _2,
+                _3,
+                state: AztecModelState,
+                signal: Signal) -> VariableUpdate:
+    """
+    TODO
+    """
+
+    current_process = state['current_process']
+    if current_process is not None:
+        if current_process.phase == SelectionPhase.pending_proposals:
+            # HACK: all interacting users are potential proposers
+            # XXX: an sequencer can propose only once
+            proposals = copy(state['proposals'])
+            proposers = {p.proposer_uuid for p in proposals}
+            potential_proposers = {u 
+                                   for u in state['interacting_users']
+                                   if u.uuid not in proposers}
+
+            for potential_proposer in potential_proposers:
+                if bernoulli.rvs(params['proposal_probability_per_user_per_block']):
+                    
+                    score = uniform.rvs(0, 1)
+                    submission_time = state['time_l1']
+
+                    # TODO parametrize & use more sane assumptions
+                    gas = round(max(norm.rvs(50, 30), 1))
+                    size = round(max(norm.rvs(10_000, 5_000), 100))
+
+                    new_proposal = Proposal(uuid4(),
+                                             potential_proposer, 
+                                             score,
+                                             submission_time,
+                                             gas,
+                                             size)
+                    proposals.append(new_proposal)
+                else:
+                    pass
+        else:
+            proposals = []
+    else:
+        proposals = []
+
+    return ('proposals', proposals)
 
 
 def s_interacting_users(params: AztecModelParams,
