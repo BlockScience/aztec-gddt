@@ -85,10 +85,10 @@ class SelectionPhase(IntEnum):  # XXX
 @dataclass
 class Process:
     uuid: ProcessUUID
-    phase: SelectionPhase = SelectionPhase.pending_proposals
+    current_phase_init_time: L1Blocks
+    duration_in_current_phase: L1Blocks
 
-    current_phase_init_time: Optional[L1Blocks] = None
-    duration_in_current_phase: Optional[L1Blocks] = None
+    phase: SelectionPhase = SelectionPhase.pending_proposals
 
     leading_sequencer: Optional[SequencerUUID] = None
     uncle_sequencers: Optional[list[SequencerUUID]] = None
