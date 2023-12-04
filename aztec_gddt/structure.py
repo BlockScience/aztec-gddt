@@ -72,9 +72,13 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
     {
         'label': 'User Actions',
         'policies': {
+            # TODO Possibly add policies for the users triggering the relevant events
+            # eg. making the proofs public
         },
         'variables': {
             'proposals': s_proposals
+            # TODO Possibly add a SUF for updating toggling the event
+            # bools in the current process
         }
     },
     {
