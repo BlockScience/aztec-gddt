@@ -47,4 +47,3 @@ def bernoulli_trial(probability: float) -> bool:
     hit = (rand_num <= probability)
 
     return hit 
-

@@ -449,7 +449,7 @@ def p_submit_proof(params: AztecModelParams,
         else:
             pass
 
-    return {'update_processes': updated_process}
+    return {'update_process': updated_process}
 
 
 def p_finalize_block(params: AztecModelParams,
@@ -486,7 +486,7 @@ def p_finalize_block(params: AztecModelParams,
         else:
             pass
 
-    return {'update_processes': updated_process}
+    return {'update_process': updated_process}
 
 
 def p_race_mode(params: AztecModelParams,
@@ -513,6 +513,8 @@ def p_race_mode(params: AztecModelParams,
                     pass
         else:
             pass
+
+    return {'update_process': updated_process}
 
 
 def s_sequencer(params: AztecModelParams,
