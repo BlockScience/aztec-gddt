@@ -85,19 +85,20 @@ class SelectionPhase(IntEnum):  # XXX
 @dataclass
 class Process:
     uuid: ProcessUUID
-    phase: SelectionPhase
-    leading_sequencer: Optional[SequencerUUID]
-    uncle_sequencers: Optional[list[SequencerUUID]]
+    phase: SelectionPhase = SelectionPhase.pending_proposals
 
-    current_phase_init_time: L1Blocks
-    duration_in_current_phase: L1Blocks
+    current_phase_init_time: Optional[L1Blocks] = None
+    duration_in_current_phase: Optional[L1Blocks] = None
 
-    proofs_are_public: bool
-    block_content_is_revealed: bool
-    commit_bond_is_put_down: bool #Commitment bond is put down / rename from proof 
-    rollup_proof_is_commited: bool
-    finalization_tx_is_submitted: bool
-    process_aborted: bool
+    leading_sequencer: Optional[SequencerUUID] = None
+    uncle_sequencers: Optional[list[SequencerUUID]] = None
+
+    proofs_are_public: bool = False
+    block_content_is_revealed: bool = False
+    commit_bond_is_put_down: bool = False #Commitment bond is put down / rename from proof 
+    rollup_proof_is_commited: bool = False
+    finalization_tx_is_submitted: bool = False
+    process_aborted: bool = False
     #TODO: Think about having "global" param for minimum stake in here to make it dynamically updateable per L2 block 
 
 
