@@ -359,6 +359,8 @@ def p_select_proposal(params: AztecModelParams,
                     winner_proposal = ranked_proposals[0]
                     if len(ranked_proposals) > 1:
                         uncle_proposals = ranked_proposals[1:number_uncles+1]
+                    else:
+                        uncle_proposals = []
 
                     updated_process = copy(process)
                     updated_process.phase = SelectionPhase.pending_reveal
@@ -616,7 +618,7 @@ def s_proposals(params: AztecModelParams,
             # XXX: an sequencer can propose only once
             proposals = copy(state['proposals'])
             proposers = {p.proposer_uuid for p in proposals}
-            potential_proposers = {u 
+            potential_proposers = {u.uuid 
                                    for u in state['interacting_users']
                                    if u.uuid not in proposers}
 
