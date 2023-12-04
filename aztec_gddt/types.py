@@ -102,6 +102,18 @@ class Process:
     #TODO: Think about having "global" param for minimum stake in here to make it dynamically updateable per L2 block 
 
 
+    def __add__(self, other):
+        """
+        This is a HACK for allowing Policy Aggregation over Process.
+        Specifically, the instantiated Process plus None should result in the
+        instantiated Process. Else, throw an error.
+        """
+        if other is None:
+            return self
+        else:
+            raise ValueError('Attempted to add Process to another non-null object')
+
+
 @dataclass
 class User():  # XXX
     balance: Tokens
