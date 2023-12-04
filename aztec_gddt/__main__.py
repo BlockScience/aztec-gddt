@@ -1,6 +1,6 @@
 from aztec_gddt import default_run_args
 from aztec_gddt.experiment import standard_run
-from cadCAD_tools.execution import easy_run
+from aztec_gddt.utils import sim_run
 from datetime import datetime
 import click
 import os
@@ -15,7 +15,7 @@ import os
 def main(experiment_run: bool, pickle: bool) -> None:
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     if experiment_run is False:
-        df = easy_run(*default_run_args)
+        df = sim_run(*default_run_args)
     else:
         df = standard_run()
     if pickle:

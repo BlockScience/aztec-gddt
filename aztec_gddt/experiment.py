@@ -1,10 +1,9 @@
-import pandas as pd
+import pandas as pd # type: ignore
 from aztec_gddt.params import INITIAL_STATE
 from aztec_gddt.params import SINGLE_RUN_PARAMS
 from aztec_gddt.structure import AZTEC_MODEL_BLOCKS
-from cadCAD_tools import easy_run
 from pandas import DataFrame
-
+from aztec_gddt.utils import sim_run
 
 def standard_run() -> DataFrame:
     """Function which runs the cadCAD simulations
@@ -29,5 +28,5 @@ def standard_run() -> DataFrame:
                 N_samples)
 
     # Run simulation
-    sim_df = easy_run(*sim_args)
+    sim_df = sim_run(*sim_args)
     return sim_df
