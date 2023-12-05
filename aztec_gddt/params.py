@@ -24,16 +24,19 @@ INITIAL_STATE = AztecModelState(time_l1=0,
 SINGLE_RUN_PARAMS = AztecModelParams(label='default',
                                      timestep_in_blocks=1,
                                      uncle_count=0,
-                                     phase_duration_proposal=3,
-                                     phase_duration_reveal=3,
-                                     phase_duration_commit_bond=3,
-                                     phase_duration_rollup=3,
-                                     phase_duration_finalize=3,
-                                     phase_duration_race=3,
-                                     stake_activation_period=10,
-                                     unstake_cooldown_period=5,
-                                     proposal_probability_per_user_per_block=0.1,
-                                     block_content_reveal_probability=0.1,
-                                     tx_proof_reveal_probability=0.15,
-                                     rollup_proof_reveal_probability=0.2,
-                                     commit_bond_reveal_probability=0.25)
+                                     phase_duration_proposal=5,
+                                     phase_duration_reveal=5,
+                                     phase_duration_commit_bond=5,
+                                     phase_duration_rollup=25, 
+                                     phase_duration_finalize=3, # left at 3 for now - could merge with rollup proof submission
+                                     phase_duration_race=25, # same duration as rollup/proving phase to keep total block time fixed.
+                                     #TODO: How to keep overall block time fixed if we move to race mode after commit bond phase and skip reveal
+                                     stake_activation_period=40,
+                                     unstake_cooldown_period=40,
+                                     proposal_probability_per_user_per_block=0.1, 
+                                     #TODO: proposal_probability should depend on the score in v1 already 
+                                     block_content_reveal_probability=0.5, #reveals in ~96.9% over 5 L1 blocks
+                                     tx_proof_reveal_probability=0.15, #tx_proofs do not have to be revealed in v1
+                                     rollup_proof_reveal_probability=0.1, 
+                                     #TODO: rollup_proof_reveal if possible, we use a distribution that is much more likely to reveal later during the phase, as Proving takes time
+                                     commit_bond_reveal_probability=0.4) #bond put up with ~92% likelihood over 5 rounds
