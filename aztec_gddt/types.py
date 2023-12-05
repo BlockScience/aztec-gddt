@@ -124,9 +124,16 @@ class User():  # XXX
 class Sequencer():  # XXX
     uuid: SequencerUUID
     staked_amount: Tokens
+    score: int 
 
-    def slots(self, tokens_per_slot):
+    def slots(self, tokens_per_slot : int) -> int:
         return floor(self.staked_amount / tokens_per_slot)
+
+    def generate_score(self) -> int:
+        """ 
+        Generate a score. Current method is a uniformly random integer between 0 and 100. 
+        """
+        return np.random.randint(0,100)
 
     # TODO:
     # discuss what is an Sequencer on our model
