@@ -257,6 +257,39 @@ def p_update_interacting_users(params: AztecModelParams,
 
     return {"new_interacting_users": None}
 
+def p_init_proposals(params: AztecModelParams,
+                   _2,
+                   _3,
+                   state: AztecModelState) -> Signal:
+    """
+    Initializes a certain number of proposals. 
+
+    Args:
+         params (AztecModelParams): The current parameters of the model.
+         state (AztecModelState): The current state of the model.
+
+    Returns:
+         Signal: The new process to be considered in the system. 
+
+    """
+    
+    threshold = params["min_stake"]
+    eligible_users = list(filter(lambda x: x.staked_amount > threshold,
+                                 state["interacting_users"]))
+
+    for user in eligible_users:
+        user.new_score() #Update each user's score parameter individually.
+
+    sorted_eligible_users = sorted(eligible_users,
+                                   key = lambda x: x.score) #Sort users based on score.
+
+    num_proposals_to_create = params["num_proposals"] #Determine how many proposals to create.
+    new_proposals = [user.create_proposal(state) for 
+                     user in sorted_eligible_users[0:num_proposals_to_create]] #Create new proposals.
+
+    return {"proposals_created": new_proposals}
+
+
 
 def p_init_process(params: AztecModelParams,
                    _2,

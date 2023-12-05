@@ -100,7 +100,7 @@ class Process:
     finalization_tx_is_submitted: bool = False
     process_aborted: bool = False
     #TODO: Think about having "global" param for minimum stake in here to make it dynamically updateable per L2 block 
-
+    #NOTE: Currently I have placed this minimum stake in the AztecModelParam class. - Oct
 
     def __add__(self, other):
         """
@@ -117,23 +117,66 @@ class Process:
 @dataclass
 class User():  # XXX
     balance: Tokens
+    staked_amount: Tokens
+    sequencer_score: int
     # General User Class from which Sequencer inherits?
     # Benefits: We can clearly distuingish who is a sequencer (moves tokens from balance to stake), while also letting us draw Provers from non-sequencer users (anyone can be Prover, only needs a UUID and enough balance to put up bond)
+
+    is_sequencer: bool
+    is_prover: bool
+
+    def become_sequencer(self) -> bool:
+        self.is_sequencer = True
+        return self.is_sequencer
+
+    def become_not_sequencer(self) -> bool:
+        self.is_sequencer = False
+        return self.is_sequencer
+
+    def become_prover(self) -> bool:
+        self.is_prover = True
+        return self.is_prover
+
+    def become_not_prover(self) -> bool:
+        self.is_prover = False
+        return self.is_prover
+    
 
 @dataclass
 class Sequencer():  # XXX
     uuid: SequencerUUID
     staked_amount: Tokens
-    score: int 
+    score: int
+    is_sequencer: bool = True
+
 
     def slots(self, tokens_per_slot : int) -> int:
         return floor(self.staked_amount / tokens_per_slot)
 
-    def generate_score(self) -> int:
+    def new_score(self) -> int:
         """ 
         Generate a score. Current method is a uniformly random integer between 0 and 100. 
         """
-        return np.random.randint(0,100)
+        new_score = np.random.randint(0,100)
+        self.score = new_score
+        return new_score
+
+    def create_proposal(self, current_state: AztecModelState) -> Proposal:
+        """ 
+        Function for generating a proposal based on current information. 
+        """ 
+        new_proposal = Proposal(uuid = uuid.uuid(),
+                                proposer_id = self.uuid,
+                                score = self.score,
+                                submission_time = current_state.time_l1,
+                                gas = 1,
+                                size = 1
+                                )
+        
+
+        #TODO: discuss logic of uuid, gas, and size. -Oct
+
+        return new_proposal
 
     # TODO:
     # discuss what is an Sequencer on our model
@@ -155,10 +198,12 @@ class Proposal():
     submission_time: ContinuousL1Blocks
     gas: float
     size: float
+    from_proof_race: bool = False
+
     #TODO: add bond_uiid: /generaluserUUID
     #TODO: before, we only needed to track proposals, as that was the only way a block came into existence. 
     #Now with race mode, it might be nice to reuse this container - a Proposal with "score: None" could be a block that was made in race mode. Otherwise, nothing really changes.   
-
+    # NOTE: Rather than check 'score: None', I propose we just put this in as a bool that is default to false. 
 
 @dataclass
 class CommitmentBond():
@@ -175,7 +220,7 @@ class CommitmentBond():
     submission_time: ContinuousL1Blocks
 
 
-SelectionResults = dict[ProcessUUID, tuple[Proposal, list[Proposal]]]
+    SelectionResults = dict[ProcessUUID, tuple[Proposal, list[Proposal]]]
 
 # TODO: commit_bond aka Prover Commitment Bond Object -> tracking bond UUID (might be different from sequencer UUID, bond amount). 
 # Alternative is to include prover UUID and bond amount in proposal class, but to set to "None" when instantiating.  
@@ -209,6 +254,8 @@ class AztecModelParams(TypedDict):
 
     
     uncle_count: int
+    min_stake: int #Minimum stake required
+    num_proposals: int #Number of proposals to create
 
     # Phase Durations
     phase_duration_proposal: L1Blocks
