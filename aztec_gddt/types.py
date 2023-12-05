@@ -3,6 +3,8 @@ from dataclasses import dataclass
 from enum import IntEnum, Enum, auto
 from math import floor
 
+import uuid
+
 # Units
 
 L1Blocks = Annotated[int, 'blocks']  # Number of L1 Blocks (time dimension)
@@ -100,7 +102,7 @@ class Process:
     finalization_tx_is_submitted: bool = False
     process_aborted: bool = False
     #TODO: Think about having "global" param for minimum stake in here to make it dynamically updateable per L2 block 
-    #NOTE: Currently I have placed this minimum stake in the AztecModelParam class. - Oct
+    #NOTE: Currently I have placed this minimum stake in the AztecModelParam class. - Ock
 
     def __add__(self, other):
         """
@@ -166,7 +168,7 @@ class Sequencer():  # XXX
         Function for generating a proposal based on current information. 
         """ 
         new_proposal = Proposal(uuid = uuid.uuid(),
-                                proposer_id = self.uuid,
+                                proposer_uuid = self.uuid,
                                 score = self.score,
                                 submission_time = current_state.time_l1,
                                 gas = 1,
@@ -174,7 +176,7 @@ class Sequencer():  # XXX
                                 )
         
 
-        #TODO: discuss logic of uuid, gas, and size. -Oct
+        #TODO: discuss logic of uuid, gas, and size. -Ock
 
         return new_proposal
 
@@ -198,7 +200,7 @@ class Proposal():
     submission_time: ContinuousL1Blocks
     gas: float
     size: float
-    from_proof_race: bool = False
+    from_proof_race: bool = False #Was this proposal created in the proof race?
 
     #TODO: add bond_uiid: /generaluserUUID
     #TODO: before, we only needed to track proposals, as that was the only way a block came into existence. 

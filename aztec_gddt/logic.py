@@ -274,8 +274,10 @@ def p_init_proposals(params: AztecModelParams,
     """
     
     threshold = params["min_stake"]
-    eligible_users = list(filter(lambda x: x.staked_amount > threshold,
-                                 state["interacting_users"]))
+    eligible_users = list(filter(lambda x: x.is_sequencer and (x.staked_amount > threshold),
+                                 state["interacting_users"])) 
+    
+    #NOTE: I've written the above to work with either a specific Sequencer or a more general User class.
 
     for user in eligible_users:
         user.new_score() #Update each user's score parameter individually.
@@ -288,7 +290,6 @@ def p_init_proposals(params: AztecModelParams,
                      user in sorted_eligible_users[0:num_proposals_to_create]] #Create new proposals.
 
     return {"proposals_created": new_proposals}
-
 
 
 def p_init_process(params: AztecModelParams,
