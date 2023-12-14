@@ -1,3 +1,5 @@
+# Background Rules
+
 TODO delete background rules before publication
 
 **Proposed Collaboration Structure and Rules**
@@ -171,11 +173,10 @@ may be unnecessary due to hyperlinks
 
 <--
 
+ # Raw Materials 
 TODO Take relevant parts from this earlier draft below and use it to fill in the final draft. 
 
 An earlier draft. Definitely useful as raw materials for the final. 
-
- # Aztec Granular Design Digital Twin Model
 
 This document is intended to provide additional documentation on the approach and decisions behind our model of the Aztec network. 
 
