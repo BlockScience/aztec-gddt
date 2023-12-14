@@ -1,9 +1,8 @@
-At the moment the majority of text is commented out below. As text becomes finalized or needs to be previewed, it can be commented out. 
+TODO delete background rules before publication
 
-[
 **Proposed Collaboration Structure and Rules**
-TODO Discuss
-TODO Consensus
+TODO Discuss ✔️
+TODO Consensus ✔️
 
 1. For purposes of this sprint, please use a new branch for every new edit session. Naming Convention: `edit/name/date/brief-description`, e.g. this one will be `edit-main/ock/dec-13/create-README` 
 2. Small pull requests are preferable, so that editing decisions are independent. 
@@ -15,8 +14,8 @@ TODO Consensus
 8. Final editor (likely Jakob) is responsible for ensuring all TODOs are removed prior to publication. 
 
 **Document Thoughts**
-TODO Discuss
-TODO Consensus
+TODO Discuss ✔️
+TODO Consensus ✔️
 
 1. Of the READMEs I considered, I liked [Risk Adjusted Bonding Curves](https://github.com/BlockScience/Risk-Adjusted-Bonding-Curves) the best. 
 2. 8 like lots of hyperlinks, images, code blocks, etc. 
@@ -26,17 +25,29 @@ TODO Consensus
 
 [
 **Proposed Main Document Outline**
-TODO Discuss
-TODO Reach Consensus
+TODO Discuss ✔️
+TODO Reach Consensus ✔️
+
+# 🏴‍☠️🐙Actual Document Begins Here
 
 # Title TBD 
 
-## Summary 
+## Introduction
+
+This repository provides a cadCAD simulation model of the Aztec system, focusing on the design and implementation of the Fernet Sequencer Selection Protocol. The goal of the model is to understanding the effect of design parameters and agent behaviors on various Key Performance Indicators (KPIs). This document provides an overview of the system under consideration, the mathematical and software specifications of a simulation model for the system, and information about how to use the model. 
+
+## Overview of Aztec System
+
+
+## Introduction 
 ### Overview of Aztec System 
 ### Purpose of Model 
 ### Current Work 
 
 ## Model Overview 
+
+
+
 ### Brief cadCAD model structure overview 
 ### Using the Model 
 
@@ -62,7 +73,7 @@ An earlier draft. Definitely useful as raw materials for the final.
 
  # Aztec Granular Design Digital Twin Model
 
-his document is intended to provide additional documentation on the approach and decisions behind our model of the Aztec network. 
+This document is intended to provide additional documentation on the approach and decisions behind our model of the Aztec network. 
 
 ## Overview 
  
@@ -88,10 +99,10 @@ Overall, the real system needs to perform the following actions:
 
 The following agents are fundamental to understanding the network: 
 
-* Nodes who propagate information on the network.
-* Sequencers, who are responsible for structuring the transactions into blocks.
-* Provers, who are responsible for providing the necessary proofs to accompany a block.
-* Protocol, describing the algorithms by which various computational decisions regarding the network's state are made (e.g. which Sequencer is selected for the Proposal phase).
+* *Nodes*, who propagate information on the network.
+* *Sequencers*, who are responsible for structuring the transactions into blocks.
+* *Provers*, who are responsible for providing the necessary proofs to accompany a block.
+* *Protocol*, describing the algorithms by which various computational decisions regarding the network's state are made (e.g. which Sequencer is selected for the Proposal phase).
 
 #### Phases
 
