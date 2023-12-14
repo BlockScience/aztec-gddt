@@ -1,9 +1,10 @@
-At the moment the majority of text is commented out below. As text becomes finalized or needs to be previewed, it can be commented out. 
+# Background Rules
 
-[
+TODO delete background rules before publication
+
 **Proposed Collaboration Structure and Rules**
-TODO Discuss
-TODO Consensus
+TODO Discuss ✔️
+TODO Consensus ✔️
 
 1. For purposes of this sprint, please use a new branch for every new edit session. Naming Convention: `edit/name/date/brief-description`, e.g. this one will be `edit-main/ock/dec-13/create-README` 
 2. Small pull requests are preferable, so that editing decisions are independent. 
@@ -15,8 +16,8 @@ TODO Consensus
 8. Final editor (likely Jakob) is responsible for ensuring all TODOs are removed prior to publication. 
 
 **Document Thoughts**
-TODO Discuss
-TODO Consensus
+TODO Discuss ✔️
+TODO Consensus ✔️
 
 1. Of the READMEs I considered, I liked [Risk Adjusted Bonding Curves](https://github.com/BlockScience/Risk-Adjusted-Bonding-Curves) the best. 
 2. 8 like lots of hyperlinks, images, code blocks, etc. 
@@ -26,51 +27,33 @@ TODO Consensus
 
 [
 **Proposed Main Document Outline**
-TODO Discuss
-TODO Reach Consensus
+TODO Discuss ✔️
+TODO Reach Consensus ✔️
+
+# 🏴‍☠️🐙Actual Document Begins Here
 
 # Title TBD 
 
-## Summary 
-### Overview of Aztec System 
-### Purpose of Model 
-### Current Work 
+## Introduction
 
-## Model Overview 
-### Brief cadCAD model structure overview 
-### Using the Model 
+TODO approve as acceptable
+TODO approve as final
 
-## Model Details 
-### State Variables
-### Parameters
-### Policies
-### Partial State Update Blocks? 
+This repository provides a cadCAD simulation model of the Aztec system, focusing on the design and implementation of the Fernet Sequencer Selection Protocol. The goal of the model is to understanding the effect of design parameters and agent behaviors on the helath of the Aztec network, as measured through various Key Performance Indicators (KPIs).
 
-## Software Details 
-### How to Install cadCAD
-### Project Directory Structure
+This document provides:
+* an overview of the system under consideration, with special focus on Fernet
+* mathematical and software specifications for the cadCAD simulation model for the system, and
+* information about how to use the model. 
 
-## References 
-may be unnecessary due to hyperlinks
--->
+## Overview of Aztec System
 
-<--
+TODO approve as acceptable
+TODO approve as final 
 
-TODO Take relevant parts from this earlier draft below and use it to fill in the final draft. 
+The stated goal of [Aztec Network](https://aztec.network/) is "A no-compromises privacy-first Layer 2 on Ethereum."  Aztec uses zero-knowledge infrastructure and economic incentives to create to publish summaries of Layer 2 (L2) blocks on the Layer 1 (L1) Ethereum blockchain. Achieving this goal depends on Agents playing different roles through a sequence of Phases. 
 
-An earlier draft. Definitely useful as raw materials for the final. 
-
- # Aztec Granular Design Digital Twin Model
-
-his document is intended to provide additional documentation on the approach and decisions behind our model of the Aztec network. 
-
-## Overview 
- 
-This repository provides a cadCAD model of the Aztec system, focusing on the design and implementation of the Fernet Sequencer Selection Protocol. The goal of the model is to understanding the effect of design parameters on various Key Performance Indicators (KPIs) under a wide range of possible scenarios. This document provides an overview of the system under consideration, the mathematical and software specifications of a simulation model for the system, and results of the research undertaken with this model. 
-
-## Overview of Aztec Network
-
-The stated goal of [Aztec Network](https://aztec.network/) is "A no-compromises privacy-first Layer 2 on Ethereum." To achieve this goal, Aztec uses zero-knowledge infrastructure to publish summaries of Layer 2 blocks on the Ethereum blockchain. Fulfillment of these goals depends on performance of various agents through specific processes, described below. 
+The decentralized and anonymous nature of Aztec creates risks that participants in the network may be either unreliable or malicious. 
 
 ### Description of System
 
@@ -82,18 +65,22 @@ Overall, the real system needs to perform the following actions:
 1. Propagate transaction information amongst network participants. 
 2. Package these transactions into blocks (by selecting and ordering).
 3. Provide batch zero-knowledge proofs attesting to the validity of the block. 
-4. Publish the information from Steps 2 and 3 to the Ethereum blockchain. 
+4. Publish the information from Steps 2 and 3 to the Ethereum blockchain.
 
 #### Agents
 
 The following agents are fundamental to understanding the network: 
 
-* Nodes who propagate information on the network.
-* Sequencers, who are responsible for structuring the transactions into blocks.
-* Provers, who are responsible for providing the necessary proofs to accompany a block.
-* Protocol, describing the algorithms by which various computational decisions regarding the network's state are made (e.g. which Sequencer is selected for the Proposal phase).
+* *Users*, who create transactions that they wish to have inluded in the network. 
+* *Nodes*, who propagate information on the network.
+* *Sequencers*, who are responsible for structuring the transactions into blocks.
+* *Provers*, who are responsible for providing the necessary proofs to accompany a block.
+* *Protocol*, describing the algorithms by which various computational decisions regarding the network's state are made (e.g. which Sequencer is selected for the Proposal phase).
 
 #### Phases
+
+TODO approve as acceptable
+TODO approve as final
 
 The process of performing Aztec's fundamental activities proceeds in a few well-defined phases.
 
@@ -137,7 +124,69 @@ At the end of this process, there are two possible outcomes.
 * A suitable completed block is not produced. (We assume any produced valid block will be published.)
 * The Agents responsible for failure of work receive appropriate consequences (e.g. some portion of stake is slashed)
 * The L2 block height remains the same.
-* The system returns to Phase 1. 
+* The system returns to Phase 1.
+
+#### Purpose of Model
+
+A healthy Aztec network will have large throughput, consistently recording a large number of its user's transactions on the underlying Layer 1. Our simulation model is intended to offer insight into how the Aztec network could perform in a variety of situations. Of particular interest are situations where the network's Agents act in ways that are not in the best interests of the network. Network agents may be unable to perform their role in a specific moment, due to either simple inability or economic incentives. It can also be used to explore the impact of L1 actors, who may be inclined to censor Aztec transactions. This insight can aid decision-makers in the Aztec network with respect to system attributes, including: economic incentive structure, high-risk scenarios to monitor, and other important questions. 
+
+## Model Overview
+
+TODO approve as acceptable
+TODO approve as final
+
+The simulation model is written in cadCAD. (TODO how to describe cadCAD?) In this section we will describe the variables and parameters recorded in the simulation.  We will also describe how various aspects of the cadCAD model structure correspond to specific parts of the Aztec system in general, and the Fernet model in particular. 
+
+### Model Variables
+
+All variables of the Aztec system recorded in the model are implemented in an `AztecModelState` class. The model has the following attributes: 
+
+TODO bullet point list of attributes
+* `example_var`: an example of a variable that a model might have
+
+### Model  Parameters
+
+Parameters represent aspects of the simulation which are fixed before the beginning of a single model run. 
+
+## Model Overview 
+
+### Partial State Update Blocks 
+
+### Policies
+
+### State Update Functions
+
+
+
+<a name="overview-of-aztec-system"></a>
+
+
+## Technical Details 
+### How to Install cadCAD
+### Project Directory Structure
+
+## Future Work
+
+## References 
+may be unnecessary due to hyperlinks
+-->
+
+<--
+
+ # Raw Materials 
+TODO Take relevant parts from this earlier draft below and use it to fill in the final draft. 
+
+An earlier draft. Definitely useful as raw materials for the final. 
+
+This document is intended to provide additional documentation on the approach and decisions behind our model of the Aztec network. 
+
+## Overview 
+ 
+This repository provides a cadCAD model of the Aztec system, focusing on the design and implementation of the Fernet Sequencer Selection Protocol. The goal of the model is to understanding the effect of design parameters on various Key Performance Indicators (KPIs) under a wide range of possible scenarios. This document provides an overview of the system under consideration, the mathematical and software specifications of a simulation model for the system, and results of the research undertaken with this model. 
+
+## Overview of Aztec Network
+
+The stated goal of [Aztec Network](https://aztec.network/) is "A no-compromises privacy-first Layer 2 on Ethereum." To achieve this goal, Aztec uses zero-knowledge infrastructure to publish summaries of Layer 2 blocks on the Ethereum blockchain. Fulfillment of these goals depends on performance of various agents through specific processes, described below. 
 
 
 
