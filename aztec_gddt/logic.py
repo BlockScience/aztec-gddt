@@ -271,23 +271,26 @@ def p_commit_bond(params: AztecModelParams,
                            _2,
                            _3,
                            state: AztecModelState) -> Signal:
-    process = state['current_process']
+    process: Process | None = state['current_process']
     updated_process: Optional[Process] = None
 
     if process is None:
         pass
     else:
         if process.phase == SelectionPhase.pending_commit_bond:
+            # Move to Proof Race mode if duration is expired
             if process.duration_in_current_phase > params['phase_duration_commit_bond']:
                 updated_process = copy(process)
                 updated_process.phase = SelectionPhase.proof_race
                 updated_process.duration_in_current_phase = 0
             else:
-                if process.commit_bond_is_put_down:
+                # If duration is not expired, do  a trial to see if bond is commited
+                if bernoulli_trial(probability=params['commit_bond_reveal_probability']) is True:
                     updated_process = copy(process)
                     updated_process.phase = SelectionPhase.pending_reveal
                     updated_process.duration_in_current_phase = 0
-                else:
+                else: 
+                # else, nothing happens
                     pass
         else:
             pass
@@ -327,9 +330,7 @@ def p_reveal_content(params: AztecModelParams,
                     updated_process.phase = SelectionPhase.pending_rollup_proof
                     updated_process.duration_in_current_phase = 0
                 else:  # If block content not revealed
-                    probability_to_use = params['block_content_reveal_probability']
-                    content_will_be_revealed = bernoulli_trial(probability = probability_to_use)
-                    if content_will_be_revealed:
+                    if bernoulli_trial(probability=params['block_content_reveal_probability']) is True:
                         process.block_content_is_revealed = True
                         # XXX: How does time update here? 
                     else: 
