@@ -110,7 +110,7 @@ def s_current_process_time(_1, _2, _3, state: AztecModelState, signal: Signal) -
     Returns: 
         VariableUpdate
     """
-    updated_process = copy(state['current_process'])
+    updated_process: Process | None = copy(state['current_process'])
     if updated_process is not None:
         updated_process.duration_in_current_phase += signal['delta_blocks']
     else:
@@ -289,6 +289,22 @@ def p_commit_bond(params: AztecModelParams,
                     updated_process = copy(process)
                     updated_process.phase = SelectionPhase.pending_reveal
                     updated_process.duration_in_current_phase = 0
+
+                    gas: Gas = params['gas_estimators'].commitment_bond(state)
+                    fee = gas * state['gas_fee_l1']
+                    proposal = None # TODO: how to access it?
+                    prover = None # TODO: maybe assume any at random from interacting users?
+                    bond_amount = 0.0 # TODO: open question
+
+                    # TODO: where to store the tx?
+                    tx = CommitmentBond(who=updated_process.leading_sequencer,
+                                        when=state['time_l1'],
+                                        uuid=uuid4(),
+                                        gas=gas,
+                                        fee=fee,
+                                        proposal_tx_uuid=proposal,
+                                        prover_uuid=prover,
+                                        bond_amount=bond_amount)
                 else: 
                 # else, nothing happens
                     pass
@@ -325,16 +341,20 @@ def p_reveal_content(params: AztecModelParams,
                 updated_process.duration_in_current_phase = 0
                 # TODO: To allow for fixed phase time, we might just add another check here - if duration > params and if content is not revealed -> proof_race
             else:
-                if process.block_content_is_revealed:  # If block content was revealed. 
+                if bernoulli_trial(probability=params['block_content_reveal_probability']) is True:
                     updated_process = copy(process)
-                    updated_process.phase = SelectionPhase.pending_rollup_proof
+                    updated_process.phase = SelectionPhase.pending_finalization
                     updated_process.duration_in_current_phase = 0
-                else:  # If block content not revealed
-                    if bernoulli_trial(probability=params['block_content_reveal_probability']) is True:
-                        process.block_content_is_revealed = True
-                        # XXX: How does time update here? 
-                    else: 
-                        pass
+
+                    gas: Gas = params['gas_estimators'].content_reveal(state)
+                    fee = gas * state['gas_fee_l1']
+                    proposal = None # TODO: how to access it?
+                    prover = None # TODO: maybe assume any at random from interacting users?
+                    bond_amount = None # TODO: open question
+
+                    # TODO: where to store the tx?
+                else: 
+                    pass
         else:
             pass
 
