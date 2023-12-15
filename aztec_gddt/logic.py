@@ -287,6 +287,7 @@ def p_init_process(params: AztecModelParams,
         # XXX: Lack of active process implies on a new one being initiated
         do_init_process = True
     else:
+        # Else, check if the current one is finalized
         do_init_process = state['current_process'].phase == SelectionPhase.finalized
         do_init_process |= state['current_process'].phase == SelectionPhase.finalized_without_rewards
         do_init_process |= state['current_process'].phase == SelectionPhase.skipped

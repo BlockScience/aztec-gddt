@@ -2,6 +2,7 @@ from typing import Annotated, TypedDict, Union, NamedTuple, Optional
 from enum import IntEnum, Enum, auto
 from math import floor
 from pydantic import BaseModel, PositiveInt, FiniteFloat
+from typing import Callable
 from pydantic.dataclasses import dataclass
 
 # Units
@@ -20,6 +21,9 @@ ProcessUUID = Annotated[object, 'uuid']
 Gas = Annotated[int, 'gas']
 Gwei = Annotated[int, 'gwei']
 BlobGas = Annotated[int, 'blob_gas']
+
+
+
 
 class L1TransactionType(Enum):
     BlockProposal=auto()
@@ -222,6 +226,17 @@ class AztecModelState(TypedDict):
     events: list[Event]
 
 
+GasEstimator = Callable[[AztecModelState, TransactionL1], Gas]
+BlobGasEstimator = Callable[[AztecModelState, TransactionL1Blob], BlobGas]
+
+@dataclass
+class L1GasEstimators():
+    proposal: GasEstimator
+    commitment_bond: GasEstimator
+    content_reveal: GasEstimator
+    content_reveal_blob: BlobGasEstimator
+    rollup_proof: GasEstimator
+
 class AztecModelParams(TypedDict):
     # random_seed: int #Random seed for simulation model variation. 
     
@@ -257,3 +272,8 @@ class AztecModelParams(TypedDict):
     rollup_proof_reveal_probability: Probability
     # XXX If noone commits to put up a bond for Proving, sequencer loses their privilege and we enter race mode
     commit_bond_reveal_probability: Probability 
+
+    gas_estimators: L1GasEstimators
+
+
+
