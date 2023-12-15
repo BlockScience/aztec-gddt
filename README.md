@@ -39,10 +39,10 @@ TODO Reach Consensus ✔️
 TODO approve as acceptable
 TODO approve as final
 
-This repository provides a cadCAD simulation model of the Aztec system, focusing on the design and implementation of the Fernet Sequencer Selection Protocol. The goal of the model is to understanding the effect of design parameters and agent behaviors on the helath of the Aztec network, as measured through various Key Performance Indicators (KPIs).
+This repository provides a cadCAD simulation model of the Aztec system, focusing on the design and implementation of the Fernet Sequencer Selection Protocol. The goal of the model is to understand the effect of design parameters and agent behaviors on the health of the Aztec network, as measured through various Key Performance Indicators (KPIs).
 
 This document provides:
-* an overview of the system under consideration, with special focus on Fernet
+* an overview of the system under consideration, focussing on the Sequencer Selection Protocol "Fernet"
 * mathematical and software specifications for the cadCAD simulation model for the system, and
 * information about how to use the model. 
 
@@ -51,20 +51,20 @@ This document provides:
 TODO approve as acceptable
 TODO approve as final 
 
-The stated goal of [Aztec Network](https://aztec.network/) is "A no-compromises privacy-first Layer 2 on Ethereum."  Aztec uses zero-knowledge infrastructure and economic incentives to create to publish summaries of Layer 2 (L2) blocks on the Layer 1 (L1) Ethereum blockchain. Achieving this goal depends on Agents playing different roles through a sequence of Phases. 
+The stated goal of [Aztec Network](https://aztec.network/) is "A no-compromises privacy-first Layer 2 on Ethereum."  Aztec uses zero-knowledge infrastructure and economic incentives to publish Layer 2 (L2) transactions, batched into single zero-knowledge "rollup" proofs, on the Layer 1 (L1) Ethereum blockchain. Achieving this goal sustainably and reliably without centralized intermediaries depends on Agents playing different roles through a sequence of phases. 
 
-The decentralized and anonymous nature of Aztec creates risks that participants in the network may be either unreliable or malicious. 
+The decentralized and anonymous nature of Aztec creates risks that participants in the network may be either unreliable or malicious in intent. 
 
 ### Description of System
 
-Our description of the system is based on [the Fernet documentation](https://hackmd.io/@aztec-network/fernet) and discussions with colleagues. 
+Our description of the system is based on [the Fernet documentation](https://hackmd.io/@aztec-network/fernet) and discussions with Aztec Labs and colleagues. 
 
 #### Actions
 
 Overall, the real system needs to perform the following actions:
 1. Propagate transaction information amongst network participants. 
 2. Package these transactions into blocks (by selecting and ordering).
-3. Provide batch zero-knowledge proofs attesting to the validity of the block. 
+3. Provide batch zero-knowledge proofs attesting to the validity of the entire block. 
 4. Publish the information from Steps 2 and 3 to the Ethereum blockchain.
 
 #### Agents
@@ -85,50 +85,51 @@ TODO approve as final
 The process of performing Aztec's fundamental activities proceeds in a few well-defined phases.
 
 **Ongoing Processes**
-* Sequencers make the decision to (un)stake funds with the network, making themselves (in)eligible to be selected in the Selection phase. 
-* Information propagates through the network, with Nodes distributing information through both public and private mempools.
+* Sequencers make the decision to (un-)stake funds with the network, making themselves (in-)eligible to be selected in the Selection phase after a defined (de-)activation period. 
+* Information is propagated through the network, with Nodes collecting information in their mempools, receiving information through both public ("public mempool") and private ("private mempool") means.
 
 **For a Specific Block** 
 ![Aztec - Spec](https://github.com/BlockScience/aztec-gddt/assets/80513714/05746e08-97c4-46ff-979b-e3af3cd976e0)
 
-**Phase 0: Sequencers Determine Eligibility** 
-**Step 1:** each Sequencer decides whether or not they wish to make themself available to perform work in this Block process.
+**Phase 0: Sequencers (Un-)Stake** 
+**Step 1:** Each Sequencer decides whether or not they wish to remain / make themself available to perform work for the network, requiring to wait out a defined (de-)activation period.
 
 **Phase 1 (Proposal Phase)**
-**Step 1:** Each Sequencer who self-selected in Step 0 decides whether their score is high enough to commit a **block proposal** consisting of necessary data. 
-**Step 2:** based on the proposals from Step 1, the Protocol selects a Sequencer that is selected to perform the work. (It is possible that other Sequencers and their Proposals may continue as **Uncles**, available in case the selected Sequencer does not fulfill work. This is a design choice.)
+**Step 1:** Each Sequencer who has at least the minimum stake active, and is not currently waiting out a (de-)activation period, decides whether they deem their score high enough to commit a **block proposal** consisting of necessary data. 
+**Step 2:** based on the proposals from Step 1, the Protocol selects the Sequencer with the highest score as selected to perform the work for this block. (It is possible that other Sequencers and their Proposals may continue as **Uncles**, available in case the selected Sequencer does not fulfill work. This is a design choice.)
 
 **Phase 2 (Commitment Bond Phase)**
-The Sequencer decides whether they want to prove the block themselves (putting down a bond), or whether they have an agreement with another Prover who commits (and puts down a bond). 
+The Sequencer decides whether they want to prove the block themselves (putting down the bond), or whether they have an agreement with another Prover (or 3rd party proving marketplace) who commits to prove the block (and puts down the bond). 
 
 **Phase 3 (Reveal Phase)**
-The Sequencer reveals the contents of the block. This is necessary for the block to be valid.
+The Sequencer reveals the contents of the block. This is necessary for the protocol to consider the block to be valid.
 
 **Phase 4a (Proving Phase)**
-Provers are able to provide proofs necessary for completion of the block. 
+The Prover computes the necessary proof(s) and commits them on L1, triggering the finalization of this block and any respective payouts. 
 
 **Phase 4b (Proof Race Phase)**
-If either no bond was put down, or the content was not revealed, the priorly chosen sequencer loses their privilege. Instead of a regular Proving Phase, anyone can now submit a valid rollup proof for any valid block (does not have to be a proof for any priorly committed proposal). First valid rollup proof wins. 
+If either no bond was put down, or the content was not revealed, the priorly chosen sequencer loses their privilege. Instead of a regular Proving Phase, anyone can now submit a valid rollup proof for any valid block (which does not have to be a proof for any priorly committed proposal). The first valid rollup proof on L1 wins, triggering finalization of this block and any respective payouts. 
 
-**Phase 5 (Finalization Phase)**
-A final L1 transaction is needed to finalize the rollup block. This pays out rewards to Sequencer and Prover. 
+# Note: Finalization Phase commented out, as not needed anymore.
+# **Phase 5 (Finalization Phase)**
+# A final L1 transaction is needed to finalize the rollup block. This pays out rewards to Sequencer and Prover. 
 
 **End Result**
 At the end of this process, there are two possible outcomes.
 **Success:** 
-* A suitable completed L2 block is produced and is published to L1. 
-* The Agents involved in work receive appropriate consequences (i.e. token emissions)
+* A valid, completed L2 block rollup proof is produced and published to L1. 
+* The Agents involved in the work receive appropriate consequences (i.e. token emissions and fee payouts, as well as portions of stake slashed in case a chosen sequencer fails their obligation resulting in race mode)
 * The L2 block number is incremented by 1. 
-* The system returns to Phase 1. 
+* The system returns to Phase 1 (or in this model - to Phase 0).
 **Failure:**
-* A suitable completed block is not produced. (We assume any produced valid block will be published.)
-* The Agents responsible for failure of work receive appropriate consequences (e.g. some portion of stake is slashed)
+* A valid, completed L2 block rollup proof is not published to L1 in time.
+* The Agents responsible for failure of work receive appropriate consequences (i.e. some portion of stake or commitment bond is slashed)
 * The L2 block height remains the same.
 * The system returns to Phase 1.
 
 #### Purpose of Model
 
-A healthy Aztec network will have large throughput, consistently recording a large number of its user's transactions on the underlying Layer 1. Our simulation model is intended to offer insight into how the Aztec network could perform in a variety of situations. Of particular interest are situations where the network's Agents act in ways that are not in the best interests of the network. Network agents may be unable to perform their role in a specific moment, due to either simple inability or economic incentives. It can also be used to explore the impact of L1 actors, who may be inclined to censor Aztec transactions. This insight can aid decision-makers in the Aztec network with respect to system attributes, including: economic incentive structure, high-risk scenarios to monitor, and other important questions. 
+A healthy Aztec network will have reliable throughput, consistently recording a sufficiently large number of its user's transactions on the underlying Layer 1. Our simulation model is intended to offer insight into how the Aztec network could perform in a variety of situations. Of particular interest are situations where the network's Agents act in ways that are not in the best interests of the network. Network agents may be unable to perform their role in a specific moment, due to either simple inability or economic incentives. It can also be used to explore the impact of L1 actors, who may be inclined to censor Aztec transactions. This insight can aid decision-makers in the Aztec network with respect to system attributes, including: economic incentive structure, high-risk scenarios to monitor, and other important questions. 
 
 ## Model Overview
 
