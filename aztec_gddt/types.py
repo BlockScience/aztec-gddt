@@ -4,6 +4,7 @@ from math import floor
 from pydantic import BaseModel, PositiveInt, FiniteFloat
 from typing import Callable
 from pydantic.dataclasses import dataclass
+from uuid import uuid4
 
 # Units
 
@@ -33,10 +34,9 @@ class L1TransactionType(Enum):
 
 @dataclass
 class TransactionL1():
-    uuid: TxUUID
     who: UserUUID
     when: L1Blocks
-    kind: L1TransactionType
+    uuid: TxUUID
     gas: Gas
     fee: Gwei
 
@@ -211,6 +211,9 @@ class AztecModelState(TypedDict):
     time_l1: L1Blocks
     delta_l1_blocks: L1Blocks
 
+    gas_fee_l1: Gwei
+    gas_fee_blob: Gwei
+
     # Metrics
     finalized_blocks_count: int
 
@@ -226,8 +229,8 @@ class AztecModelState(TypedDict):
     events: list[Event]
 
 
-GasEstimator = Callable[[AztecModelState, TransactionL1], Gas]
-BlobGasEstimator = Callable[[AztecModelState, TransactionL1Blob], BlobGas]
+GasEstimator = Callable[[AztecModelState], Gas]
+BlobGasEstimator = Callable[[AztecModelState], BlobGas]
 
 @dataclass
 class L1GasEstimators():

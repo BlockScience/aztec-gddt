@@ -494,36 +494,34 @@ def s_proposals(params: AztecModelParams,
                 state: AztecModelState,
                 signal: Signal) -> VariableUpdate:
     """
-    TODO
+    Logic for submitting new proposals.
     """
 
-    current_process = state['current_process']
+    current_process: Process | None = state['current_process']
     if current_process is not None:
         if current_process.phase == SelectionPhase.pending_proposals:
             # HACK: all interacting users are potential proposers
             # XXX: an sequencer can propose only once
-            proposals = copy(state['proposals'])
-            proposers = {p.proposer_uuid for p in proposals}
-            potential_proposers = {u.uuid 
+            proposals: list[Proposal] = copy(state['proposals'])
+            proposers: set[UserUUID] = {p.who for p in proposals}
+            potential_proposers: set[UserUUID] = {u.uuid 
                                    for u in state['interacting_users']
                                    if u.uuid not in proposers}
 
             for potential_proposer in potential_proposers:
                 if bernoulli.rvs(params['proposal_probability_per_user_per_block']):
+
+                    gas: Gas = params['gas_estimators'].proposal(state)
+                    fee: Gwei= gas * state['gas_fee_l1']
+                    score = uniform.rvs() # XXX: score is always uniform
                     
-                    score = uniform.rvs(0, 1)
-                    submission_time = state['time_l1']
-
-                    # TODO parametrize & use more sane assumptions
-                    gas = round(max(norm.rvs(50, 30), 1))
-                    size = round(max(norm.rvs(10_000, 5_000), 100))
-
-                    new_proposal = Proposal(uuid4(),
-                                             potential_proposer, 
-                                             score,
-                                             submission_time,
-                                             gas,
-                                             size)
+                    new_proposal = Proposal(who=potential_proposer,
+                                            when=state['time_l1'],
+                                            uuid=uuid4(),
+                                            gas=gas,
+                                            fee=fee,
+                                            score=score)
+                
                     proposals.append(new_proposal)
                 else:
                     pass
