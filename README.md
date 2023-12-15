@@ -4,42 +4,6 @@
 <i style="font-size:0.6em; text-align:center;display: block;">Cactus on the Madrid Botanical Garden, Danilo L. Bernardineli, 2023</i>
 <br>
 
-# Background Rules
-
-TODO delete background rules before publication
-
-**Proposed Collaboration Structure and Rules**
-TODO Discuss ✔️
-TODO Consensus ✔️
-
-1. For purposes of this sprint, please use a new branch for every new edit session. Naming Convention: `edit/name/date/brief-description`, e.g. this one will be `edit-main/ock/dec-13/create-README` 
-2. Small pull requests are preferable, so that editing decisions are independent. 
-3. Each tags the other as reviewer for every pull request. Please do not commit directly to main. 
-4. Branches are deleted after approval. 
-5. For async discussion, open an Issue in GitHub **and** signal in Slack. 
-6. Ideas for things that need to be included but not sure where go in comments (like this one). Please include TODO in the comment; everything should have an action as to what needs to be completed to consider it final.
-7. Once a TODO is completed, please delete the comment. 
-8. Final editor (likely Jakob) is responsible for ensuring all TODOs are removed prior to publication. 
-
-**Document Thoughts**
-TODO Discuss ✔️
-TODO Consensus ✔️
-
-1. Of the READMEs I considered, I liked [Risk Adjusted Bonding Curves](https://github.com/BlockScience/Risk-Adjusted-Bonding-Curves) the best. 
-2. 8 like lots of hyperlinks, images, code blocks, etc. 
-3. Use hyperlinks within the document for ease of navigation. 
-4. Let's put technical things like "How to Install cadCAD" towards the end. My preference is to write primarily for the two extremes: the reader who won't install the model, and the one who already knows how to do so. 
-]: #
-
-[
-**Proposed Main Document Outline**
-TODO Discuss ✔️
-TODO Reach Consensus ✔️
-
-# 🏴‍☠️🐙Actual Document Begins Here
-
-# Title TBD 
-
 ## Introduction
 
 TODO approve as acceptable
