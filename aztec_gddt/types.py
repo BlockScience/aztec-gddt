@@ -116,6 +116,7 @@ class Process:
 
     leading_sequencer: Optional[UserUUID] = None
     uncle_sequencers: Optional[list[UserUUID]] = None
+    winning_proposal: Optional[TxUUID] = None
 
     proofs_are_public: bool = False
     block_content_is_revealed: bool = False
