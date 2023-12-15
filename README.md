@@ -1,3 +1,9 @@
+# aztec_gddt
+
+<img src="media/cover.jpg" style="width:80%;display:block;margin-left: auto;margin-right: auto;"/>
+<i style="font-size:0.6em; text-align:center;display: block;">Cactus on the Madrid Botanical Garden, Danilo L. Bernardineli, 2023</i>
+<br>
+
 # Background Rules
 
 TODO delete background rules before publication
