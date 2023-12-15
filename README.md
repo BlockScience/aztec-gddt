@@ -4,6 +4,14 @@
 <i style="font-size:0.6em; text-align:center;display: block;">Cactus on the Madrid Botanical Garden, Danilo L. Bernardineli, 2023</i>
 <br>
 
+## Quickstart
+
+There are 3 main ways to interact with the model:
+1. Through Python CLI: `python -m aztec_gddt`, which is going to run a pre-programmed experiment.
+2. Through Jupyter Notebooks: some examples can be found at `notebooks/`
+3. Through tests: we use `pytest` as the testing framework.
+
+
 ## Introduction
 
 TODO approve as acceptable
