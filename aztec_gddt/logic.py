@@ -331,7 +331,7 @@ def p_reveal_content(params: AztecModelParams,
     # Note: Advances state of Process in reveal phase that have revealed block content.
     process = state['current_process']
     updated_process: Optional[Process] = None
-
+    new_transactions = list()
     
     if process is None:
         pass
@@ -363,13 +363,16 @@ def p_reveal_content(params: AztecModelParams,
                                         blob_gas=blob_gas,
                                         blob_fee=blob_fee)
 
+                    new_transactions.append(tx)
+                    updated_process.tx_content_reveal = tx.uuid
                     # TODO: where to store the tx?
                 else: 
                     pass
         else:
             pass
 
-    return {'update_process': updated_process}
+    return {'update_process': updated_process,
+            'new_transactions': new_transactions}
     
 
 def p_submit_proof(params: AztecModelParams,
@@ -381,6 +384,7 @@ def p_submit_proof(params: AztecModelParams,
     """
     process = state['current_process']
     updated_process: Optional[Process] = None
+    new_transactions = list()
 
     if process is None:
         pass
@@ -395,12 +399,28 @@ def p_submit_proof(params: AztecModelParams,
                     updated_process = copy(process)
                     updated_process.phase = SelectionPhase.pending_finalization
                     updated_process.duration_in_current_phase = 0
+
+                    who = updated_process.leading_sequencer # XXX
+                    gas: Gas = params['gas_estimators'].content_reveal(state)
+                    fee: Gwei = gas * state['gas_fee_l1']
+                    blob_gas: BlobGas = params['gas_estimators'].rollup_proof(state)
+                    blob_fee: Gwei = blob_gas * state['gas_fee_blob']
+
+                    tx = RollupProof(who=who,
+                                        when=state['time_l1'],
+                                        uuid=uuid4(),
+                                        gas=gas,
+                                        fee=fee)
+
+                    new_transactions.append(tx)
+                    updated_process.tx_content_reveal = tx.uuid
                 else: 
                     pass  # Nothing changes if no valid rollup
         else:
             pass
 
-    return {'update_process': updated_process}
+    return {'update_process': updated_process,
+            'new_transactions': new_transactions}
 
 
 def p_finalize_block(params: AztecModelParams,
