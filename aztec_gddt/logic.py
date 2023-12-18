@@ -606,29 +606,30 @@ def s_agents_rewards(params: AztecModelParams,
 
 
     p: Process = state['current_process'] # type: ignore
-    txs = state['transactions']
-    total_rewards = signal.get('fee_cashback', 0.0) + signal.get('block_reward', 0.0)
-    agents: dict[AgentUUID, Agent] = state['agents'].copy()
+    if p.phase == SelectionPhase.finalized:
+        txs = state['transactions']
+        total_rewards = signal.get('fee_cashback', 0.0) + signal.get('block_reward', 0.0)
+        agents: dict[AgentUUID, Agent] = state['agents'].copy()
 
-    rewards_relay = total_rewards * params['rewards_to_relay']
-    rewards_prover = total_rewards * params['rewards_to_provers']
-    rewards_sequencer = total_rewards - (rewards_relay + rewards_prover)
+        rewards_relay = total_rewards * params['rewards_to_relay']
+        rewards_prover = total_rewards * params['rewards_to_provers']
+        rewards_sequencer = total_rewards - (rewards_relay + rewards_prover)
 
-    # TODO: How to select the winning sequencer when entering race mode?
+        # TODO: How to select the winning sequencer when entering race mode?
 
-    sequencer_uuid = p.leading_sequencer
-    
-    # TODO: add check for whatever the Process went through race-mode or not.
-    if p.entered_race_mode:
-        prover_uuid = txs[p.tx_commitment_bond].prover_uuid # type: ignore
-        relay_uuid = sequencer_uuid # TODO: make sure that relays are included. For now, assume no relays
+        sequencer_uuid = p.leading_sequencer
+        
+        # TODO: add check for whatever the Process went through race-mode or not.
+        if p.entered_race_mode:
+            prover_uuid = txs[p.tx_commitment_bond].prover_uuid # type: ignore
+            relay_uuid = sequencer_uuid # TODO: make sure that relays are included. For now, assume no relays
+        else:
+            prover_uuid = sequencer_uuid
+
+        # Disburse Rewards
+        agents[sequencer_uuid].balance += rewards_sequencer
+        agents[prover_uuid].balance += rewards_prover
+        agents[relay_uuid].balance += rewards_relay
+        return ('agents', agents)
     else:
-        prover_uuid = sequencer_uuid
-
-    # Disburse Rewards
-    agents[sequencer_uuid].balance += rewards_sequencer
-    agents[prover_uuid].balance += rewards_prover
-    agents[relay_uuid].balance += rewards_relay
-    
-
-    return ('agents', agents)
+        return ('agents', state['agents'])
