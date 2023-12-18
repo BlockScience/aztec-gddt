@@ -16,23 +16,23 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
         }
     },
     {
-        'label': 'Update Interacting Users',
+        'label': 'Update Interacting Agents',
         'ignore': False,
         'policies': {
-            #TODO'update_interacting_users': p_update_interacting_users 
+            #TODO'update_agents': p_update_agents 
         },
         'variables': {
-            #TODO 'interacting_users': s_interacting_users
+            #TODO 'agents': s_agents
         }
     },
     {
-        'label': 'User Actions',
+        'label': 'Agent Actions',
         'policies': {
             # TODO Possibly add policies for the users triggering the relevant events
             # eg. making the proofs public
         },
         'variables': {
-            'proposals': s_proposals
+            'transactions': s_transactions_new_proposals
             # TODO Possibly add a SUF for updating toggling the event
             # bools in the current process
         }
@@ -50,7 +50,8 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
             'submit_block_proof_content_race': p_race_mode
         },
         'variables': {
-            'current_process': s_process
+            'current_process': s_process,
+            'transactions': s_transactions
         }
     }
 ]

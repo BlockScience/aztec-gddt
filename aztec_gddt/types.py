@@ -1,7 +1,10 @@
 from typing import Annotated, TypedDict, Union, NamedTuple, Optional
-from dataclasses import dataclass
-from enum import IntEnum, Enum, auto
+from enum import IntEnum, Enum, auto, Flag
 from math import floor
+from pydantic import BaseModel, PositiveInt, FiniteFloat
+from typing import Callable
+from pydantic.dataclasses import dataclass
+from uuid import uuid4
 
 # Units
 
@@ -12,13 +15,34 @@ Seconds = Annotated[int, 's']
 Probability = Annotated[float, 'probability']
 Tokens = Annotated[float, 'tokens']  # Amount of slashable tokens
 
+AgentUUID = Annotated[object, 'uuid']
+TxUUID = Annotated[object, 'uuid']
 ProcessUUID = Annotated[object, 'uuid']
-SequencerUUID = Annotated[object, 'uuid']
-ProposalUUID = Annotated[object, 'uuid']
-BondUUID = Annotated[object, 'uuid']
-UserUUID = Annotated[object, 'uuid']
+
+Gas = Annotated[int, 'gas']
+Gwei = Annotated[int, 'gwei']
+BlobGas = Annotated[int, 'blob_gas']
 
 
+
+
+class L1TransactionType(Enum):
+    BlockProposal=auto()
+    CommitmentBond=auto()
+    ContentReveal=auto()
+    RollupProof=auto()
+
+@dataclass
+class TransactionL1():
+    who: AgentUUID
+    when: L1Blocks
+    uuid: TxUUID
+    gas: Gas
+    fee: Gwei
+
+    @property
+    def gas_price(self):
+        return self.fee / self.gas
 class EventCategories(Enum):
     """
     Pattern for event naming: {time}_{agent}_{desc}
@@ -80,8 +104,6 @@ class SelectionPhase(IntEnum):  # XXX
     skipped = -1
     finalized_without_rewards = -2  # XXX
     proof_race = -3
-
-
 @dataclass
 class Process:
     uuid: ProcessUUID
@@ -90,16 +112,25 @@ class Process:
 
     phase: SelectionPhase = SelectionPhase.pending_proposals
 
-    leading_sequencer: Optional[SequencerUUID] = None
-    uncle_sequencers: Optional[list[SequencerUUID]] = None
 
+    # Relevant L1 Transactions
+    tx_winning_proposal: Optional[TxUUID] = None
+    tx_commitment_bond: Optional[TxUUID] = None
+    tx_content_reveal: Optional[TxUUID] = None
+    tx_rollup_proof: Optional[TxUUID] = None
+
+    # Agent-related info
+    leading_sequencer: Optional[AgentUUID] = None
+    uncle_sequencers: Optional[list[AgentUUID]] = None
+    
+
+    # Process State
     proofs_are_public: bool = False
     block_content_is_revealed: bool = False
     commit_bond_is_put_down: bool = False #Commitment bond is put down / rename from proof 
     rollup_proof_is_commited: bool = False
     finalization_tx_is_submitted: bool = False
     process_aborted: bool = False
-    #TODO: Think about having "global" param for minimum stake in here to make it dynamically updateable per L2 block 
 
 
     def __add__(self, other):
@@ -115,58 +146,56 @@ class Process:
 
 
 @dataclass
-class User():  # XXX
+class Agent(): 
+    uuid: AgentUUID
     balance: Tokens
-    # General User Class from which Sequencer inherits?
-    # Benefits: We can clearly distuingish who is a sequencer (moves tokens from balance to stake), while also letting us draw Provers from non-sequencer users (anyone can be Prover, only needs a UUID and enough balance to put up bond)
+    is_sequencer: bool = False
+    is_prover: bool = False
+    is_relay: bool = False
+    staked_amount: Tokens = 0.0
 
-@dataclass
-class Sequencer():  # XXX
-    uuid: SequencerUUID
-    staked_amount: Tokens
-
-    def slots(self, tokens_per_slot):
+    def slots(self, tokens_per_slot: Tokens) -> Tokens:
         return floor(self.staked_amount / tokens_per_slot)
-
-    # TODO:
-    # discuss what is an Sequencer on our model
-    # discuss how to derive proposal scores - each sequencer a random value and calculate score for each per round?
-    # discuss how to separate general users (Provers mainly) and sequencers -> general class -> sequencers inherit from it 
-
+    
 
 @dataclass
-class Proposal():
+class TransactionL1Blob(TransactionL1):
+    blob_gas: BlobGas
+    blob_fee: Gwei
+
+    @property
+    def blob_gas_price(self):
+        return self.blob_fee / self.blob_gas
+@dataclass
+class Proposal(TransactionL1):
     """
     NOTE: Instantiation of this class can be understood as a 
     L1T_proposer_submit_proposal event.
     """
-    # Skipping having a Process UUID as the proposals container
-    # already uses it as a key.
-    uuid:  ProposalUUID
-    proposer_uuid: SequencerUUID
-    score: float
-    submission_time: ContinuousL1Blocks
-    gas: float
-    size: float
+    score: FiniteFloat
+        
     #TODO: add bond_uiid: /generaluserUUID
     #TODO: before, we only needed to track proposals, as that was the only way a block came into existence. 
     #Now with race mode, it might be nice to reuse this container - a Proposal with "score: None" could be a block that was made in race mode. Otherwise, nothing really changes.   
 
 
 @dataclass
-class CommitmentBond():
+class CommitmentBond(TransactionL1):
     """
     NOTE: Instantiation of this class can be understood as a 
     L1T_lead_submit_commit_bond event.
     """
-
-    uuid:  BondUUID
-    proposal_uuid: ProposalUUID #gives us sequencerUUID
-    prover_uuid: UserUUID #can be the same as sequencerUUID, but doesnt have to be
+    proposal_tx_uuid: TxUUID
+    prover_uuid: AgentUUID
     bond_amount: float
-    gas: float
-    submission_time: ContinuousL1Blocks
 
+@dataclass 
+class ContentReveal(TransactionL1Blob):
+    pass
+
+@dataclass 
+class RollupProof(TransactionL1):
+    pass
 
 SelectionResults = dict[ProcessUUID, tuple[Proposal, list[Proposal]]]
 
@@ -179,20 +208,32 @@ class AztecModelState(TypedDict):
     time_l1: L1Blocks
     delta_l1_blocks: L1Blocks
 
+    # Agents
+    agents: dict[AgentUUID, Agent]
+
+    # Process State
+    current_process: Optional[Process]
+    transactions: dict[TxUUID, TransactionL1 | Proposal | CommitmentBond | ContentReveal | RollupProof]
+
+    # Environmental / Behavioral Variables
+    gas_fee_l1: Gwei
+    gas_fee_blob: Gwei
+
     # Metrics
     finalized_blocks_count: int
 
-    # Global State
-    interacting_users: list[Sequencer]
-    current_process: Optional[Process]
 
-    # Flattened Meso State
-    proposals: list[Proposal]
 
-    # TODO: should L1/Gossip/RT events be a global or meso state?
-    # How are they defined in terms of types?
-    events: list[Event]
+GasEstimator = Callable[[AztecModelState], Gas]
+BlobGasEstimator = Callable[[AztecModelState], BlobGas]
 
+@dataclass
+class L1GasEstimators():
+    proposal: GasEstimator
+    commitment_bond: GasEstimator
+    content_reveal: GasEstimator
+    content_reveal_blob: BlobGasEstimator
+    rollup_proof: GasEstimator
 
 class AztecModelParams(TypedDict):
     # random_seed: int #Random seed for simulation model variation. 
@@ -229,3 +270,8 @@ class AztecModelParams(TypedDict):
     rollup_proof_reveal_probability: Probability
     # XXX If noone commits to put up a bond for Proving, sequencer loses their privilege and we enter race mode
     commit_bond_reveal_probability: Probability 
+
+    gas_estimators: L1GasEstimators
+
+
+

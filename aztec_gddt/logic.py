@@ -84,7 +84,7 @@ def s_block_time(params: AztecModelParams, _2, _3,
         VariableUpdate:
             A two-element tuple that all state update functions must return.
     """
-    return ('time_l1', state['time_l1'] + signal['delta_blocks'])
+    return ('time_l1', state['time_l1'] + signal['delta_blocks']) # type: ignore
 
 
 def s_delta_blocks(_1, _2, _3, _4, signal: Signal) -> VariableUpdate:
@@ -110,131 +110,16 @@ def s_current_process_time(_1, _2, _3, state: AztecModelState, signal: Signal) -
     Returns: 
         VariableUpdate
     """
-    updated_process = copy(state['current_process'])
+    updated_process: Process | None = copy(state['current_process'])
     if updated_process is not None:
-        updated_process.duration_in_current_phase += signal['delta_blocks']
+        updated_process.duration_in_current_phase += signal['delta_blocks'] # type: ignore
     else:
         pass
         
     return ('current_process', updated_process)
 
-##############################
-## Pre-Phase                ##
-##############################
 
-##############################
-## Pre-Phase                ##
-##  Completed               ##
-##############################
-
-##############################
-## Pre-Phase                ##
-## In Progress              ##
-##############################
-
-##############################
-## Pre-Phase                ##
-## Not Started              ##
-##############################
-
-##############################
-## Block Proposal Phase     ##
-##############################
-
-##############################
-## Block Proposal Phase     ##
-## Completed                ##
-##############################
-
-##############################
-## Block Proposal Phase     ##
-## In Progress              ##
-##############################
-
-##############################
-## Block Proposal Phase     ##
-## Not Started              ##
-##############################
-
-##############################
-## Block Reveal Phase       ##
-##############################
-
-##############################
-## Block Reveal Phase       ##
-## Completed                ##
-##############################
-
-##############################
-## Block Reveal Phase       ##
-## In Progress              ##
-##############################
-
-##############################
-## Block Reveal Phase       ##
-## Not Started              ##
-##############################
-
-##############################
-## Prover Commitment Phase  ##
-##############################
-
-##############################
-## Prover Commitment Phase  ##
-## Completed                ##
-##############################
-
-##############################
-## Prover Commitment Phase  ##
-## In Progress              ##
-##############################
-
-##############################
-## Prover Commitment Phase  ##
-## Not Started              ##
-##############################
-
-##############################
-## Proving Phase            ##
-##############################
-
-##############################
-## Proving Phase            ##
-## Completed                ##
-##############################
-
-##############################
-## Proving Phase            ##
-## In Progress              ##
-##############################
-
-##############################
-## Proving Phase            ##
-## Not Started              ##
-##############################
-
-##############################
-## Finalization Phase       ##
-##############################
-
-##############################
-## Finalization Phase       ##
-## Completed                ##
-##############################
-
-##############################
-## Finalization Phase       ##
-## In Progress              ##
-##############################
-
-##############################
-## Finalization Phase       ##
-## Not Started              ##
-##############################
-
-
-
-def p_update_interacting_users(params: AztecModelParams,
+def p_update_agents(params: AztecModelParams,
                                _2,
                                _3,
                                state: AztecModelState) -> Signal:
@@ -255,7 +140,7 @@ def p_update_interacting_users(params: AztecModelParams,
     # right now we only have sequencers -> with the introduction of commitment bond we might introduce second class 
     # commitment bond could be put up by lead sequencer, or by anyone else (e.g. 3rd party marketplace)
 
-    return {"new_interacting_users": None}
+    return {"new_agents": None}
 
 
 def p_init_process(params: AztecModelParams,
@@ -287,6 +172,7 @@ def p_init_process(params: AztecModelParams,
         # XXX: Lack of active process implies on a new one being initiated
         do_init_process = True
     else:
+        # Else, check if the current one is finalized
         do_init_process = state['current_process'].phase == SelectionPhase.finalized
         do_init_process |= state['current_process'].phase == SelectionPhase.finalized_without_rewards
         do_init_process |= state['current_process'].phase == SelectionPhase.skipped
@@ -347,18 +233,18 @@ def p_select_proposal(params: AztecModelParams,
                 # TODO: filter out invalid proposals
                 # J: Which invalid proposals are we expecting here? Anything "spam/invalid" would just be ignored, not sure we need to sim that, unless for blockspace
                 # TODO: Above seems incorrect - if duration of phase exceeds duration, the next phase starts. 
-                proposals = state['proposals']
+                proposals: dict[TxUUID, Proposal] = proposals_from_tx(state['transactions'])
                 if len(proposals) > 0:
                     # TODO: check if true
-                    number_uncles = min(len(proposals) - 1, params['uncle_count'])
+                    number_uncles: int = min(len(proposals) - 1, params['uncle_count'])
 
-                    ranked_proposals = sorted(proposals,
+                    ranked_proposals: list[Proposal] = sorted(proposals.values(),
                                                 key=lambda p: p.score,
                                                 reverse=True)
 
-                    winner_proposal = ranked_proposals[0]
+                    winner_proposal: Proposal = ranked_proposals[0]
                     if len(ranked_proposals) > 1:
-                        uncle_proposals = ranked_proposals[1:number_uncles+1]
+                        uncle_proposals: list[Proposal] = ranked_proposals[1:number_uncles+1]
                     else:
                         uncle_proposals = []
 
@@ -385,28 +271,50 @@ def p_commit_bond(params: AztecModelParams,
                            _2,
                            _3,
                            state: AztecModelState) -> Signal:
-    process = state['current_process']
+    process: Process | None = state['current_process']
     updated_process: Optional[Process] = None
+    new_transactions = list()
 
     if process is None:
         pass
     else:
         if process.phase == SelectionPhase.pending_commit_bond:
+            # Move to Proof Race mode if duration is expired
             if process.duration_in_current_phase > params['phase_duration_commit_bond']:
                 updated_process = copy(process)
                 updated_process.phase = SelectionPhase.proof_race
                 updated_process.duration_in_current_phase = 0
             else:
-                if process.commit_bond_is_put_down:
+                # If duration is not expired, do  a trial to see if bond is commited
+                if bernoulli_trial(probability=params['commit_bond_reveal_probability']) is True:
                     updated_process = copy(process)
                     updated_process.phase = SelectionPhase.pending_reveal
                     updated_process.duration_in_current_phase = 0
-                else:
+
+                    gas: Gas = params['gas_estimators'].commitment_bond(state)
+                    fee = gas * state['gas_fee_l1']
+                    proposal_uuid = updated_process.tx_winning_proposal
+                    prover = None # TODO: maybe assume any at random from interacting users?
+                    bond_amount = 0.0 # TODO: open question
+
+                    tx = CommitmentBond(who=updated_process.leading_sequencer,
+                                        when=state['time_l1'],
+                                        uuid=uuid4(),
+                                        gas=gas,
+                                        fee=fee,
+                                        proposal_tx_uuid=proposal_uuid,
+                                        prover_uuid=prover,
+                                        bond_amount=bond_amount)
+                    new_transactions.append(tx)
+                    updated_process.tx_commitment_bond = tx.uuid
+                else: 
+                # else, nothing happens
                     pass
         else:
             pass
 
-    return {'update_process': updated_process}
+    return {'update_process': updated_process,
+            'new_transactions': new_transactions}
 
 
 def p_reveal_content(params: AztecModelParams,
@@ -415,15 +323,15 @@ def p_reveal_content(params: AztecModelParams,
                      state: AztecModelState) -> Signal:
     """
     Advances state of Processes that have revealed block content.
+    TODO: check if race mode is taken into consideration. We may want to decouple 
+    user actions from the evolving logic.
     """
-    # TODO: How to check if block content was revealed for process? (Add this as a field for the class?)
-
 
                          
     # Note: Advances state of Process in reveal phase that have revealed block content.
     process = state['current_process']
     updated_process: Optional[Process] = None
-
+    new_transactions = list()
     
     if process is None:
         pass
@@ -436,22 +344,35 @@ def p_reveal_content(params: AztecModelParams,
                 updated_process.duration_in_current_phase = 0
                 # TODO: To allow for fixed phase time, we might just add another check here - if duration > params and if content is not revealed -> proof_race
             else:
-                if process.block_content_is_revealed:  # If block content was revealed. 
+                if bernoulli_trial(probability=params['block_content_reveal_probability']) is True:
                     updated_process = copy(process)
-                    updated_process.phase = SelectionPhase.pending_rollup_proof
+                    updated_process.phase = SelectionPhase.pending_finalization
                     updated_process.duration_in_current_phase = 0
-                else:  # If block content not revealed
-                    probability_to_use = params['block_content_reveal_probability']
-                    content_will_be_revealed = bernoulli_trial(probability = probability_to_use)
-                    if content_will_be_revealed:
-                        process.block_content_is_revealed = True
-                        # XXX: How does time update here? 
-                    else: 
-                        pass
+
+                    who = updated_process.leading_sequencer # XXX
+                    gas: Gas = params['gas_estimators'].content_reveal(state)
+                    fee: Gwei = gas * state['gas_fee_l1']
+                    blob_gas: BlobGas = params['gas_estimators'].content_reveal_blob(state)
+                    blob_fee: Gwei = blob_gas * state['gas_fee_blob']
+
+                    tx = ContentReveal(who=who,
+                                        when=state['time_l1'],
+                                        uuid=uuid4(),
+                                        gas=gas,
+                                        fee=fee,
+                                        blob_gas=blob_gas,
+                                        blob_fee=blob_fee)
+
+                    new_transactions.append(tx)
+                    updated_process.tx_content_reveal = tx.uuid
+                    # TODO: where to store the tx?
+                else: 
+                    pass
         else:
             pass
 
-    return {'update_process': updated_process}
+    return {'update_process': updated_process,
+            'new_transactions': new_transactions}
     
 
 def p_submit_proof(params: AztecModelParams,
@@ -463,6 +384,7 @@ def p_submit_proof(params: AztecModelParams,
     """
     process = state['current_process']
     updated_process: Optional[Process] = None
+    new_transactions = list()
 
     if process is None:
         pass
@@ -477,12 +399,28 @@ def p_submit_proof(params: AztecModelParams,
                     updated_process = copy(process)
                     updated_process.phase = SelectionPhase.pending_finalization
                     updated_process.duration_in_current_phase = 0
+
+                    who = updated_process.leading_sequencer # XXX
+                    gas: Gas = params['gas_estimators'].content_reveal(state)
+                    fee: Gwei = gas * state['gas_fee_l1']
+                    blob_gas: BlobGas = params['gas_estimators'].rollup_proof(state)
+                    blob_fee: Gwei = blob_gas * state['gas_fee_blob']
+
+                    tx = RollupProof(who=who,
+                                        when=state['time_l1'],
+                                        uuid=uuid4(),
+                                        gas=gas,
+                                        fee=fee)
+
+                    new_transactions.append(tx)
+                    updated_process.tx_rollup_proof = tx.uuid
                 else: 
                     pass  # Nothing changes if no valid rollup
         else:
             pass
 
-    return {'update_process': updated_process}
+    return {'update_process': updated_process,
+            'new_transactions': new_transactions}
 
 
 def p_finalize_block(params: AztecModelParams,
@@ -602,54 +540,58 @@ def s_process(params: AztecModelParams,
 
 
 
-def s_proposals(params: AztecModelParams,
+def s_transactions_new_proposals(params: AztecModelParams,
                 _2,
                 _3,
                 state: AztecModelState,
                 signal: Signal) -> VariableUpdate:
     """
-    TODO
+    Logic for submitting new proposals.
     """
 
-    current_process = state['current_process']
+    new_transactions = state['transactions'].copy()
+    current_process: Process | None = state['current_process']
+    new_proposals: dict[TxUUID, Proposal] = dict()
     if current_process is not None:
         if current_process.phase == SelectionPhase.pending_proposals:
             # HACK: all interacting users are potential proposers
             # XXX: an sequencer can propose only once
-            proposals = copy(state['proposals'])
-            proposers = {p.proposer_uuid for p in proposals}
-            potential_proposers = {u.uuid 
-                                   for u in state['interacting_users']
-                                   if u.uuid not in proposers}
+            proposers: set[AgentUUID] = {p.who for p in new_transactions.values()}
+            potential_proposers: set[AgentUUID] = {u.uuid 
+                                   for u in state['agents'].values()
+                                   if u.uuid not in proposers
+                                   and u.is_sequencer}
 
             for potential_proposer in potential_proposers:
                 if bernoulli.rvs(params['proposal_probability_per_user_per_block']):
+
+                    tx_uuid = uuid4()
+                    gas: Gas = params['gas_estimators'].proposal(state)
+                    fee: Gwei= gas * state['gas_fee_l1']
+                    score = uniform.rvs() # XXX: score is always uniform
                     
-                    score = uniform.rvs(0, 1)
-                    submission_time = state['time_l1']
-
-                    # TODO parametrize & use more sane assumptions
-                    gas = round(max(norm.rvs(50, 30), 1))
-                    size = round(max(norm.rvs(10_000, 5_000), 100))
-
-                    new_proposal = Proposal(uuid4(),
-                                             potential_proposer, 
-                                             score,
-                                             submission_time,
-                                             gas,
-                                             size)
-                    proposals.append(new_proposal)
+                    new_proposal = Proposal(who=potential_proposer,
+                                            when=state['time_l1'],
+                                            uuid=tx_uuid,
+                                            gas=gas,
+                                            fee=fee,
+                                            score=score)
+                
+                    new_proposals[tx_uuid] = new_proposal
                 else:
                     pass
         else:
-            proposals = []
+            new_proposals = dict()
     else:
-        proposals = []
-
-    return ('proposals', proposals)
+        new_proposals = dict()
 
 
-def s_interacting_users(params: AztecModelParams,
+    new_transactions = {**new_transactions, **new_proposals}
+
+    return ('transactions', new_transactions)
+
+
+def s_agents(params: AztecModelParams,
                 _2,
                 _3,
                 state: AztecModelState,
@@ -657,5 +599,21 @@ def s_interacting_users(params: AztecModelParams,
     """
     TODO
     """
-    return ('interacting_users', None)
+    return ('agents', None)
 
+def s_transactions(params: AztecModelParams,
+                _2,
+                _3,
+                state: AztecModelState,
+                signal: Signal) -> VariableUpdate:
+    """
+    Logic for submitting new proposals.
+    """
+
+    new_tx_list: list[TransactionL1] = signal.get('new_transactions', list()) # type: ignore
+
+    new_tx_dict: dict[TxUUID, TransactionL1] = {tx.uuid: tx for tx in new_tx_list}
+
+    new_transactions = {**state['transactions'].copy(), **new_tx_dict}
+
+    return ('transactions', new_transactions)
