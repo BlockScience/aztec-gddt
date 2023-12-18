@@ -528,29 +528,30 @@ def s_proposals(params: AztecModelParams,
             potential_proposers: set[AgentUUID] = {u.uuid 
                                    for u in state['agents'].values()
                                    if u.uuid not in proposers
-                                   and type(u) == Sequencer}
+                                   and u.is_sequencer}
 
             for potential_proposer in potential_proposers:
                 if bernoulli.rvs(params['proposal_probability_per_user_per_block']):
 
+                    tx_uuid = uuid4()
                     gas: Gas = params['gas_estimators'].proposal(state)
                     fee: Gwei= gas * state['gas_fee_l1']
                     score = uniform.rvs() # XXX: score is always uniform
                     
                     new_proposal = Proposal(who=potential_proposer,
                                             when=state['time_l1'],
-                                            uuid=uuid4(),
+                                            uuid=tx_uuid,
                                             gas=gas,
                                             fee=fee,
                                             score=score)
                 
-                    proposals.append(new_proposal)
+                    proposals[tx_uuid] = new_proposal
                 else:
                     pass
         else:
-            proposals = []
+            proposals = dict()
     else:
-        proposals = []
+        proposals = dict()
 
     return ('proposals', proposals)
 
