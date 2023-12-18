@@ -2,7 +2,7 @@ from copy import deepcopy, copy
 from typing import Callable
 from uuid import uuid4
 
-from cadCAD_tools.types import Signal, VariableUpdate  # type: ignore
+from cadCAD_tools.types import VariableUpdate  # type: ignore
 
 from aztec_gddt.helper import *
 from aztec_gddt.types import *
@@ -57,7 +57,7 @@ def add_suf(variable: str, default_value=0.0) -> Callable:
 ## to any particular phase.          ##
 #######################################
 
-def p_evolve_time(params: AztecModelParams, _2, _3, _4) -> Signal:
+def p_evolve_time(params: AztecModelParams, _2, _3, _4) -> SignalTime:
     """Policy function giving the change in number of blocks. 
 
     Args:
@@ -72,7 +72,7 @@ def p_evolve_time(params: AztecModelParams, _2, _3, _4) -> Signal:
 
 def s_block_time(params: AztecModelParams, _2, _3,
                  state: AztecModelState,
-                 signal: Signal) -> VariableUpdate:
+                 signal: SignalTime) -> VariableUpdate:
     """State update function advancing block time.  
 
     Args:
@@ -87,7 +87,7 @@ def s_block_time(params: AztecModelParams, _2, _3,
     return ('time_l1', state['time_l1'] + signal['delta_blocks']) # type: ignore
 
 
-def s_delta_blocks(_1, _2, _3, _4, signal: Signal) -> VariableUpdate:
+def s_delta_blocks(_1, _2, _3, _4, signal: SignalTime) -> VariableUpdate:
     """
     State update function for change in block number. 
 
@@ -97,10 +97,14 @@ def s_delta_blocks(_1, _2, _3, _4, signal: Signal) -> VariableUpdate:
     Returns: 
         VariableUpdate
     """
-    return ('delta_blocks', signal['delta_blocks'])
+    return ('delta_blocks', signal.get('delta_blocks', 0))
 
 
-def s_current_process_time(_1, _2, _3, state: AztecModelState, signal: Signal) -> VariableUpdate:
+def s_current_process_time(_1,
+                            _2,
+                            _3, 
+                           state: AztecModelState, 
+                           signal: SignalTime) -> VariableUpdate:
     """
     State update function for change in block number. 
 
@@ -119,34 +123,10 @@ def s_current_process_time(_1, _2, _3, state: AztecModelState, signal: Signal) -
     return ('current_process', updated_process)
 
 
-def p_update_agents(params: AztecModelParams,
-                               _2,
-                               _3,
-                               state: AztecModelState) -> Signal:
-    """
-    Used to determine who drops in and out of interacting users.
-
-    Args:
-         params (AztecModelParams): The current parameters of the model.
-         state (AztecModelState): The current state of the model.
-
-    Returns:
-         Signal: The new process to be considered in the system. 
-
-    """
-    # TODO: logic for updating interacting users
-    # TODO: Logic: staked_amount > min_stake 
-    # staked_amount is updated at end of process due to rewards and slashing
-    # right now we only have sequencers -> with the introduction of commitment bond we might introduce second class 
-    # commitment bond could be put up by lead sequencer, or by anyone else (e.g. 3rd party marketplace)
-
-    return {"new_agents": None}
-
-
 def p_init_process(params: AztecModelParams,
                    _2,
                    _3,
-                   state: AztecModelState) -> Signal:
+                   state: AztecModelState) -> SignalEvolveProcess:
     """
     Initializes a specific process. 
 
@@ -202,7 +182,7 @@ def p_init_process(params: AztecModelParams,
 def p_select_proposal(params: AztecModelParams,
                       _2,
                       _3,
-                      state: AztecModelState) -> Signal:
+                      state: AztecModelState) -> SignalEvolveProcess:
     """
     Select a sequencer from list of eligible sequencers, and
     determine uncle sequencers. 
@@ -270,7 +250,7 @@ def p_select_proposal(params: AztecModelParams,
 def p_commit_bond(params: AztecModelParams,
                            _2,
                            _3,
-                           state: AztecModelState) -> Signal:
+                           state: AztecModelState) -> SignalEvolveProcess:
     process: Process | None = state['current_process']
     updated_process: Optional[Process] = None
     new_transactions = list()
@@ -283,6 +263,7 @@ def p_commit_bond(params: AztecModelParams,
             if process.duration_in_current_phase > params['phase_duration_commit_bond']:
                 updated_process = copy(process)
                 updated_process.phase = SelectionPhase.proof_race
+                updated_process.entered_race_mode = True
                 updated_process.duration_in_current_phase = 0
             else:
                 # If duration is not expired, do  a trial to see if bond is commited
@@ -320,7 +301,7 @@ def p_commit_bond(params: AztecModelParams,
 def p_reveal_content(params: AztecModelParams,
                      _2,
                      _3,
-                     state: AztecModelState) -> Signal:
+                     state: AztecModelState) -> SignalEvolveProcess:
     """
     Advances state of Processes that have revealed block content.
     TODO: check if race mode is taken into consideration. We may want to decouple 
@@ -341,6 +322,7 @@ def p_reveal_content(params: AztecModelParams,
             if process.duration_in_current_phase > params['phase_duration_reveal']:
                 updated_process = copy(process)
                 updated_process.phase = SelectionPhase.proof_race
+                updated_process.entered_race_mode = True
                 updated_process.duration_in_current_phase = 0
                 # TODO: To allow for fixed phase time, we might just add another check here - if duration > params and if content is not revealed -> proof_race
             else:
@@ -378,7 +360,7 @@ def p_reveal_content(params: AztecModelParams,
 def p_submit_proof(params: AztecModelParams,
                           _2,
                           _3,
-                          state: AztecModelState) -> Signal:
+                          state: AztecModelState) -> SignalEvolveProcess:
     """
     Advances state of Processes that have submitted valid proofs.
     """
@@ -426,7 +408,7 @@ def p_submit_proof(params: AztecModelParams,
 def p_finalize_block(params: AztecModelParams,
                      _2,
                      _3,
-                     state: AztecModelState) -> Signal:
+                     state: AztecModelState) -> SignalEvolveProcess:
     """
 
     """
@@ -465,7 +447,7 @@ def p_finalize_block(params: AztecModelParams,
 def p_race_mode(params: AztecModelParams,
                      _2,
                      _3,
-                     state: AztecModelState) -> Signal:
+                     state: AztecModelState) -> SignalEvolveProcess:
     process = state['current_process']
     updated_process: Optional[Process] = None
 
@@ -492,44 +474,11 @@ def p_race_mode(params: AztecModelParams,
     return {'update_process': updated_process}
 
 
-def s_sequencer(params: AztecModelParams,
-                _2,
-                _3,
-                state: AztecModelState,
-                signal: Signal) -> VariableUpdate:
-    """
-
-    """
-    # TODO: Logic for updating the sequencer
-    # Signal comes from p_select_sequencer
-
-    return ('sequencer', None)
-
-
-# def s_processes(params: AztecModelParams,
-#                 _2,
-#                 _3,
-#                 state: AztecModelState,
-#                 signal: Signal) -> VariableUpdate:
-#     """
-#     NOTE: this SUF is depreciated
-#     """
-#     processes = deepcopy(state['processes'])
-#     processes_to_update: dict[ProcessUUID,
-#                               Process] = signal.get('updated_processes', {})
-#     for process_uuid, updated_process in processes_to_update.items():
-#         pass  # TODO
-
-#     new_process = signal.get('new_process', None)
-#     if new_process != None:
-#         processes.append(new_process)
-#     return ('processes', processes)
-
 def s_process(params: AztecModelParams,
                 _2,
                 _3,
                 state: AztecModelState,
-                signal: Signal) -> VariableUpdate:
+                signal: SignalEvolveProcess) -> VariableUpdate:
     """
     
     """
@@ -544,7 +493,7 @@ def s_transactions_new_proposals(params: AztecModelParams,
                 _2,
                 _3,
                 state: AztecModelState,
-                signal: Signal) -> VariableUpdate:
+                _5) -> VariableUpdate:
     """
     Logic for submitting new proposals.
     """
@@ -591,21 +540,11 @@ def s_transactions_new_proposals(params: AztecModelParams,
     return ('transactions', new_transactions)
 
 
-def s_agents(params: AztecModelParams,
-                _2,
-                _3,
-                state: AztecModelState,
-                signal: Signal) -> VariableUpdate:
-    """
-    TODO
-    """
-    return ('agents', None)
-
 def s_transactions(params: AztecModelParams,
                 _2,
                 _3,
                 state: AztecModelState,
-                signal: Signal) -> VariableUpdate:
+                signal: SignalEvolveProcess) -> VariableUpdate:
     """
     Logic for submitting new proposals.
     """
@@ -617,3 +556,80 @@ def s_transactions(params: AztecModelParams,
     new_transactions = {**state['transactions'].copy(), **new_tx_dict}
 
     return ('transactions', new_transactions)
+
+
+
+def p_block_reward(params: AztecModelParams,
+                     _2,
+                     _3,
+                     state: AztecModelState) -> SignalPayout:
+    p: Process = state['current_process'] # type: ignore
+    if p.phase == SelectionPhase.finalized:
+        reward = params['reward_per_block']
+    else:
+        reward = 0
+    return SignalPayout(block_reward=reward)
+
+
+def p_fee_cashback(params: AztecModelParams,
+                     _2,
+                     _3,
+                     state: AztecModelState) -> SignalPayout:
+    p: Process = state['current_process'] # type: ignore
+    if p.phase == SelectionPhase.finalized:
+
+        txs: dict[TxUUID, AnyL1Transaction] = state['transactions']
+        # L1 Fees
+        total_fees = 0
+        total_fees += txs[p.tx_winning_proposal].fee
+        total_fees += txs[p.tx_content_reveal].fee
+        total_fees += txs[p.tx_rollup_proof].fee
+        total_fees += txs[p.tx_commitment_bond].fee
+        total_fees += txs[p.tx_finalization].fee
+
+        # Blob Fees
+        total_fees += txs[p.tx_content_reveal].blob_fee # type: ignore
+    else:
+        total_fees = 0
+
+    return SignalPayout(fee_cashback=total_fees)
+
+
+def s_agents_rewards(params: AztecModelParams,
+                _2,
+                _3,
+                state: AztecModelState,
+                signal: SignalPayout) -> VariableUpdate:
+    """
+    TODO
+    """
+
+
+    p: Process = state['current_process'] # type: ignore
+    if p.phase == SelectionPhase.finalized:
+        txs = state['transactions']
+        total_rewards = signal.get('fee_cashback', 0.0) + signal.get('block_reward', 0.0)
+        agents: dict[AgentUUID, Agent] = state['agents'].copy()
+
+        rewards_relay = total_rewards * params['rewards_to_relay']
+        rewards_prover = total_rewards * params['rewards_to_provers']
+        rewards_sequencer = total_rewards - (rewards_relay + rewards_prover)
+
+        # TODO: How to select the winning sequencer when entering race mode?
+
+        sequencer_uuid = p.leading_sequencer
+        
+        # TODO: add check for whatever the Process went through race-mode or not.
+        if p.entered_race_mode:
+            prover_uuid = txs[p.tx_commitment_bond].prover_uuid # type: ignore
+            relay_uuid = sequencer_uuid # TODO: make sure that relays are included. For now, assume no relays
+        else:
+            prover_uuid = sequencer_uuid
+
+        # Disburse Rewards
+        agents[sequencer_uuid].balance += rewards_sequencer
+        agents[prover_uuid].balance += rewards_prover
+        agents[relay_uuid].balance += rewards_relay
+        return ('agents', agents)
+    else:
+        return ('agents', state['agents'])
