@@ -1,5 +1,5 @@
 from typing import Annotated, TypedDict, Union, NamedTuple, Optional
-from enum import IntEnum, Enum, auto
+from enum import IntEnum, Enum, auto, Flag
 from math import floor
 from pydantic import BaseModel, PositiveInt, FiniteFloat
 from typing import Callable
@@ -104,8 +104,6 @@ class SelectionPhase(IntEnum):  # XXX
     skipped = -1
     finalized_without_rewards = -2  # XXX
     proof_race = -3
-
-
 @dataclass
 class Process:
     uuid: ProcessUUID
@@ -114,18 +112,23 @@ class Process:
 
     phase: SelectionPhase = SelectionPhase.pending_proposals
 
+
+    # Relevant L1 Transactions
+    tx_winning_proposal: Optional[TxUUID] = None
+    tx_commitment_bond: Optional[TxUUID] = None
+
+    # Agent-related info
     leading_sequencer: Optional[AgentUUID] = None
     uncle_sequencers: Optional[list[AgentUUID]] = None
-    winning_proposal: Optional[TxUUID] = None
+    
 
+    # Process State
     proofs_are_public: bool = False
     block_content_is_revealed: bool = False
     commit_bond_is_put_down: bool = False #Commitment bond is put down / rename from proof 
     rollup_proof_is_commited: bool = False
     finalization_tx_is_submitted: bool = False
     process_aborted: bool = False
-    transactions_l1: list[TransactionL1] = []
-    #TODO: Think about having "global" param for minimum stake in here to make it dynamically updateable per L2 block 
 
 
     def __add__(self, other):
@@ -208,7 +211,7 @@ class AztecModelState(TypedDict):
 
     # Process State
     current_process: Optional[Process]
-    proposals: dict[TxUUID, Proposal]
+    transactions: dict[TxUUID, TransactionL1 | Proposal | CommitmentBond | ContentReveal | RollupProof]
 
     # Environmental / Behavioral Variables
     gas_fee_l1: Gwei

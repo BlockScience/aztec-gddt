@@ -32,7 +32,7 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
             # eg. making the proofs public
         },
         'variables': {
-            'proposals': s_proposals
+            'transactions': s_transactions_new_proposals
             # TODO Possibly add a SUF for updating toggling the event
             # bools in the current process
         }
@@ -50,7 +50,8 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
             'submit_block_proof_content_race': p_race_mode
         },
         'variables': {
-            'current_process': s_process
+            'current_process': s_process,
+            'transactions': s_transactions
         }
     }
 ]
