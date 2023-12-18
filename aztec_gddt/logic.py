@@ -413,7 +413,7 @@ def p_submit_proof(params: AztecModelParams,
                                         fee=fee)
 
                     new_transactions.append(tx)
-                    updated_process.tx_content_reveal = tx.uuid
+                    updated_process.tx_rollup_proof = tx.uuid
                 else: 
                     pass  # Nothing changes if no valid rollup
         else:
