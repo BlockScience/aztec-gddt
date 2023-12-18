@@ -28,7 +28,9 @@ INITIAL_STATE = AztecModelState(time_l1=0,
                                 gas_fee_l1=30,
                                 gas_fee_blob=30,
 
-                                finalized_blocks_count=0
+                                finalized_blocks_count=0,
+                                disbursed_block_rewards=0.0,
+                                disbursed_fee_cashback=0.0
                                 )
 
 # HACK: Gas is 1 for all transactions
@@ -46,6 +48,8 @@ SINGLE_RUN_PARAMS = AztecModelParams(label='default',
                                      timestep_in_blocks=1,
 
                                      uncle_count=0,
+                                     reward_per_block=1.0, # TODO
+                                     fee_subsidy_fraction=1.0,
 
                                      # Phase Durations
                                      phase_duration_proposal=5,
@@ -65,4 +69,6 @@ SINGLE_RUN_PARAMS = AztecModelParams(label='default',
                                      tx_proof_reveal_probability=0.15,  # tx_proofs do not have to be revealed in v1
                                      rollup_proof_reveal_probability=0.1,
                                      commit_bond_reveal_probability=0.4,
-                                     gas_estimators=GAS_ESTIMATORS)  # P=92% over 4B
+                                     gas_estimators=GAS_ESTIMATORS,
+                                     rewards_to_provers=0.495,
+                                     rewards_to_relay=0.01)  # P=92% over 4B
