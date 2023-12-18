@@ -23,7 +23,7 @@ INITIAL_STATE = AztecModelState(time_l1=0,
 
                                 agents=AGENTS_DICT,
                                 current_process=None,
-                                proposals=dict(),
+                                transactions=dict(),
 
                                 gas_fee_l1=30,
                                 gas_fee_blob=30,
