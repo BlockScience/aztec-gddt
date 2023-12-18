@@ -5,6 +5,7 @@ from pydantic import BaseModel, PositiveInt, FiniteFloat
 from typing import Callable
 from pydantic.dataclasses import dataclass
 from uuid import uuid4
+from typing import Sequence
 
 # Units
 
@@ -122,7 +123,6 @@ class Process:
     # Agent-related info
     leading_sequencer: Optional[AgentUUID] = None
     uncle_sequencers: Optional[list[AgentUUID]] = None
-    
 
     # Process State
     proofs_are_public: bool = False
@@ -197,6 +197,9 @@ class ContentReveal(TransactionL1Blob):
 class RollupProof(TransactionL1):
     pass
 
+
+AnyL1Transaction = TransactionL1 | Proposal | CommitmentBond | ContentReveal | RollupProof
+
 SelectionResults = dict[ProcessUUID, tuple[Proposal, list[Proposal]]]
 
 # TODO: commit_bond aka Prover Commitment Bond Object -> tracking bond UUID (might be different from sequencer UUID, bond amount). 
@@ -213,7 +216,7 @@ class AztecModelState(TypedDict):
 
     # Process State
     current_process: Optional[Process]
-    transactions: dict[TxUUID, TransactionL1 | Proposal | CommitmentBond | ContentReveal | RollupProof]
+    transactions: dict[TxUUID, AnyL1Transaction]
 
     # Environmental / Behavioral Variables
     gas_fee_l1: Gwei
@@ -221,6 +224,8 @@ class AztecModelState(TypedDict):
 
     # Metrics
     finalized_blocks_count: int
+    disbursed_block_rewards: Tokens
+    disbursed_fee_cashback: Tokens
 
 
 
@@ -275,3 +280,13 @@ class AztecModelParams(TypedDict):
 
 
 
+class SignalTime(TypedDict, total=False):
+    delta_blocks: L1Blocks
+
+class SignalEvolveProcess(TypedDict, total=False):
+    new_transactions: Sequence[AnyL1Transaction]
+    update_process: Process | None
+
+class SignalPayout(TypedDict, total=False):
+    block_reward: Tokens
+    fee_cashback: Tokens
