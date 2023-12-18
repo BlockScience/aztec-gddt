@@ -84,7 +84,7 @@ def s_block_time(params: AztecModelParams, _2, _3,
         VariableUpdate:
             A two-element tuple that all state update functions must return.
     """
-    return ('time_l1', state['time_l1'] + signal['delta_blocks'])
+    return ('time_l1', state['time_l1'] + signal['delta_blocks']) # type: ignore
 
 
 def s_delta_blocks(_1, _2, _3, _4, signal: Signal) -> VariableUpdate:
@@ -112,14 +112,14 @@ def s_current_process_time(_1, _2, _3, state: AztecModelState, signal: Signal) -
     """
     updated_process: Process | None = copy(state['current_process'])
     if updated_process is not None:
-        updated_process.duration_in_current_phase += signal['delta_blocks']
+        updated_process.duration_in_current_phase += signal['delta_blocks'] # type: ignore
     else:
         pass
         
     return ('current_process', updated_process)
 
 
-def p_update_interacting_users(params: AztecModelParams,
+def p_update_agents(params: AztecModelParams,
                                _2,
                                _3,
                                state: AztecModelState) -> Signal:
@@ -140,7 +140,7 @@ def p_update_interacting_users(params: AztecModelParams,
     # right now we only have sequencers -> with the introduction of commitment bond we might introduce second class 
     # commitment bond could be put up by lead sequencer, or by anyone else (e.g. 3rd party marketplace)
 
-    return {"new_interacting_users": None}
+    return {"new_agents": None}
 
 
 def p_init_process(params: AztecModelParams,
@@ -233,18 +233,18 @@ def p_select_proposal(params: AztecModelParams,
                 # TODO: filter out invalid proposals
                 # J: Which invalid proposals are we expecting here? Anything "spam/invalid" would just be ignored, not sure we need to sim that, unless for blockspace
                 # TODO: Above seems incorrect - if duration of phase exceeds duration, the next phase starts. 
-                proposals = state['proposals']
+                proposals: dict[TxUUID, Proposal] = state['proposals']
                 if len(proposals) > 0:
                     # TODO: check if true
-                    number_uncles = min(len(proposals) - 1, params['uncle_count'])
+                    number_uncles: int = min(len(proposals) - 1, params['uncle_count'])
 
-                    ranked_proposals = sorted(proposals,
+                    ranked_proposals: list[Proposal] = sorted(proposals.values(),
                                                 key=lambda p: p.score,
                                                 reverse=True)
 
-                    winner_proposal = ranked_proposals[0]
+                    winner_proposal: Proposal = ranked_proposals[0]
                     if len(ranked_proposals) > 1:
-                        uncle_proposals = ranked_proposals[1:number_uncles+1]
+                        uncle_proposals: list[Proposal] = ranked_proposals[1:number_uncles+1]
                     else:
                         uncle_proposals = []
 
@@ -523,11 +523,12 @@ def s_proposals(params: AztecModelParams,
         if current_process.phase == SelectionPhase.pending_proposals:
             # HACK: all interacting users are potential proposers
             # XXX: an sequencer can propose only once
-            proposals: list[Proposal] = copy(state['proposals'])
-            proposers: set[UserUUID] = {p.who for p in proposals}
-            potential_proposers: set[UserUUID] = {u.uuid 
-                                   for u in state['interacting_users']
-                                   if u.uuid not in proposers}
+            proposals: dict[TxUUID, Proposal] = state['proposals'].copy()
+            proposers: set[AgentUUID] = {p.who for p in proposals.values()}
+            potential_proposers: set[AgentUUID] = {u.uuid 
+                                   for u in state['agents'].values()
+                                   if u.uuid not in proposers
+                                   and type(u) == Sequencer}
 
             for potential_proposer in potential_proposers:
                 if bernoulli.rvs(params['proposal_probability_per_user_per_block']):
@@ -554,7 +555,7 @@ def s_proposals(params: AztecModelParams,
     return ('proposals', proposals)
 
 
-def s_interacting_users(params: AztecModelParams,
+def s_agents(params: AztecModelParams,
                 _2,
                 _3,
                 state: AztecModelState,
@@ -562,5 +563,5 @@ def s_interacting_users(params: AztecModelParams,
     """
     TODO
     """
-    return ('interacting_users', None)
+    return ('agents', None)
 

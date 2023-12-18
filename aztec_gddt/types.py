@@ -15,7 +15,7 @@ Seconds = Annotated[int, 's']
 Probability = Annotated[float, 'probability']
 Tokens = Annotated[float, 'tokens']  # Amount of slashable tokens
 
-UserUUID = Annotated[object, 'uuid']
+AgentUUID = Annotated[object, 'uuid']
 TxUUID = Annotated[object, 'uuid']
 ProcessUUID = Annotated[object, 'uuid']
 
@@ -34,7 +34,7 @@ class L1TransactionType(Enum):
 
 @dataclass
 class TransactionL1():
-    who: UserUUID
+    who: AgentUUID
     when: L1Blocks
     uuid: TxUUID
     gas: Gas
@@ -114,8 +114,8 @@ class Process:
 
     phase: SelectionPhase = SelectionPhase.pending_proposals
 
-    leading_sequencer: Optional[UserUUID] = None
-    uncle_sequencers: Optional[list[UserUUID]] = None
+    leading_sequencer: Optional[AgentUUID] = None
+    uncle_sequencers: Optional[list[AgentUUID]] = None
     winning_proposal: Optional[TxUUID] = None
 
     proofs_are_public: bool = False
@@ -141,25 +141,16 @@ class Process:
 
 
 @dataclass
-class User():  # XXX
-    uuid: UserUUID
+class Agent(): 
+    uuid: AgentUUID
     balance: Tokens
-    # General User Class from which Sequencer inherits?
-    # Benefits: We can clearly distuingish who is a sequencer (moves tokens from balance to stake), while also letting us draw Provers from non-sequencer users (anyone can be Prover, only needs a UUID and enough balance to put up bond)
+    is_sequencer: bool = False
+    is_prover: bool = False
+    is_relay: bool = False
+    staked_amount: Tokens = 0.0
 
-@dataclass
-class Sequencer(User):  # XXX
-    staked_amount: Tokens
-
-    def slots(self, tokens_per_slot):
+    def slots(self, tokens_per_slot: Tokens) -> Tokens:
         return floor(self.staked_amount / tokens_per_slot)
-
-    # TODO:
-    # discuss what is an Sequencer on our model
-    # discuss how to derive proposal scores - each sequencer a random value and calculate score for each per round?
-    # discuss how to separate general users (Provers mainly) and sequencers -> general class -> sequencers inherit from it 
-
-
     
 
 @dataclass
@@ -190,7 +181,7 @@ class CommitmentBond(TransactionL1):
     L1T_lead_submit_commit_bond event.
     """
     proposal_tx_uuid: TxUUID
-    prover_uuid: UserUUID
+    prover_uuid: AgentUUID
     bond_amount: float
 
 @dataclass 
@@ -212,22 +203,20 @@ class AztecModelState(TypedDict):
     time_l1: L1Blocks
     delta_l1_blocks: L1Blocks
 
+    # Agents
+    agents: dict[AgentUUID, Agent]
+
+    # Process State
+    current_process: Optional[Process]
+    proposals: dict[TxUUID, Proposal]
+
+    # Environmental / Behavioral Variables
     gas_fee_l1: Gwei
     gas_fee_blob: Gwei
 
     # Metrics
     finalized_blocks_count: int
 
-    # Global State
-    interacting_users: list[Sequencer]
-    current_process: Optional[Process]
-
-    # Flattened Meso State
-    proposals: list[Proposal]
-
-    # TODO: should L1/Gossip/RT events be a global or meso state?
-    # How are they defined in terms of types?
-    events: list[Event]
 
 
 GasEstimator = Callable[[AztecModelState], Gas]

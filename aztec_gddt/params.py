@@ -15,7 +15,7 @@ INITIAL_INTERACTING_USERS = [Sequencer(i, max(norm.rvs(200, 100), 1))
 INITIAL_STATE = AztecModelState(time_l1=0,
                                 delta_l1_blocks=0,
                                 finalized_blocks_count=0,
-                                interacting_users=INITIAL_INTERACTING_USERS,
+                                agents=INITIAL_INTERACTING_USERS,
                                 current_process=None,
                                 proposals=[],
                                 events=[])
