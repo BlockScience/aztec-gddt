@@ -2,41 +2,67 @@ from aztec_gddt.types import *
 from uuid import uuid4
 from scipy.stats import norm  # type: ignore
 
-TIMESTEPS = 5  # TODO
-SAMPLES = 1  # TODO
+TIMESTEPS = 5  # HACK
+SAMPLES = 1  # HACK
 
-N_INITIAL_USERS = 3
+N_INITIAL_AGENTS = 3
 
-INITIAL_INTERACTING_USERS = [Sequencer(i, max(norm.rvs(200, 100), 1))
-                             for i
-                             in range(N_INITIAL_USERS)]
+INITIAL_AGENTS: list[Agent] = [Agent(uuid=uuid4(),
+                                     balance=max(norm.rvs(200, 100), 1),
+                                     is_sequencer=True,
+                                     is_prover=True,
+                                     is_relay=False,
+                                     staked_amount=0.0)
+                               for i
+                               in range(N_INITIAL_AGENTS)]
 
-# TODO: Set default values for initial state. - Ock, 11/29
+AGENTS_DICT: dict[AgentUUID, Agent] = {a.uuid: a for a in INITIAL_AGENTS}
+
 INITIAL_STATE = AztecModelState(time_l1=0,
                                 delta_l1_blocks=0,
-                                finalized_blocks_count=0,
-                                interacting_users=INITIAL_INTERACTING_USERS,
+
+                                agents=AGENTS_DICT,
                                 current_process=None,
-                                proposals=[],
-                                events=[])
+                                transactions=dict(),
+
+                                gas_fee_l1=30,
+                                gas_fee_blob=30,
+
+                                finalized_blocks_count=0
+                                )
+
+# HACK: Gas is 1 for all transactions
+GAS_ESTIMATORS = L1GasEstimators(
+    proposal=lambda _: 1,
+    commitment_bond=lambda _: 1,
+    content_reveal=lambda _: 1,
+    content_reveal_blob=lambda _: 1,
+    rollup_proof=lambda _: 1
+)
+
 
 # NOTE: I set the default parameters below to be completely arbitrary. - Ock, 11/29
 SINGLE_RUN_PARAMS = AztecModelParams(label='default',
                                      timestep_in_blocks=1,
+
                                      uncle_count=0,
+
+                                     # Phase Durations
                                      phase_duration_proposal=5,
                                      phase_duration_reveal=5,
                                      phase_duration_commit_bond=5,
-                                     phase_duration_rollup=25, 
-                                     phase_duration_finalize=3, # left at 3 for now - could merge with rollup proof submission
-                                     phase_duration_race=25, # same duration as rollup/proving phase to keep total block time fixed.
-                                     #TODO: How to keep overall block time fixed if we move to race mode after commit bond phase and skip reveal
+                                     phase_duration_rollup=25,
+                                     phase_duration_finalize=3,
+                                     phase_duration_race=25,
+
                                      stake_activation_period=40,
                                      unstake_cooldown_period=40,
-                                     proposal_probability_per_user_per_block=0.1, 
-                                     #TODO: proposal_probability should depend on the score in v1 already 
-                                     block_content_reveal_probability=0.5, #reveals in ~96.9% over 5 L1 blocks
-                                     tx_proof_reveal_probability=0.15, #tx_proofs do not have to be revealed in v1
-                                     rollup_proof_reveal_probability=0.1, 
-                                     #TODO: rollup_proof_reveal if possible, we use a distribution that is much more likely to reveal later during the phase, as Proving takes time
-                                     commit_bond_reveal_probability=0.4) #bond put up with ~92% likelihood over 5 rounds
+
+
+                                     # Behavioral Parameters
+                                     proposal_probability_per_user_per_block=0.1,
+                                     block_content_reveal_probability=0.5,  # ~97% reveal per 5 block
+                                     tx_proof_reveal_probability=0.15,  # tx_proofs do not have to be revealed in v1
+                                     rollup_proof_reveal_probability=0.1,
+                                     commit_bond_reveal_probability=0.4,
+                                     gas_estimators=GAS_ESTIMATORS)  # P=92% over 4B
