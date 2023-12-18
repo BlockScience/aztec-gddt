@@ -297,7 +297,6 @@ def p_commit_bond(params: AztecModelParams,
                     prover = None # TODO: maybe assume any at random from interacting users?
                     bond_amount = 0.0 # TODO: open question
 
-                    # TODO: where to store the tx?
                     tx = CommitmentBond(who=updated_process.leading_sequencer,
                                         when=state['time_l1'],
                                         uuid=uuid4(),
@@ -324,9 +323,9 @@ def p_reveal_content(params: AztecModelParams,
                      state: AztecModelState) -> Signal:
     """
     Advances state of Processes that have revealed block content.
+    TODO: check if race mode is taken into consideration. We may want to decouple 
+    user actions from the evolving logic.
     """
-    # TODO: How to check if block content was revealed for process? (Add this as a field for the class?)
-
 
                          
     # Note: Advances state of Process in reveal phase that have revealed block content.
@@ -350,11 +349,19 @@ def p_reveal_content(params: AztecModelParams,
                     updated_process.phase = SelectionPhase.pending_finalization
                     updated_process.duration_in_current_phase = 0
 
+                    who = updated_process.leading_sequencer # XXX
                     gas: Gas = params['gas_estimators'].content_reveal(state)
-                    fee = gas * state['gas_fee_l1']
-                    proposal = None # TODO: how to access it?
-                    prover = None # TODO: maybe assume any at random from interacting users?
-                    bond_amount = None # TODO: open question
+                    fee: Gwei = gas * state['gas_fee_l1']
+                    blob_gas: BlobGas = params['gas_estimators'].content_reveal_blob(state)
+                    blob_fee: Gwei = blob_gas * state['gas_fee_blob']
+
+                    tx = ContentReveal(who=who,
+                                        when=state['time_l1'],
+                                        uuid=uuid4(),
+                                        gas=gas,
+                                        fee=fee,
+                                        blob_gas=blob_gas,
+                                        blob_fee=blob_fee)
 
                     # TODO: where to store the tx?
                 else: 
