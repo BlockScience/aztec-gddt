@@ -263,6 +263,7 @@ def p_commit_bond(params: AztecModelParams,
             if process.duration_in_current_phase > params['phase_duration_commit_bond']:
                 updated_process = copy(process)
                 updated_process.phase = SelectionPhase.proof_race
+                updated_process.entered_race_mode = True
                 updated_process.duration_in_current_phase = 0
             else:
                 # If duration is not expired, do  a trial to see if bond is commited
@@ -321,6 +322,7 @@ def p_reveal_content(params: AztecModelParams,
             if process.duration_in_current_phase > params['phase_duration_reveal']:
                 updated_process = copy(process)
                 updated_process.phase = SelectionPhase.proof_race
+                updated_process.entered_race_mode = True
                 updated_process.duration_in_current_phase = 0
                 # TODO: To allow for fixed phase time, we might just add another check here - if duration > params and if content is not revealed -> proof_race
             else:
@@ -561,14 +563,36 @@ def p_block_reward(params: AztecModelParams,
                      _2,
                      _3,
                      state: AztecModelState) -> SignalPayout:
-    return SignalPayout(block_reward=0.0)
+    p: Process = state['current_process'] # type: ignore
+    if p.phase == SelectionPhase.finalized:
+        reward = params['reward_per_block']
+    else:
+        reward = 0
+    return SignalPayout(block_reward=reward)
 
 
 def p_fee_cashback(params: AztecModelParams,
                      _2,
                      _3,
                      state: AztecModelState) -> SignalPayout:
-    return SignalPayout(fee_cashback=0.0)
+    p: Process = state['current_process'] # type: ignore
+    if p.phase == SelectionPhase.finalized:
+
+        txs: dict[TxUUID, AnyL1Transaction] = state['transactions']
+        # L1 Fees
+        total_fees = 0
+        total_fees += txs[p.tx_winning_proposal].fee
+        total_fees += txs[p.tx_content_reveal].fee
+        total_fees += txs[p.tx_rollup_proof].fee
+        total_fees += txs[p.tx_commitment_bond].fee
+        total_fees += txs[p.tx_finalization].fee
+
+        # Blob Fees
+        total_fees += txs[p.tx_content_reveal].blob_fee # type: ignore
+    else:
+        total_fees = 0
+
+    return SignalPayout(fee_cashback=total_fees)
 
 
 def s_agents_rewards(params: AztecModelParams,
@@ -579,4 +603,32 @@ def s_agents_rewards(params: AztecModelParams,
     """
     TODO
     """
-    return ('agents', None)
+
+
+    p: Process = state['current_process'] # type: ignore
+    txs = state['transactions']
+    total_rewards = signal.get('fee_cashback', 0.0) + signal.get('block_reward', 0.0)
+    agents: dict[AgentUUID, Agent] = state['agents'].copy()
+
+    rewards_relay = total_rewards * params['rewards_to_relay']
+    rewards_prover = total_rewards * params['rewards_to_provers']
+    rewards_sequencer = total_rewards - (rewards_relay + rewards_prover)
+
+    # TODO: How to select the winning sequencer when entering race mode?
+
+    sequencer_uuid = p.leading_sequencer
+    
+    # TODO: add check for whatever the Process went through race-mode or not.
+    if p.entered_race_mode:
+        prover_uuid = txs[p.tx_commitment_bond].prover_uuid # type: ignore
+        relay_uuid = sequencer_uuid # TODO: make sure that relays are included. For now, assume no relays
+    else:
+        prover_uuid = sequencer_uuid
+
+    # Disburse Rewards
+    agents[sequencer_uuid].balance += rewards_sequencer
+    agents[prover_uuid].balance += rewards_prover
+    agents[relay_uuid].balance += rewards_relay
+    
+
+    return ('agents', agents)

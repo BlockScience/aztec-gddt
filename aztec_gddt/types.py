@@ -23,7 +23,7 @@ ProcessUUID = Annotated[object, 'uuid']
 Gas = Annotated[int, 'gas']
 Gwei = Annotated[int, 'gwei']
 BlobGas = Annotated[int, 'blob_gas']
-
+Percentage = Annotated[float, "%"]
 
 
 
@@ -44,53 +44,9 @@ class TransactionL1():
     @property
     def gas_price(self):
         return self.fee / self.gas
-class EventCategories(Enum):
-    """
-    Pattern for event naming: {time}_{agent}_{desc}
-    RT: Real Time
-    L1T: L1 Blocks Time.
-    """
-    # Block process related events
-    # Implemented through the `Process` dataclass
-    # Triggers block process transition from 0->1
-    L1T_protocol_init_block_process = auto()
-    # Triggers block process transition 1->2
-    L1T_protocol_finish_proposal_phase = auto()
 
-    # Proposal related events
-    # Implemented through the `Proposal` dataclass
-    L1T_proposer_submit_proposal = auto()
-
-    # Leading sequencer related events
-    # Implemented through the `Process` dataclass
-
-    # Proving Network sends rollup proof to lead
-    # RT_prover_submit_rollup_proof = auto()
-    # RT_prover_submit_rollup_proof commented out as currently not needed
-
-    # Triggers block process transition from 2-> 3 or -3
-    L1T_lead_submit_commit_bond = auto()
-    # Triggers block process transition from 3-> 4 or -3
-    L1T_lead_submit_block_content = auto()
-    # RT_lead_reveal_tx_proofs = auto()
-    # RT_lead_reveal_tx_proofs commented out as currently not needed, represented through commit_bond
-
-    # Triggers block process transition from  4-> 5 or -2
-    L1T_lead_submit_rollup_proof = auto()
-    # Triggers block process transition from  5-> 6 or -2
-    L1T_lead_submit_finalization_tx = auto()
-
-    # Misc
-    # Implemented through the `Process` dataclass
-    RT_nonlead_transition_state = auto()
-
-
-class Event(NamedTuple):
-    time: ContinuousL1Blocks
-    type: EventCategories
 
 # Types for representing entities
-
 
 class SelectionPhase(IntEnum):  # XXX
     # Expected phases
@@ -119,6 +75,7 @@ class Process:
     tx_commitment_bond: Optional[TxUUID] = None
     tx_content_reveal: Optional[TxUUID] = None
     tx_rollup_proof: Optional[TxUUID] = None
+    tx_finalization: Optional[TxUUID] = None
 
     # Agent-related info
     leading_sequencer: Optional[AgentUUID] = None
@@ -130,6 +87,7 @@ class Process:
     commit_bond_is_put_down: bool = False #Commitment bond is put down / rename from proof 
     rollup_proof_is_commited: bool = False
     finalization_tx_is_submitted: bool = False
+    entered_race_mode: bool = False
     process_aborted: bool = False
 
 
@@ -246,8 +204,10 @@ class AztecModelParams(TypedDict):
     label: str  # XXX
     timestep_in_blocks: L1Blocks  # XXX
 
-    
+    # Economic Parameters
     uncle_count: int
+    reward_per_block: Tokens
+    fee_subsidy_fraction: Percentage
 
     # Phase Durations
     phase_duration_proposal: L1Blocks
@@ -275,6 +235,10 @@ class AztecModelParams(TypedDict):
     rollup_proof_reveal_probability: Probability
     # XXX If noone commits to put up a bond for Proving, sequencer loses their privilege and we enter race mode
     commit_bond_reveal_probability: Probability 
+
+
+    rewards_to_provers: Percentage
+    rewards_to_relay: Percentage
 
     gas_estimators: L1GasEstimators
 
