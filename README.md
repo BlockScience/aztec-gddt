@@ -49,7 +49,7 @@ Overall, the real system needs to perform the following actions:
 
 The following agents are fundamental to understanding the network: 
 
-* *Users*, who create transactions that they wish to have inluded in the network. 
+* *Agents*, who create transactions that they wish to have inluded in the network. 
 * *Nodes*, who propagate information on the network.
 * *Sequencers*, who are responsible for structuring the transactions into blocks.
 * *Provers*, who are responsible for providing the necessary proofs to accompany a block.
