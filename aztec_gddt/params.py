@@ -5,25 +5,32 @@ from scipy.stats import norm  # type: ignore
 TIMESTEPS = 5  # TODO
 SAMPLES = 1  # TODO
 
-N_INITIAL_USERS = 3
+N_INITIAL_AGENTS = 3
 
-INITIAL_INTERACTING_USERS = [Agent(uuid=uuid4(),
-                                   balance=max(norm.rvs(200, 100), 1),
-                                   is_sequencer=True,
-                                   is_prover=True,
-                                   is_relay=False,
-                                   staked_amount=0.0)
-                             for i
-                             in range(N_INITIAL_USERS)]
+INITIAL_AGENTS: list[Agent] = [Agent(uuid=uuid4(),
+                                     balance=max(norm.rvs(200, 100), 1),
+                                     is_sequencer=True,
+                                     is_prover=True,
+                                     is_relay=False,
+                                     staked_amount=0.0)
+                               for i
+                               in range(N_INITIAL_AGENTS)]
+
+AGENTS_DICT: dict[AgentUUID, Agent] = {a.uuid: a for a in INITIAL_AGENTS}
 
 # TODO: Set default values for initial state. - Ock, 11/29
 INITIAL_STATE = AztecModelState(time_l1=0,
                                 delta_l1_blocks=0,
-                                finalized_blocks_count=0,
-                                agents=INITIAL_INTERACTING_USERS,
+
+                                agents=AGENTS_DICT,
                                 current_process=None,
-                                proposals=[],
-                                events=[])
+                                proposals=dict(),
+
+                                gas_fee_l1=30,
+                                gas_fee_blob=30,
+
+                                finalized_blocks_count=0
+                                )
 
 # NOTE: I set the default parameters below to be completely arbitrary. - Ock, 11/29
 SINGLE_RUN_PARAMS = AztecModelParams(label='default',
