@@ -2,8 +2,8 @@ from aztec_gddt.types import *
 from uuid import uuid4
 from scipy.stats import norm  # type: ignore
 
-TIMESTEPS = 5  # TODO
-SAMPLES = 1  # TODO
+TIMESTEPS = 5  # HACK
+SAMPLES = 1  # HACK
 
 N_INITIAL_AGENTS = 3
 
@@ -18,7 +18,6 @@ INITIAL_AGENTS: list[Agent] = [Agent(uuid=uuid4(),
 
 AGENTS_DICT: dict[AgentUUID, Agent] = {a.uuid: a for a in INITIAL_AGENTS}
 
-# TODO: Set default values for initial state. - Ock, 11/29
 INITIAL_STATE = AztecModelState(time_l1=0,
                                 delta_l1_blocks=0,
 
@@ -31,7 +30,6 @@ INITIAL_STATE = AztecModelState(time_l1=0,
 
                                 finalized_blocks_count=0
                                 )
-
 
 # HACK: Gas is 1 for all transactions
 GAS_ESTIMATORS = L1GasEstimators(

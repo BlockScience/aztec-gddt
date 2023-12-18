@@ -233,7 +233,7 @@ def p_select_proposal(params: AztecModelParams,
                 # TODO: filter out invalid proposals
                 # J: Which invalid proposals are we expecting here? Anything "spam/invalid" would just be ignored, not sure we need to sim that, unless for blockspace
                 # TODO: Above seems incorrect - if duration of phase exceeds duration, the next phase starts. 
-                proposals: dict[TxUUID, Proposal] = state['proposals']
+                proposals: dict[TxUUID, Proposal] = proposals_from_tx(state['transactions'])
                 if len(proposals) > 0:
                     # TODO: check if true
                     number_uncles: int = min(len(proposals) - 1, params['uncle_count'])
@@ -273,6 +273,7 @@ def p_commit_bond(params: AztecModelParams,
                            state: AztecModelState) -> Signal:
     process: Process | None = state['current_process']
     updated_process: Optional[Process] = None
+    new_transactions = list()
 
     if process is None:
         pass
@@ -292,7 +293,7 @@ def p_commit_bond(params: AztecModelParams,
 
                     gas: Gas = params['gas_estimators'].commitment_bond(state)
                     fee = gas * state['gas_fee_l1']
-                    proposal = None # TODO: how to access it?
+                    proposal_uuid = updated_process.tx_winning_proposal
                     prover = None # TODO: maybe assume any at random from interacting users?
                     bond_amount = 0.0 # TODO: open question
 
@@ -302,16 +303,19 @@ def p_commit_bond(params: AztecModelParams,
                                         uuid=uuid4(),
                                         gas=gas,
                                         fee=fee,
-                                        proposal_tx_uuid=proposal,
+                                        proposal_tx_uuid=proposal_uuid,
                                         prover_uuid=prover,
                                         bond_amount=bond_amount)
+                    new_transactions.append(tx)
+                    updated_process.tx_commitment_bond = tx.uuid
                 else: 
                 # else, nothing happens
                     pass
         else:
             pass
 
-    return {'update_process': updated_process}
+    return {'update_process': updated_process,
+            'new_transactions': new_transactions}
 
 
 def p_reveal_content(params: AztecModelParams,
@@ -509,7 +513,7 @@ def s_process(params: AztecModelParams,
 
 
 
-def s_proposals(params: AztecModelParams,
+def s_transactions_new_proposals(params: AztecModelParams,
                 _2,
                 _3,
                 state: AztecModelState,
@@ -518,13 +522,14 @@ def s_proposals(params: AztecModelParams,
     Logic for submitting new proposals.
     """
 
+    new_transactions = state['transactions'].copy()
     current_process: Process | None = state['current_process']
+    new_proposals: dict[TxUUID, Proposal] = dict()
     if current_process is not None:
         if current_process.phase == SelectionPhase.pending_proposals:
             # HACK: all interacting users are potential proposers
             # XXX: an sequencer can propose only once
-            proposals: dict[TxUUID, Proposal] = state['proposals'].copy()
-            proposers: set[AgentUUID] = {p.who for p in proposals.values()}
+            proposers: set[AgentUUID] = {p.who for p in new_transactions.values()}
             potential_proposers: set[AgentUUID] = {u.uuid 
                                    for u in state['agents'].values()
                                    if u.uuid not in proposers
@@ -545,15 +550,18 @@ def s_proposals(params: AztecModelParams,
                                             fee=fee,
                                             score=score)
                 
-                    proposals[tx_uuid] = new_proposal
+                    new_proposals[tx_uuid] = new_proposal
                 else:
                     pass
         else:
-            proposals = dict()
+            new_proposals = dict()
     else:
-        proposals = dict()
+        new_proposals = dict()
 
-    return ('proposals', proposals)
+
+    new_transactions = {**new_transactions, **new_proposals}
+
+    return ('transactions', new_transactions)
 
 
 def s_agents(params: AztecModelParams,
@@ -566,3 +574,19 @@ def s_agents(params: AztecModelParams,
     """
     return ('agents', None)
 
+def s_transactions(params: AztecModelParams,
+                _2,
+                _3,
+                state: AztecModelState,
+                signal: Signal) -> VariableUpdate:
+    """
+    Logic for submitting new proposals.
+    """
+
+    new_tx_list: list[TransactionL1] = signal.get('new_transactions', list()) # type: ignore
+
+    new_tx_dict: dict[TxUUID, TransactionL1] = {tx.uuid: tx for tx in new_tx_list}
+
+    new_transactions = {**state['transactions'].copy(), **new_tx_dict}
+
+    return ('transactions', new_transactions)
