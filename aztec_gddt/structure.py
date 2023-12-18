@@ -16,16 +16,6 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
         }
     },
     {
-        'label': 'Update Interacting Agents',
-        'ignore': False,
-        'policies': {
-            #TODO'update_agents': p_update_agents 
-        },
-        'variables': {
-            #TODO 'agents': s_agents
-        }
-    },
-    {
         'label': 'Agent Actions',
         'policies': {
             # TODO Possibly add policies for the users triggering the relevant events
@@ -52,6 +42,18 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
         'variables': {
             'current_process': s_process,
             'transactions': s_transactions
+        }
+    },
+    {
+        'label': 'Payouts',
+        'policies': {
+            'block_reward': p_block_reward,
+            'fee_cashback': p_fee_cashback
+        },
+        'variables':{
+            'agents': s_agents_rewards,
+            'disbursed_block_rewards': lambda _1,_2,_3,_4,s: ('disbursed_block_rewards', s['block_reward']),
+            'disbursed_fee_cashback': lambda _1,_2,_3,_4,s: ('disbursed_fee_cashback', s['fee_cashback'])
         }
     }
 ]
