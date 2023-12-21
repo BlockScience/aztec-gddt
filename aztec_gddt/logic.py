@@ -622,3 +622,14 @@ def s_agents_rewards(params: AztecModelParams,
         return ('agents', agents)
     else:
         return ('agents', state['agents'])
+
+
+def s_token_supply(params: AztecModelParams,
+                _2,
+                _3,
+                state: AztecModelState,
+                signal: SignalEvolveProcess) -> VariableUpdate:
+    """
+    Logic for submitting new proposals.
+    """
+    return ('token_supply', TokenSupply.from_state(state))
