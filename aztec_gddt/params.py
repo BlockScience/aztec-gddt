@@ -42,6 +42,14 @@ GAS_ESTIMATORS = L1GasEstimators(
     rollup_proof=lambda _: 1
 )
 
+# HACK: Gas is 1 for all transactions
+TX_ESTIMATORS = UserTransactionEstimators(
+    transaction_count=lambda _: 1,
+    transaction_average_size=lambda _: 100,
+    transaction_average_fee_per_size=lambda _: 50.5
+)
+
+
 
 # NOTE: I set the default parameters below to be completely arbitrary. - Ock, 11/29
 SINGLE_RUN_PARAMS = AztecModelParams(label='default',
@@ -69,6 +77,14 @@ SINGLE_RUN_PARAMS = AztecModelParams(label='default',
                                      tx_proof_reveal_probability=0.15,  # tx_proofs do not have to be revealed in v1
                                      rollup_proof_reveal_probability=0.1,
                                      commit_bond_reveal_probability=0.4,
-                                     gas_estimators=GAS_ESTIMATORS,
+
+
+                                     
                                      rewards_to_provers=0.495,
-                                     rewards_to_relay=0.01)  # P=92% over 4B
+                                     rewards_to_relay=0.01,
+
+                                     gas_estimators=GAS_ESTIMATORS,
+                                     tx_estimators=TX_ESTIMATORS
+                                     
+                                     
+                                     )  # P=92% over 4B
