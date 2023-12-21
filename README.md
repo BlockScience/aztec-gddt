@@ -64,7 +64,7 @@ The process of performing Aztec's fundamental activities proceeds in a few well-
 
 **Ongoing Processes**
 * Sequencers make the decision to (un-)stake funds with the network, making themselves (in-)eligible to be selected in the Selection phase after a defined (de-)activation period. 
-* Information is propagated through the network, with Nodes collecting information in their mempools, receiving information through both public ("public mempool") and private ("private mempool") means.
+* Information is propagated through the network, with Nodes collecting information in their mempools, receiving information through both public ("public mempool") and private ("private mempool") means. In this first version of the model, this information is naively represented with `size` of proposals (blocks). 
 
 **For a Specific Block** 
 ![Aztec - Spec](https://github.com/BlockScience/aztec-gddt/assets/80513714/05746e08-97c4-46ff-979b-e3af3cd976e0)
@@ -88,10 +88,6 @@ The Prover computes the necessary proof(s) and commits them on L1, triggering th
 **Phase 4b (Proof Race Phase)**
 If either no bond was put down, or the content was not revealed, the priorly chosen sequencer loses their privilege. Instead of a regular Proving Phase, anyone can now submit a valid rollup proof for any valid block (which does not have to be a proof for any priorly committed proposal). The first valid rollup proof on L1 wins, triggering finalization of this block and any respective payouts. 
 
-# Note: Finalization Phase commented out, as not needed anymore.
-# **Phase 5 (Finalization Phase)**
-# A final L1 transaction is needed to finalize the rollup block. This pays out rewards to Sequencer and Prover. 
-
 **End Result**
 At the end of this process, there are two possible outcomes.
 **Success:** 
@@ -105,16 +101,17 @@ At the end of this process, there are two possible outcomes.
 * The L2 block height remains the same.
 * The system returns to Phase 1.
 
-#### Purpose of Model
+#### Purpose of this Model
 
-A healthy Aztec network will have reliable throughput, consistently recording a sufficiently large number of its user's transactions on the underlying Layer 1. Our simulation model is intended to offer insight into how the Aztec network could perform in a variety of situations. Of particular interest are situations where the network's Agents act in ways that are not in the best interests of the network. Network agents may be unable to perform their role in a specific moment, due to either simple inability or economic incentives. It can also be used to explore the impact of L1 actors, who may be inclined to censor Aztec transactions. This insight can aid decision-makers in the Aztec network with respect to system attributes, including: economic incentive structure, high-risk scenarios to monitor, and other important questions. 
+A healthy Aztec network will have reliable throughput, consistently recording blocks on the underlying Layer 1. Our simulation model is intended to offer insight into how the Aztec network could perform in a variety of situations. Of particular interest are situations where the network's Agents act in ways that are not in the best interests of the network. Network agents may be unable to perform their role in a specific moment, due to either simple inability or economic incentives. It can also be used to explore the impact of L1 actors, who may be inclined to censor Aztec transactions. This insight can aid decision-makers in the Aztec network with respect to system attributes, including: economic incentive structure, high-risk scenarios to monitor, and other important questions. 
 
 ## Model Overview
 
 TODO approve as acceptable
 TODO approve as final
+TODO how to describe cadCAD 
 
-The simulation model is written in cadCAD. (TODO how to describe cadCAD?) In this section we will describe the variables and parameters recorded in the simulation.  We will also describe how various aspects of the cadCAD model structure correspond to specific parts of the Aztec system in general, and the Fernet model in particular. 
+The simulation model is written in cadCAD. In this section we will describe the variables and parameters recorded in the simulation.  We will also describe how various aspects of the cadCAD model structure correspond to specific parts of the Aztec system in general, and the Fernet model in particular. 
 
 ### Model Variables
 
@@ -126,8 +123,10 @@ TODO bullet point list of attributes
 ### Model  Parameters
 
 Parameters represent aspects of the simulation which are fixed before the beginning of a single model run. 
+* `example_par`: an example of a parameter that can be set
 
-## Model Overview 
+## cadCAD Model Overview 
+TODO: Link to Readme or copy over?
 
 ### Partial State Update Blocks 
 
@@ -153,62 +152,8 @@ may be unnecessary due to hyperlinks
 <--
 
  # Raw Materials 
-TODO Take relevant parts from this earlier draft below and use it to fill in the final draft. 
-
-An earlier draft. Definitely useful as raw materials for the final. 
-
-This document is intended to provide additional documentation on the approach and decisions behind our model of the Aztec network. 
-
-## Overview 
- 
-This repository provides a cadCAD model of the Aztec system, focusing on the design and implementation of the Fernet Sequencer Selection Protocol. The goal of the model is to understanding the effect of design parameters on various Key Performance Indicators (KPIs) under a wide range of possible scenarios. This document provides an overview of the system under consideration, the mathematical and software specifications of a simulation model for the system, and results of the research undertaken with this model. 
-
-## Overview of Aztec Network
-
-The stated goal of [Aztec Network](https://aztec.network/) is "A no-compromises privacy-first Layer 2 on Ethereum." To achieve this goal, Aztec uses zero-knowledge infrastructure to publish summaries of Layer 2 blocks on the Ethereum blockchain. Fulfillment of these goals depends on performance of various agents through specific processes, described below. 
-
-
-
-## Overview of System
-
-This section is in progress.
-
-### System Goals 
-
-The primary system goal is to provide a reliable source of L2 blockspace, offering both performance and privacy. The issue is that these two goals are often in tension. 
-
-### System Parameters
-These are the sliders (continuous) and switches (discrete) that can impact the system response to user behavior. 
-
-**TODO** 
-
-### KPIs
-
-TODO: Describe KPIs. Be sure that they are not exogeneous variables. 
-
-## Modeling and Simulation
-
-### Design of Model
-
-TODO: Give a description of the phases of the model. 
-
-The fundamental structure of a cadCAD model uses **policy functions** and **partial state update blocks** 
-
-### Key Questions and Hypotheses
-
-TODO: Look at key questions doc and extract what we can. 
-
-### Scenarios
-
-TODO: Provide scenarios. 
-
-## Data Analysis
-
-TODO: Provide details on data analysis currently underway. 
-
-## References
-
-
+TODO: Take relevant parts from this earlier draft below and use it to fill in the final draft. 
+Note: Jakob took out most of below, as it was used above. 
 
 # Software Stuff
 
