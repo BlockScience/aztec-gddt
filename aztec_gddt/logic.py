@@ -313,16 +313,19 @@ def p_commit_bond(params: AztecModelParams,
                         prover = updated_process.leading_sequencer
                         bond_amount = 0.0  # TODO: open question
 
-                    tx = CommitmentBond(who=updated_process.leading_sequencer,
-                                        when=state['time_l1'],
-                                        uuid=uuid4(),
-                                        gas=gas,
-                                        fee=fee,
-                                        proposal_tx_uuid=proposal_uuid,
-                                        prover_uuid=prover,
-                                        bond_amount=bond_amount)
-                    new_transactions.append(tx)
-                    updated_process.tx_commitment_bond = tx.uuid
+                    if state['gas_fee_l1'] <= params['gas_threshold_for_tx']:
+                        tx = CommitmentBond(who=updated_process.leading_sequencer,
+                                            when=state['time_l1'],
+                                            uuid=uuid4(),
+                                            gas=gas,
+                                            fee=fee,
+                                            proposal_tx_uuid=proposal_uuid,
+                                            prover_uuid=prover,
+                                            bond_amount=bond_amount)
+                        new_transactions.append(tx)
+                        updated_process.tx_commitment_bond = tx.uuid
+                    else:
+                        pass
                 else:
                     # else, nothing happens
                     pass
@@ -378,20 +381,22 @@ def p_reveal_content(params: AztecModelParams,
                     tx_avg_fee_per_size = params['tx_estimators'].transaction_average_fee_per_size(
                         state)
 
-                    tx = ContentReveal(who=who,
-                                       when=state['time_l1'],
-                                       uuid=uuid4(),
-                                       gas=gas,
-                                       fee=fee,
-                                       blob_gas=blob_gas,
-                                       blob_fee=blob_fee,
-                                       transaction_count=tx_count,
-                                       transaction_avg_size=tx_avg_size,
-                                       transaction_avg_fee_per_size=tx_avg_fee_per_size)
+                    if state['gas_fee_l1'] <= params['gas_threshold_for_tx'] & state['gas_fee_blob'] <= params['blob_gas_threshold_for_tx']:
+                        tx = ContentReveal(who=who,
+                                        when=state['time_l1'],
+                                        uuid=uuid4(),
+                                        gas=gas,
+                                        fee=fee,
+                                        blob_gas=blob_gas,
+                                        blob_fee=blob_fee,
+                                        transaction_count=tx_count,
+                                        transaction_avg_size=tx_avg_size,
+                                        transaction_avg_fee_per_size=tx_avg_fee_per_size)
 
-                    new_transactions.append(tx)
-                    updated_process.tx_content_reveal = tx.uuid
-                    # TODO: where to store the tx?
+                        new_transactions.append(tx)
+                        updated_process.tx_content_reveal = tx.uuid
+                    else:
+                        pass
                 else:
                     pass
         else:
@@ -429,18 +434,18 @@ def p_submit_proof(params: AztecModelParams,
                     who = updated_process.leading_sequencer  # XXX
                     gas: Gas = params['gas_estimators'].content_reveal(state)
                     fee: Gwei = gas * state['gas_fee_l1']
-                    blob_gas: BlobGas = params['gas_estimators'].rollup_proof(
-                        state)
-                    blob_fee: Gwei = blob_gas * state['gas_fee_blob']
 
-                    tx = RollupProof(who=who,
-                                     when=state['time_l1'],
-                                     uuid=uuid4(),
-                                     gas=gas,
-                                     fee=fee)
+                    if state['gas_fee_l1'] <= params['gas_threshold_for_tx']:
+                        tx = RollupProof(who=who,
+                                        when=state['time_l1'],
+                                        uuid=uuid4(),
+                                        gas=gas,
+                                        fee=fee)
 
-                    new_transactions.append(tx)
-                    updated_process.tx_rollup_proof = tx.uuid
+                        new_transactions.append(tx)
+                        updated_process.tx_rollup_proof = tx.uuid
+                    else:
+                        pass
                 else:
                     pass  # Nothing changes if no valid rollup
         else:
@@ -525,14 +530,17 @@ def s_transactions_new_proposals(params: AztecModelParams,
                     fee: Gwei = gas * state['gas_fee_l1']
                     score = uniform.rvs()  # XXX: score is always uniform
 
-                    new_proposal = Proposal(who=potential_proposer,
-                                            when=state['time_l1'],
-                                            uuid=tx_uuid,
-                                            gas=gas,
-                                            fee=fee,
-                                            score=score)
+                    if state['gas_fee_l1'] <= params['gas_threshold_for_tx']:
+                        new_proposal = Proposal(who=potential_proposer,
+                                                when=state['time_l1'],
+                                                uuid=tx_uuid,
+                                                gas=gas,
+                                                fee=fee,
+                                                score=score)
 
-                    new_proposals[tx_uuid] = new_proposal
+                        new_proposals[tx_uuid] = new_proposal
+                    else:
+                        pass
                 else:
                     pass
         else:
