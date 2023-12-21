@@ -15,3 +15,7 @@ def test_default_run():
 
     expected_rows = N_samples * (1 + N_timesteps)
     assert len(sim_df) == expected_rows
+
+def test_standard_run():
+    from aztec_gddt.experiment import standard_run
+    df = standard_run().set_index('time_l1')

@@ -2,7 +2,7 @@ from aztec_gddt.types import *
 from uuid import uuid4
 from scipy.stats import norm  # type: ignore
 
-TIMESTEPS = 5  # HACK
+TIMESTEPS = 1000  # HACK
 SAMPLES = 1  # HACK
 
 N_INITIAL_AGENTS = 3
@@ -16,6 +16,13 @@ INITIAL_AGENTS: list[Agent] = [Agent(uuid=uuid4(),
                                      staked_amount=0.0)
                                for i
                                in range(N_INITIAL_AGENTS)]
+
+INITIAL_AGENTS.append(Agent(uuid=uuid4(),
+                            balance=0,
+                            is_sequencer=False,
+                            is_prover=False,
+                            is_relay=True,
+                            staked_amount=0.0))
 
 AGENTS_DICT: dict[AgentUUID, Agent] = {a.uuid: a for a in INITIAL_AGENTS}
 
@@ -33,6 +40,7 @@ INITIAL_SUPPLY = TokenSupply(
 
 INITIAL_STATE = AztecModelState(time_l1=0,
                                 delta_l1_blocks=0,
+                                advance_l1_blocks=0,
 
                                 agents=AGENTS_DICT,
                                 current_process=None, # XXX
@@ -72,10 +80,10 @@ SINGLE_RUN_PARAMS = AztecModelParams(label='default',
                                      fee_subsidy_fraction=1.0, # TODO
 
                                      # Phase Durations
-                                     phase_duration_proposal=5, # TODO
-                                     phase_duration_reveal=5, # TODO
-                                     phase_duration_commit_bond=5, # TODO
-                                     phase_duration_rollup=25, # TODO
+                                     phase_duration_proposal=10, # TODO
+                                     phase_duration_reveal=10, # TODO
+                                     phase_duration_commit_bond=10, # TODO
+                                     phase_duration_rollup=30, # TODO
                                      phase_duration_race=25, # TODO
 
                                      stake_activation_period=40, # TODO
@@ -83,14 +91,14 @@ SINGLE_RUN_PARAMS = AztecModelParams(label='default',
 
 
                                      # Behavioral Parameters
-                                     proposal_probability_per_user_per_block=0.1, # XXX
-                                     block_content_reveal_probability=0.5, # XXX
-                                     tx_proof_reveal_probability=0.15, # XXX
-                                     rollup_proof_reveal_probability=0.1, # XXX
-                                     commit_bond_reveal_probability=0.4, # XXX
+                                     proposal_probability_per_user_per_block=0.3, # XXX
+                                     block_content_reveal_probability=0.3, # XXX
+                                     tx_proof_reveal_probability=0.3, # XXX
+                                     rollup_proof_reveal_probability=0.3, # XXX
+                                     commit_bond_reveal_probability=0.3, # XXX
                                      gas_threshold_for_tx=70, # HACK
                                      blob_gas_threshold_for_tx=50, # HACK
-                                     proving_marketplace_usage_probability=0.5, # XXX
+                                     proving_marketplace_usage_probability=0.3, # XXX
                                      
                                      rewards_to_provers=0.495, # XXX
                                      rewards_to_relay=0.01, # XXX
