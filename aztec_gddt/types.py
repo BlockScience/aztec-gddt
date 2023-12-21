@@ -253,6 +253,8 @@ class AztecModelParams(TypedDict):
     # XXX If noone commits to put up a bond for Proving, sequencer loses their privilege and we enter race mode
     commit_bond_reveal_probability: Probability 
 
+    proving_marketplace_usage_probability: Probability
+
 
     rewards_to_provers: Percentage
     rewards_to_relay: Percentage
