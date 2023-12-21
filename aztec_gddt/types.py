@@ -26,12 +26,12 @@ BlobGas = Annotated[int, 'blob_gas']
 Percentage = Annotated[float, "%"]
 
 
-
 class L1TransactionType(Enum):
-    BlockProposal=auto()
-    CommitmentBond=auto()
-    ContentReveal=auto()
-    RollupProof=auto()
+    BlockProposal = auto()
+    CommitmentBond = auto()
+    ContentReveal = auto()
+    RollupProof = auto()
+
 
 @dataclass
 class TransactionL1():
@@ -48,7 +48,7 @@ class TransactionL1():
 
 # Types for representing entities
 
-class SelectionPhase(IntEnum): 
+class SelectionPhase(IntEnum):
     pending_proposals = 1
     pending_commit_bond = 2
     pending_reveal = 3
@@ -56,6 +56,28 @@ class SelectionPhase(IntEnum):
     finalized = 5
     skipped = -1
     proof_race = -2
+
+
+@dataclass
+class TokenSupply():
+    circulating: Tokens
+    staked: Tokens
+    burnt: Tokens
+    issued: Tokens
+
+    @property
+    def user(self):
+        return self.circulating + self.staked
+
+    @staticmethod
+    def from_state(state: 'AztecModelState') -> "TokenSupply":
+        obj = TokenSupply(circulating=sum(a.balance for a in state['agents'].values()),
+                          staked=sum(a.staked_amount for a in state['agents'].values()),
+                          burnt=state['cumm_burn'],
+                          issued=state['cumm_block_rewards'] + state['cumm_fee_cashback'])
+        return obj
+
+
 @dataclass
 class Process:
     uuid: ProcessUUID
@@ -63,7 +85,6 @@ class Process:
     duration_in_current_phase: L1Blocks
 
     phase: SelectionPhase = SelectionPhase.pending_proposals
-
 
     # Relevant L1 Transactions
     tx_winning_proposal: Optional[TxUUID] = None
@@ -78,11 +99,11 @@ class Process:
     # Process State
     proofs_are_public: bool = False
     block_content_is_revealed: bool = False
-    commit_bond_is_put_down: bool = False #Commitment bond is put down / rename from proof 
+    # Commitment bond is put down / rename from proof
+    commit_bond_is_put_down: bool = False
     rollup_proof_is_commited: bool = False
     entered_race_mode: bool = False
     process_aborted: bool = False
-
 
     def __add__(self, other):
         """
@@ -93,11 +114,12 @@ class Process:
         if other is None:
             return self
         else:
-            raise ValueError('Attempted to add Process to another non-null object')
+            raise ValueError(
+                'Attempted to add Process to another non-null object')
 
 
 @dataclass
-class Agent(): 
+class Agent():
     uuid: AgentUUID
     balance: Tokens
     is_sequencer: bool = False
@@ -107,7 +129,7 @@ class Agent():
 
     def slots(self, tokens_per_slot: Tokens) -> Tokens:
         return floor(self.staked_amount / tokens_per_slot)
-    
+
 
 @dataclass
 class TransactionL1Blob(TransactionL1):
@@ -117,6 +139,8 @@ class TransactionL1Blob(TransactionL1):
     @property
     def blob_gas_price(self):
         return self.blob_fee / self.blob_gas
+
+
 @dataclass
 class Proposal(TransactionL1):
     """
@@ -124,10 +148,10 @@ class Proposal(TransactionL1):
     L1T_proposer_submit_proposal event.
     """
     score: FiniteFloat
-        
-    #TODO: add bond_uiid: /generaluserUUID
-    #TODO: before, we only needed to track proposals, as that was the only way a block came into existence. 
-    #Now with race mode, it might be nice to reuse this container - a Proposal with "score: None" could be a block that was made in race mode. Otherwise, nothing really changes.   
+
+    # TODO: add bond_uiid: /generaluserUUID
+    # TODO: before, we only needed to track proposals, as that was the only way a block came into existence.
+    # Now with race mode, it might be nice to reuse this container - a Proposal with "score: None" could be a block that was made in race mode. Otherwise, nothing really changes.
 
 
 @dataclass
@@ -140,7 +164,8 @@ class CommitmentBond(TransactionL1):
     prover_uuid: AgentUUID
     bond_amount: float
 
-@dataclass 
+
+@dataclass
 class ContentReveal(TransactionL1Blob):
     transaction_count: int
     transaction_avg_size: int
@@ -150,7 +175,8 @@ class ContentReveal(TransactionL1Blob):
     def total_tx_fee(self) -> Tokens:
         return self.transaction_count * self.transaction_avg_size * self.transaction_avg_fee_per_size
 
-@dataclass 
+
+@dataclass
 class RollupProof(TransactionL1):
     pass
 
@@ -159,10 +185,12 @@ AnyL1Transaction = TransactionL1 | Proposal | CommitmentBond | ContentReveal | R
 
 SelectionResults = dict[ProcessUUID, tuple[Proposal, list[Proposal]]]
 
-# TODO: commit_bond aka Prover Commitment Bond Object -> tracking bond UUID (might be different from sequencer UUID, bond amount). 
-# Alternative is to include prover UUID and bond amount in proposal class, but to set to "None" when instantiating.  
+# TODO: commit_bond aka Prover Commitment Bond Object -> tracking bond UUID (might be different from sequencer UUID, bond amount).
+# Alternative is to include prover UUID and bond amount in proposal class, but to set to "None" when instantiating.
 
 # Definition for simulation-specific types
+
+
 class AztecModelState(TypedDict):
     # Time progression
     time_l1: L1Blocks
@@ -181,15 +209,18 @@ class AztecModelState(TypedDict):
 
     # Metrics
     finalized_blocks_count: int
-    disbursed_block_rewards: Tokens
-    disbursed_fee_cashback: Tokens
+    cumm_block_rewards: Tokens
+    cumm_fee_cashback: Tokens
+    cumm_burn: Tokens
 
+    token_supply: TokenSupply
 
 
 GasEstimator = Callable[[AztecModelState], Gas]
 BlobGasEstimator = Callable[[AztecModelState], BlobGas]
 BaseIntEstimator = Callable[[AztecModelState], int]
 BaseFloatEstimator = Callable[[AztecModelState], float]
+
 
 @dataclass
 class L1GasEstimators():
@@ -200,17 +231,16 @@ class L1GasEstimators():
     rollup_proof: GasEstimator
 
 
-
-
 @dataclass
 class UserTransactionEstimators():
     transaction_count: BaseIntEstimator
     transaction_average_size: BaseIntEstimator
     transaction_average_fee_per_size: BaseFloatEstimator
 
+
 class AztecModelParams(TypedDict):
-    # random_seed: int #Random seed for simulation model variation. 
-    
+    # random_seed: int #Random seed for simulation model variation.
+
     label: str  # XXX
     timestep_in_blocks: L1Blocks  # XXX
 
@@ -243,10 +273,9 @@ class AztecModelParams(TypedDict):
     # XXX If Provers don't send back rollup proof, lead can't submit
     rollup_proof_reveal_probability: Probability
     # XXX If noone commits to put up a bond for Proving, sequencer loses their privilege and we enter race mode
-    commit_bond_reveal_probability: Probability 
+    commit_bond_reveal_probability: Probability
 
     proving_marketplace_usage_probability: Probability
-
 
     rewards_to_provers: Percentage
     rewards_to_relay: Percentage
@@ -255,13 +284,14 @@ class AztecModelParams(TypedDict):
     tx_estimators: UserTransactionEstimators
 
 
-
 class SignalTime(TypedDict, total=False):
     delta_blocks: L1Blocks
+
 
 class SignalEvolveProcess(TypedDict, total=False):
     new_transactions: Sequence[AnyL1Transaction]
     update_process: Process | None
+
 
 class SignalPayout(TypedDict, total=False):
     block_reward: Tokens
