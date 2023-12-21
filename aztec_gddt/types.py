@@ -198,6 +198,7 @@ class AztecModelState(TypedDict):
     # Time progression
     time_l1: L1Blocks
     delta_l1_blocks: L1Blocks
+    advance_l1_blocks: L1Blocks
 
     # Agents
     agents: dict[AgentUUID, Agent]
@@ -296,6 +297,7 @@ class SignalTime(TypedDict, total=False):
 class SignalEvolveProcess(TypedDict, total=False):
     new_transactions: Sequence[AnyL1Transaction]
     update_process: Process | None
+    advance_l1_blocks: Optional[int]
 
 
 class SignalPayout(TypedDict, total=False):
