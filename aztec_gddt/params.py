@@ -7,6 +7,7 @@ SAMPLES = 1  # HACK
 
 N_INITIAL_AGENTS = 3
 
+ # XXX
 INITIAL_AGENTS: list[Agent] = [Agent(uuid=uuid4(),
                                      balance=max(norm.rvs(200, 100), 1),
                                      is_sequencer=True,
@@ -18,9 +19,9 @@ INITIAL_AGENTS: list[Agent] = [Agent(uuid=uuid4(),
 
 AGENTS_DICT: dict[AgentUUID, Agent] = {a.uuid: a for a in INITIAL_AGENTS}
 
-INITIAL_CUMM_REWARDS = 10000
-INITIAL_CUMM_CASHBACK = 50
-INITIAL_CUMM_BURN = 50
+INITIAL_CUMM_REWARDS = 10000 # XXX
+INITIAL_CUMM_CASHBACK = 50 # XXX
+INITIAL_CUMM_BURN = 50 # XXX
 INITIAL_SUPPLY = TokenSupply(
     circulating=sum(a.balance for a in INITIAL_AGENTS),
     staked=sum(a.staked_amount for a in INITIAL_AGENTS),
@@ -34,11 +35,11 @@ INITIAL_STATE = AztecModelState(time_l1=0,
                                 delta_l1_blocks=0,
 
                                 agents=AGENTS_DICT,
-                                current_process=None,
+                                current_process=None, # XXX
                                 transactions=dict(),
 
-                                gas_fee_l1=30,
-                                gas_fee_blob=30,
+                                gas_fee_l1=50, # XXX
+                                gas_fee_blob=7, # XXX
 
                                 finalized_blocks_count=0,
                                 cumm_block_rewards=INITIAL_CUMM_REWARDS,
@@ -47,13 +48,12 @@ INITIAL_STATE = AztecModelState(time_l1=0,
                                 token_supply=INITIAL_SUPPLY
                                 )
 
-# HACK: Gas is 1 for all transactions
 GAS_ESTIMATORS = L1GasEstimators(
-    proposal=lambda _: 1,
-    commitment_bond=lambda _: 1,
-    content_reveal=lambda _: 1,
-    content_reveal_blob=lambda _: 1,
-    rollup_proof=lambda _: 1
+    proposal=lambda _: 100_000,
+    commitment_bond=lambda _: 100_000,
+    content_reveal=lambda _: 81_000,
+    content_reveal_blob=lambda _: 500_000, # NOTE: this is a HACK assumption
+    rollup_proof=lambda _: 450_000
 )
 
 # HACK: Gas is 1 for all transactions
@@ -64,38 +64,34 @@ TX_ESTIMATORS = UserTransactionEstimators(
 )
 
 
-
-# NOTE: I set the default parameters below to be completely arbitrary. - Ock, 11/29
 SINGLE_RUN_PARAMS = AztecModelParams(label='default',
                                      timestep_in_blocks=1,
 
-                                     uncle_count=0,
+                                     uncle_count=2, # TODO
                                      reward_per_block=1.0, # TODO
-                                     fee_subsidy_fraction=1.0,
+                                     fee_subsidy_fraction=1.0, # TODO
 
                                      # Phase Durations
-                                     phase_duration_proposal=5,
-                                     phase_duration_reveal=5,
-                                     phase_duration_commit_bond=5,
-                                     phase_duration_rollup=25,
-                                     phase_duration_race=25,
+                                     phase_duration_proposal=5, # TODO
+                                     phase_duration_reveal=5, # TODO
+                                     phase_duration_commit_bond=5, # TODO
+                                     phase_duration_rollup=25, # TODO
+                                     phase_duration_race=25, # TODO
 
-                                     stake_activation_period=40,
-                                     unstake_cooldown_period=40,
+                                     stake_activation_period=40, # TODO
+                                     unstake_cooldown_period=40, # TODO
 
 
                                      # Behavioral Parameters
-                                     proposal_probability_per_user_per_block=0.1,
-                                     block_content_reveal_probability=0.5,  # ~97% reveal per 5 block
-                                     tx_proof_reveal_probability=0.15,  # tx_proofs do not have to be revealed in v1
-                                     rollup_proof_reveal_probability=0.1,
-                                     commit_bond_reveal_probability=0.4,
-                                     proving_marketplace_usage_probability=0.5,
-
-
+                                     proposal_probability_per_user_per_block=0.1, # XXX
+                                     block_content_reveal_probability=0.5, # XXX
+                                     tx_proof_reveal_probability=0.15, # XXX
+                                     rollup_proof_reveal_probability=0.1, # XXX
+                                     commit_bond_reveal_probability=0.4, # XXX
+                                     proving_marketplace_usage_probability=0.5, # XXX
                                      
-                                     rewards_to_provers=0.495,
-                                     rewards_to_relay=0.01,
+                                     rewards_to_provers=0.495, # XXX
+                                     rewards_to_relay=0.01, # XXX
 
                                      gas_estimators=GAS_ESTIMATORS,
                                      tx_estimators=TX_ESTIMATORS
