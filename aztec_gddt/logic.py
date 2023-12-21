@@ -2,6 +2,8 @@ from copy import deepcopy, copy
 from typing import Callable
 from uuid import uuid4
 
+from random import choice
+
 from cadCAD_tools.types import VariableUpdate  # type: ignore
 
 from aztec_gddt.helper import *
@@ -275,8 +277,15 @@ def p_commit_bond(params: AztecModelParams,
                     gas: Gas = params['gas_estimators'].commitment_bond(state)
                     fee = gas * state['gas_fee_l1']
                     proposal_uuid = updated_process.tx_winning_proposal
-                    prover = None # TODO: maybe assume any at random from interacting users?
-                    bond_amount = 0.0 # TODO: open question
+
+                    if bernoulli_trial(params['proving_marketplace_usage_probability']) is True:
+                        provers: list[AgentUUID] = [a_id for (a_id, a) in state['agents'].items() if a.is_prover]
+                        # TODO: what about relays?
+                        prover: AgentUUID = choice(provers)
+                        bond_amount = 0.0 # TODO: open question
+                    else:
+                        prover = updated_process.leading_sequencer
+                        bond_amount = 0.0 # TODO: open question
 
                     tx = CommitmentBond(who=updated_process.leading_sequencer,
                                         when=state['time_l1'],
