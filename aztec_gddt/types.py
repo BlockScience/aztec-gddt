@@ -149,7 +149,13 @@ class CommitmentBond(TransactionL1):
 
 @dataclass 
 class ContentReveal(TransactionL1Blob):
-    pass
+    transaction_count: int
+    transaction_avg_size: int
+    transaction_avg_fee_per_size: Tokens
+
+    @property
+    def total_tx_fee(self) -> Tokens:
+        return self.transaction_count * self.transaction_avg_size * self.transaction_avg_fee_per_size
 
 @dataclass 
 class RollupProof(TransactionL1):
@@ -189,6 +195,8 @@ class AztecModelState(TypedDict):
 
 GasEstimator = Callable[[AztecModelState], Gas]
 BlobGasEstimator = Callable[[AztecModelState], BlobGas]
+BaseIntEstimator = Callable[[AztecModelState], int]
+BaseFloatEstimator = Callable[[AztecModelState], float]
 
 @dataclass
 class L1GasEstimators():
@@ -197,6 +205,15 @@ class L1GasEstimators():
     content_reveal: GasEstimator
     content_reveal_blob: BlobGasEstimator
     rollup_proof: GasEstimator
+
+
+
+
+@dataclass
+class UserTransactionEstimators():
+    transaction_count: BaseIntEstimator
+    transaction_average_size: BaseIntEstimator
+    transaction_average_fee_per_size: BaseFloatEstimator
 
 class AztecModelParams(TypedDict):
     # random_seed: int #Random seed for simulation model variation. 
@@ -241,6 +258,7 @@ class AztecModelParams(TypedDict):
     rewards_to_relay: Percentage
 
     gas_estimators: L1GasEstimators
+    tx_estimators: UserTransactionEstimators
 
 
 
@@ -254,3 +272,4 @@ class SignalEvolveProcess(TypedDict, total=False):
 class SignalPayout(TypedDict, total=False):
     block_reward: Tokens
     fee_cashback: Tokens
+    fee_from_users: Tokens

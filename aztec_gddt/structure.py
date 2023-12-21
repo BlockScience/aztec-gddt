@@ -48,7 +48,8 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
         'label': 'Payouts',
         'policies': {
             'block_reward': p_block_reward,
-            'fee_cashback': p_fee_cashback
+            'fee_cashback': p_fee_cashback,
+            'fee_from_users': p_fee_from_users
         },
         'variables':{
             'agents': s_agents_rewards,

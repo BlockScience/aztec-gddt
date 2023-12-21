@@ -337,13 +337,21 @@ def p_reveal_content(params: AztecModelParams,
                     blob_gas: BlobGas = params['gas_estimators'].content_reveal_blob(state)
                     blob_fee: Gwei = blob_gas * state['gas_fee_blob']
 
+                    tx_count = params['tx_estimators'].transaction_count(state)
+                    tx_avg_size = params['tx_estimators'].transaction_average_size(state)
+                    tx_avg_fee_per_size = params['tx_estimators'].transaction_average_fee_per_size(state)
+
+
                     tx = ContentReveal(who=who,
                                         when=state['time_l1'],
                                         uuid=uuid4(),
                                         gas=gas,
                                         fee=fee,
                                         blob_gas=blob_gas,
-                                        blob_fee=blob_fee)
+                                        blob_fee=blob_fee,
+                                        transaction_count=tx_count,
+                                        transaction_avg_size=tx_avg_size,
+                                        transaction_avg_fee_per_size=tx_avg_fee_per_size)
 
                     new_transactions.append(tx)
                     updated_process.tx_content_reveal = tx.uuid
@@ -593,6 +601,20 @@ def p_fee_cashback(params: AztecModelParams,
         total_fees = 0
 
     return SignalPayout(fee_cashback=total_fees)
+
+
+def p_fee_from_users(params: AztecModelParams,
+                     _2,
+                     _3,
+                     state: AztecModelState) -> SignalPayout:
+    p: Process = state['current_process'] # type: ignore
+    if p.phase == SelectionPhase.finalized:
+        txs: dict[TxUUID, AnyL1Transaction] = state['transactions']
+        total_fees = txs[p.tx_content_reveal].total_tx_fee # type: ignore
+    else:
+        total_fees = 0
+
+    return SignalPayout(fee_from_users=total_fees)
 
 
 def s_agents_rewards(params: AztecModelParams,
