@@ -77,6 +77,7 @@ SINGLE_RUN_PARAMS = AztecModelParams(label='default',
                                      tx_proof_reveal_probability=0.15,  # tx_proofs do not have to be revealed in v1
                                      rollup_proof_reveal_probability=0.1,
                                      commit_bond_reveal_probability=0.4,
+                                     proving_marketplace_usage_probability=0.5,
 
 
                                      
