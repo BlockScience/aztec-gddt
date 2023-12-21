@@ -376,8 +376,7 @@ def p_reveal_content(params: AztecModelParams,
                     blob_fee: Gwei = blob_gas * state['gas_fee_blob']
 
                     tx_count = params['tx_estimators'].transaction_count(state)
-                    tx_avg_size = params['tx_estimators'].transaction_average_size(
-                        state)
+                    tx_avg_size = int(state['transactions'][process.tx_winning_proposal].size / tx_count) # type: ignore
                     tx_avg_fee_per_size = params['tx_estimators'].transaction_average_fee_per_size(
                         state)
 
@@ -529,6 +528,8 @@ def s_transactions_new_proposals(params: AztecModelParams,
                     gas: Gas = params['gas_estimators'].proposal(state)
                     fee: Gwei = gas * state['gas_fee_l1']
                     score = uniform.rvs()  # XXX: score is always uniform
+                    size = params['tx_estimators'].proposal_average_size(state)
+                    public_share = 0.5 # HACK
 
                     if state['gas_fee_l1'] <= params['gas_threshold_for_tx']:
                         new_proposal = Proposal(who=potential_proposer,
@@ -536,7 +537,9 @@ def s_transactions_new_proposals(params: AztecModelParams,
                                                 uuid=tx_uuid,
                                                 gas=gas,
                                                 fee=fee,
-                                                score=score)
+                                                score=score,
+                                                size=size,
+                                                public_composition=public_share)
 
                         new_proposals[tx_uuid] = new_proposal
                     else:
