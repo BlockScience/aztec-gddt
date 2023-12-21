@@ -88,6 +88,8 @@ SINGLE_RUN_PARAMS = AztecModelParams(label='default',
                                      tx_proof_reveal_probability=0.15, # XXX
                                      rollup_proof_reveal_probability=0.1, # XXX
                                      commit_bond_reveal_probability=0.4, # XXX
+                                     gas_threshold_for_tx=70, # HACK
+                                     blob_gas_threshold_for_tx=50, # HACK
                                      proving_marketplace_usage_probability=0.5, # XXX
                                      
                                      rewards_to_provers=0.495, # XXX
