@@ -60,7 +60,7 @@ def add_suf(variable: str, default_value=0.0) -> Callable:
 ## to any particular phase.          ##
 #######################################
 
-def p_evolve_time(params: AztecModelParams, _2, _3, _4) -> SignalTime:
+def p_evolve_time(params: AztecModelParams, _2, _3, state: AztecModelState) -> SignalTime:
     """Policy function giving the change in number of blocks. 
 
     Args:
@@ -70,7 +70,7 @@ def p_evolve_time(params: AztecModelParams, _2, _3, _4) -> SignalTime:
         Signal: 
             a dictionary of variables that can be used in an update
     """
-    return {'delta_blocks': params['timestep_in_blocks']}
+    return {'delta_blocks': params['timestep_in_blocks'] + state['advance_l1_blocks']}
 
 
 def s_block_time(params: AztecModelParams, _2, _3,
@@ -101,6 +101,22 @@ def s_delta_blocks(_1, _2, _3, _4, signal: SignalTime) -> VariableUpdate:
         VariableUpdate
     """
     return ('delta_blocks', signal.get('delta_blocks', 0))
+
+def s_reset_advance(params: AztecModelParams, _2, _3,
+                 state: AztecModelState,
+                 signal: SignalTime) -> VariableUpdate:
+    """State update function advancing block time.  
+
+    Args:
+         params (AztecModelParams): The current parameters of the model.
+         state (AztecModelState): The current state of the model.
+         signal (Signal): The Signal, generated in p_evolve_time, of how many blocks to advance time. 
+
+    Returns:
+        VariableUpdate:
+            A two-element tuple that all state update functions must return.
+    """
+    return ('advance_l1_blocks', 0)  # type: ignore
 
 
 def s_current_process_time(_1,
@@ -234,7 +250,8 @@ def p_select_proposal(params: AztecModelParams,
         pass
     else:
         if process.phase == SelectionPhase.pending_proposals:
-            if process.duration_in_current_phase > params['phase_duration_proposal']:
+            remaining_time = params['phase_duration_proposal'] - process.duration_in_current_phase
+            if remaining_time < 0:
                 # TODO: filter out invalid proposals
                 # J: Which invalid proposals are we expecting here? Anything "spam/invalid" would just be ignored, not sure we need to sim that, unless for blockspace
                 # TODO: Above seems incorrect - if duration of phase exceeds duration, the next phase starts.
@@ -256,11 +273,12 @@ def p_select_proposal(params: AztecModelParams,
                         uncle_proposals = []
 
                     updated_process = copy(process)
-                    updated_process.phase = SelectionPhase.pending_reveal
+                    updated_process.phase = SelectionPhase.pending_commit_bond
                     updated_process.duration_in_current_phase = 0
-                    updated_process.leading_sequencer = winner_proposal.uuid
+                    updated_process.leading_sequencer = winner_proposal.who
                     updated_process.uncle_sequencers = [
-                        p.uuid for p in uncle_proposals]
+                        p.who for p in uncle_proposals]
+                    updated_process.tx_winning_proposal = winner_proposal.uuid
                 else:
                     # TODO: check what happens if there are no proposals
                     updated_process = copy(process)
@@ -281,21 +299,24 @@ def p_commit_bond(params: AztecModelParams,
     process: Process | None = state['current_process']
     updated_process: Optional[Process] = None
     new_transactions = list()
+    advance_blocks = 0
 
     if process is None:
         pass
     else:
         if process.phase == SelectionPhase.pending_commit_bond:
+            remaining_time = params['phase_duration_commit_bond'] - process.duration_in_current_phase
             # Move to Proof Race mode if duration is expired
-            if process.duration_in_current_phase > params['phase_duration_commit_bond']:
+            if remaining_time < 0:
                 updated_process = copy(process)
                 updated_process.phase = SelectionPhase.proof_race
                 updated_process.entered_race_mode = True
                 updated_process.duration_in_current_phase = 0
             else:
                 # If duration is not expired, do  a trial to see if bond is commited
-                if bernoulli_trial(probability=params['commit_bond_reveal_probability']) is True:
+                if bernoulli_trial(probability=params['commit_bond_reveal_probability']) is True and (state['gas_fee_l1'] <= params['gas_threshold_for_tx']):
                     updated_process = copy(process)
+                    advance_blocks = remaining_time
                     updated_process.phase = SelectionPhase.pending_reveal
                     updated_process.duration_in_current_phase = 0
 
@@ -313,19 +334,16 @@ def p_commit_bond(params: AztecModelParams,
                         prover = updated_process.leading_sequencer
                         bond_amount = 0.0  # TODO: open question
 
-                    if state['gas_fee_l1'] <= params['gas_threshold_for_tx']:
-                        tx = CommitmentBond(who=updated_process.leading_sequencer,
-                                            when=state['time_l1'],
-                                            uuid=uuid4(),
-                                            gas=gas,
-                                            fee=fee,
-                                            proposal_tx_uuid=proposal_uuid,
-                                            prover_uuid=prover,
-                                            bond_amount=bond_amount)
-                        new_transactions.append(tx)
-                        updated_process.tx_commitment_bond = tx.uuid
-                    else:
-                        pass
+                    tx = CommitmentBond(who=updated_process.leading_sequencer,
+                                        when=state['time_l1'],
+                                        uuid=uuid4(),
+                                        gas=gas,
+                                        fee=fee,
+                                        proposal_tx_uuid=proposal_uuid,
+                                        prover_uuid=prover,
+                                        bond_amount=bond_amount)
+                    new_transactions.append(tx)
+                    updated_process.tx_commitment_bond = tx.uuid
                 else:
                     # else, nothing happens
                     pass
@@ -333,7 +351,8 @@ def p_commit_bond(params: AztecModelParams,
             pass
 
     return {'update_process': updated_process,
-            'new_transactions': new_transactions}
+            'new_transactions': new_transactions,
+            'advance_l1_blocks': advance_blocks}
 
 
 def p_reveal_content(params: AztecModelParams,
@@ -349,6 +368,7 @@ def p_reveal_content(params: AztecModelParams,
     # Note: Advances state of Process in reveal phase that have revealed block content.
     process = state['current_process']
     updated_process: Optional[Process] = None
+    advance_blocks = 0
     new_transactions = list()
 
     if process is None:
@@ -356,15 +376,17 @@ def p_reveal_content(params: AztecModelParams,
     else:
         if process.phase == SelectionPhase.pending_reveal:
             # If the process has blown the phase duration
-            if process.duration_in_current_phase > params['phase_duration_reveal']:
+            remaining_time = params['phase_duration_reveal'] - process.duration_in_current_phase
+            if remaining_time < 0:
                 updated_process = copy(process)
                 updated_process.phase = SelectionPhase.proof_race
                 updated_process.entered_race_mode = True
                 updated_process.duration_in_current_phase = 0
                 # TODO: To allow for fixed phase time, we might just add another check here - if duration > params and if content is not revealed -> proof_race
             else:
-                if bernoulli_trial(probability=params['block_content_reveal_probability']) is True:
+                if bernoulli_trial(probability=params['block_content_reveal_probability']) is True and (state['gas_fee_l1'] <= params['gas_threshold_for_tx']) and (state['gas_fee_blob'] <= params['blob_gas_threshold_for_tx']):
                     updated_process = copy(process)
+                    advance_blocks = remaining_time
                     updated_process.phase = SelectionPhase.pending_rollup_proof
                     updated_process.duration_in_current_phase = 0
 
@@ -380,29 +402,28 @@ def p_reveal_content(params: AztecModelParams,
                     tx_avg_fee_per_size = params['tx_estimators'].transaction_average_fee_per_size(
                         state)
 
-                    if state['gas_fee_l1'] <= params['gas_threshold_for_tx'] & state['gas_fee_blob'] <= params['blob_gas_threshold_for_tx']:
-                        tx = ContentReveal(who=who,
-                                        when=state['time_l1'],
-                                        uuid=uuid4(),
-                                        gas=gas,
-                                        fee=fee,
-                                        blob_gas=blob_gas,
-                                        blob_fee=blob_fee,
-                                        transaction_count=tx_count,
-                                        transaction_avg_size=tx_avg_size,
-                                        transaction_avg_fee_per_size=tx_avg_fee_per_size)
+                    tx = ContentReveal(who=who,
+                                    when=state['time_l1'],
+                                    uuid=uuid4(),
+                                    gas=gas,
+                                    fee=fee,
+                                    blob_gas=blob_gas,
+                                    blob_fee=blob_fee,
+                                    transaction_count=tx_count,
+                                    transaction_avg_size=tx_avg_size,
+                                    transaction_avg_fee_per_size=tx_avg_fee_per_size)
 
-                        new_transactions.append(tx)
-                        updated_process.tx_content_reveal = tx.uuid
-                    else:
-                        pass
+                    new_transactions.append(tx)
+                    updated_process.tx_content_reveal = tx.uuid
+
                 else:
                     pass
         else:
             pass
 
     return {'update_process': updated_process,
-            'new_transactions': new_transactions}
+            'new_transactions': new_transactions,
+            'advance_l1_blocks': advance_blocks}
 
 
 def p_submit_proof(params: AztecModelParams,
@@ -415,18 +436,21 @@ def p_submit_proof(params: AztecModelParams,
     process = state['current_process']
     updated_process: Optional[Process] = None
     new_transactions = list()
+    advance_blocks = 0
 
     if process is None:
         pass
     else:
         if process.phase == SelectionPhase.pending_rollup_proof:
+            remaining_time = params['phase_duration_rollup'] - process.duration_in_current_phase
             if process.duration_in_current_phase > params['phase_duration_rollup']:
                 updated_process = copy(process)
                 updated_process.phase = SelectionPhase.skipped  # TODO: confirm
                 updated_process.duration_in_current_phase = 0
             else:
-                if process.rollup_proof_is_commited:
+                if bernoulli_trial(probability=params['rollup_proof_reveal_probability']) and (state['gas_fee_l1'] <= params['gas_threshold_for_tx']):
                     updated_process = copy(process)
+                    advance_blocks = remaining_time
                     updated_process.phase = SelectionPhase.finalized
                     updated_process.duration_in_current_phase = 0
 
@@ -434,24 +458,23 @@ def p_submit_proof(params: AztecModelParams,
                     gas: Gas = params['gas_estimators'].content_reveal(state)
                     fee: Gwei = gas * state['gas_fee_l1']
 
-                    if state['gas_fee_l1'] <= params['gas_threshold_for_tx']:
-                        tx = RollupProof(who=who,
-                                        when=state['time_l1'],
-                                        uuid=uuid4(),
-                                        gas=gas,
-                                        fee=fee)
+                    tx = RollupProof(who=who,
+                                    when=state['time_l1'],
+                                    uuid=uuid4(),
+                                    gas=gas,
+                                    fee=fee)
 
-                        new_transactions.append(tx)
-                        updated_process.tx_rollup_proof = tx.uuid
-                    else:
-                        pass
+                    new_transactions.append(tx)
+                    updated_process.tx_rollup_proof = tx.uuid
+
                 else:
                     pass  # Nothing changes if no valid rollup
         else:
             pass
 
     return {'update_process': updated_process,
-            'new_transactions': new_transactions}
+            'new_transactions': new_transactions,
+            'advance_l1_blocks': advance_blocks}
 
 
 def p_race_mode(params: AztecModelParams,
@@ -531,7 +554,7 @@ def s_transactions_new_proposals(params: AztecModelParams,
                     size = params['tx_estimators'].proposal_average_size(state)
                     public_share = 0.5 # HACK
 
-                    if state['gas_fee_l1'] <= params['gas_threshold_for_tx']:
+                    if (state['gas_fee_l1'] <= params['gas_threshold_for_tx']):
                         new_proposal = Proposal(who=potential_proposer,
                                                 when=state['time_l1'],
                                                 uuid=tx_uuid,
@@ -554,6 +577,10 @@ def s_transactions_new_proposals(params: AztecModelParams,
     new_transactions = {**new_transactions, **new_proposals}
 
     return ('transactions', new_transactions)
+
+
+def s_advance_blocks(_1, _2, _3, _4, signal: SignalEvolveProcess) -> VariableUpdate:
+    return ('advance_l1_blocks', signal.get('advance_blocks', 0))
 
 
 def s_transactions(params: AztecModelParams,
@@ -640,6 +667,11 @@ def s_agents_rewards(params: AztecModelParams,
         total_rewards = signal.get(
             'fee_cashback', 0.0) + signal.get('block_reward', 0.0)
         agents: dict[AgentUUID, Agent] = state['agents'].copy()
+
+
+        relays = [a_id for (a_id, a) in state['agents'].items() if a.is_relay]
+
+        relay_uuid: AgentUUID = choice(relays)
 
         rewards_relay = total_rewards * params['rewards_to_relay']
         rewards_prover = total_rewards * params['rewards_to_provers']
