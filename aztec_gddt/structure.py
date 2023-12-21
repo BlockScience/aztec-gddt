@@ -36,7 +36,6 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
             'reveal_block_content': p_reveal_content,
             'submit_commit_bond': p_commit_bond,
             'submit_block_proof': p_submit_proof,
-            'finalize_block': p_finalize_block,
             'submit_block_proof_content_race': p_race_mode
         },
         'variables': {
