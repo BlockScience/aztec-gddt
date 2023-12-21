@@ -18,6 +18,18 @@ INITIAL_AGENTS: list[Agent] = [Agent(uuid=uuid4(),
 
 AGENTS_DICT: dict[AgentUUID, Agent] = {a.uuid: a for a in INITIAL_AGENTS}
 
+INITIAL_CUMM_REWARDS = 10000
+INITIAL_CUMM_CASHBACK = 50
+INITIAL_CUMM_BURN = 50
+INITIAL_SUPPLY = TokenSupply(
+    circulating=sum(a.balance for a in INITIAL_AGENTS),
+    staked=sum(a.staked_amount for a in INITIAL_AGENTS),
+    burnt=INITIAL_CUMM_BURN,
+    issued=INITIAL_CUMM_REWARDS+INITIAL_CUMM_CASHBACK
+)
+
+
+
 INITIAL_STATE = AztecModelState(time_l1=0,
                                 delta_l1_blocks=0,
 
@@ -29,8 +41,10 @@ INITIAL_STATE = AztecModelState(time_l1=0,
                                 gas_fee_blob=30,
 
                                 finalized_blocks_count=0,
-                                disbursed_block_rewards=0.0,
-                                disbursed_fee_cashback=0.0
+                                cumm_block_rewards=INITIAL_CUMM_REWARDS,
+                                cumm_fee_cashback=INITIAL_CUMM_CASHBACK,
+                                cumm_burn=INITIAL_CUMM_BURN,
+                                token_supply=INITIAL_SUPPLY
                                 )
 
 # HACK: Gas is 1 for all transactions
@@ -64,7 +78,6 @@ SINGLE_RUN_PARAMS = AztecModelParams(label='default',
                                      phase_duration_reveal=5,
                                      phase_duration_commit_bond=5,
                                      phase_duration_rollup=25,
-                                     phase_duration_finalize=3,
                                      phase_duration_race=25,
 
                                      stake_activation_period=40,
