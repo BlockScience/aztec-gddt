@@ -16,6 +16,16 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
         }
     },
     {
+        'label': 'Exogenous Processes',
+        'policies': {
+
+        },
+        'variables': {
+            'gas_fee_l1': s_gas_fee_l1,
+            'gas_fee_blob': s_gas_fee_blob
+        }
+    },
+    {
         'label': 'Agent Actions',
         'policies': {
             # TODO Possibly add policies for the users triggering the relevant events
