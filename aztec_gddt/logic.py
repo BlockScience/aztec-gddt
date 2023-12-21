@@ -156,7 +156,6 @@ def p_init_process(params: AztecModelParams,
     else:
         # Else, check if the current one is finalized
         do_init_process = state['current_process'].phase == SelectionPhase.finalized
-        do_init_process |= state['current_process'].phase == SelectionPhase.finalized_without_rewards
         do_init_process |= state['current_process'].phase == SelectionPhase.skipped
 
     #######################################
@@ -174,7 +173,6 @@ def p_init_process(params: AztecModelParams,
                               block_content_is_revealed=False,
                               commit_bond_is_put_down=False, 
                               rollup_proof_is_commited=False,
-                              finalization_tx_is_submitted=False,
                               process_aborted=False)
     else:
         new_process = None
@@ -337,7 +335,7 @@ def p_reveal_content(params: AztecModelParams,
             else:
                 if bernoulli_trial(probability=params['block_content_reveal_probability']) is True:
                     updated_process = copy(process)
-                    updated_process.phase = SelectionPhase.pending_finalization
+                    updated_process.phase = SelectionPhase.pending_rollup_proof
                     updated_process.duration_in_current_phase = 0
 
                     who = updated_process.leading_sequencer # XXX
@@ -396,7 +394,7 @@ def p_submit_proof(params: AztecModelParams,
             else:
                 if process.rollup_proof_is_commited:
                     updated_process = copy(process)
-                    updated_process.phase = SelectionPhase.pending_finalization
+                    updated_process.phase = SelectionPhase.finalized
                     updated_process.duration_in_current_phase = 0
 
                     who = updated_process.leading_sequencer # XXX
@@ -422,45 +420,6 @@ def p_submit_proof(params: AztecModelParams,
             'new_transactions': new_transactions}
 
 
-def p_finalize_block(params: AztecModelParams,
-                     _2,
-                     _3,
-                     state: AztecModelState) -> SignalEvolveProcess:
-    """
-
-    """
-    # TODO
-    # For every process on the `pending_finalization` phase, do:
-    # - If the process has blown the phase duration,
-    # then transition to finalized w/o rewards.
-    # - Else, check if the finalize transaction was submitted.
-    # If yes, advance to the next phase. Else, nothing happens
-
-    process = state['current_process']
-    updated_process: Optional[Process] = None
-
-    if process is None:
-        pass
-    else:
-        if process.phase == SelectionPhase.pending_finalization:
-            if process.duration_in_current_phase > params['phase_duration_finalize']:
-                updated_process = copy(process)
-                updated_process.phase = SelectionPhase.finalized_without_rewards
-                updated_process.duration_in_current_phase = 0
-            else:
-                if process.finalization_tx_is_submitted:
-                    updated_process = copy(process)
-                    updated_process.phase = SelectionPhase.finalized
-                    updated_process.duration_in_current_phase = 0
-                    # TODO: may add reward logic?
-                else:
-                    pass
-        else:
-            pass
-
-    return {'update_process': updated_process}
-
-
 def p_race_mode(params: AztecModelParams,
                      _2,
                      _3,
@@ -479,7 +438,7 @@ def p_race_mode(params: AztecModelParams,
             else:
                 if process.block_content_is_revealed & process.rollup_proof_is_commited:
                     updated_process = copy(process)
-                    updated_process.phase = SelectionPhase.pending_finalization
+                    updated_process.phase = SelectionPhase.finalized
                     updated_process.duration_in_current_phase = 0
                     # NOTE: this logic may be changed in the future
                     # to take into account the racing dynamics
@@ -602,7 +561,6 @@ def p_fee_cashback(params: AztecModelParams,
         total_fees += txs[p.tx_content_reveal].fee
         total_fees += txs[p.tx_rollup_proof].fee
         total_fees += txs[p.tx_commitment_bond].fee
-        total_fees += txs[p.tx_finalization].fee
 
         # Blob Fees
         total_fees += txs[p.tx_content_reveal].blob_fee # type: ignore

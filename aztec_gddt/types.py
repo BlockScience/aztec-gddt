@@ -48,19 +48,14 @@ class TransactionL1():
 
 # Types for representing entities
 
-class SelectionPhase(IntEnum):  # XXX
-    # Expected phases
+class SelectionPhase(IntEnum): 
     pending_proposals = 1
     pending_commit_bond = 2
     pending_reveal = 3
     pending_rollup_proof = 4
-    pending_finalization = 5
-    finalized = 6
-
-    # Non-expected phases
+    finalized = 5
     skipped = -1
-    finalized_without_rewards = -2  # XXX
-    proof_race = -3
+    proof_race = -2
 @dataclass
 class Process:
     uuid: ProcessUUID
@@ -75,7 +70,6 @@ class Process:
     tx_commitment_bond: Optional[TxUUID] = None
     tx_content_reveal: Optional[TxUUID] = None
     tx_rollup_proof: Optional[TxUUID] = None
-    tx_finalization: Optional[TxUUID] = None
 
     # Agent-related info
     leading_sequencer: Optional[AgentUUID] = None
@@ -86,7 +80,6 @@ class Process:
     block_content_is_revealed: bool = False
     commit_bond_is_put_down: bool = False #Commitment bond is put down / rename from proof 
     rollup_proof_is_commited: bool = False
-    finalization_tx_is_submitted: bool = False
     entered_race_mode: bool = False
     process_aborted: bool = False
 
@@ -231,7 +224,6 @@ class AztecModelParams(TypedDict):
     phase_duration_reveal: L1Blocks
     phase_duration_commit_bond: L1Blocks
     phase_duration_rollup: L1Blocks
-    phase_duration_finalize: L1Blocks
     phase_duration_race: L1Blocks
 
     stake_activation_period: L1Blocks  # XXX
