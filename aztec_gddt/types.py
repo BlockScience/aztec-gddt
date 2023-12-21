@@ -20,6 +20,7 @@ AgentUUID = Annotated[object, 'uuid']
 TxUUID = Annotated[object, 'uuid']
 ProcessUUID = Annotated[object, 'uuid']
 
+Bytes = Annotated[int, 'bytes']
 Gas = Annotated[int, 'gas']
 Gwei = Annotated[int, 'gwei']
 BlobGas = Annotated[int, 'blob_gas']
@@ -148,6 +149,8 @@ class Proposal(TransactionL1):
     L1T_proposer_submit_proposal event.
     """
     score: FiniteFloat
+    size: Bytes
+    public_composition: Percentage
 
     # TODO: add bond_uiid: /generaluserUUID
     # TODO: before, we only needed to track proposals, as that was the only way a block came into existence.
@@ -234,7 +237,7 @@ class L1GasEstimators():
 @dataclass
 class UserTransactionEstimators():
     transaction_count: BaseIntEstimator
-    transaction_average_size: BaseIntEstimator
+    proposal_average_size: BaseIntEstimator
     transaction_average_fee_per_size: BaseFloatEstimator
 
 

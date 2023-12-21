@@ -59,7 +59,7 @@ GAS_ESTIMATORS = L1GasEstimators(
 # HACK: Gas is 1 for all transactions
 TX_ESTIMATORS = UserTransactionEstimators(
     transaction_count=lambda _: 1,
-    transaction_average_size=lambda _: 100,
+    proposal_average_size=lambda _: 100,
     transaction_average_fee_per_size=lambda _: 50.5
 )
 
