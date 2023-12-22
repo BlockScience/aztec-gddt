@@ -51,9 +51,6 @@ The following agents are fundamental to understanding the network:
 
 #### Phases
 
-TODO approve as acceptable
-TODO approve as final
-
 The process of performing Aztec's fundamental activities proceeds in a few well-defined phases.
 
 **Ongoing Processes**
@@ -97,7 +94,7 @@ At the end of this process, there are two possible outcomes.
 
 #### Purpose of this Model
 
-A healthy Aztec network will have reliable throughput, consistently recording blocks on the underlying Layer 1. Our simulation model is intended to offer insight into how the Aztec network could perform in a variety of situations. Of particular interest are situations where the network's Agents act in ways that are not in the best interests of the network. Network agents may be unable to perform their role in a specific moment, due to either simple inability or economic incentives. It can also be used to explore the impact of L1 actors, who may be inclined to censor Aztec transactions. This insight can aid decision-makers in the Aztec network with respect to system attributes, including: economic incentive structure, high-risk scenarios to monitor, and other important questions. 
+A healthy Aztec network will be very lively, consistently recording blocks on the underlying Layer 1. Additionally, it will have high throughput: blocks will contain a large number of transactions, according to user demand. Our simulation model is intended to offer insight into how the Aztec network may perform under a variety of circumstances. Of particular interest are situations where the network's Agents act in ways that are not in the best interests of the network. Network agents may be unable to perform their role in a specific moment, due to either simple inability or economic incentives. It can also be used to explore the impact of L1 actors, who may be inclined to censor Aztec transactions. This insight can aid decision-makers in the Aztec network with respect to system attributes, including: economic incentive structure, high-risk scenarios to monitor, and other important questions. 
 
 ## Model Overview
 
@@ -106,6 +103,15 @@ TODO approve as final
 TODO how to describe cadCAD 
 
 The simulation model is written in cadCAD. In this section we will describe the variables and parameters recorded in the simulation.  We will also describe how various aspects of the cadCAD model structure correspond to specific parts of the Aztec system in general, and the Fernet model in particular. 
+
+There are five important aspects of a cadCAD mode:
+* Model Variables
+* Model Parameters
+* Partial State Update Blocks
+* Policies
+* State Update Functions
+
+For more general information about the purpose each piece serves in a cadCAD model, please see [this overview](https://github.com/cadCAD-org/cadCAD/blob/master/documentation/README.md). 
 
 ### Model Variables
 
