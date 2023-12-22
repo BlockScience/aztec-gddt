@@ -1,4 +1,4 @@
-# aztec_gddt
+# Aztec Granular Design Digital Twin
 
 <img src="media/cover.jpg" style="width:80%;display:block;margin-left: auto;margin-right: auto;"/>
 <i style="font-size:0.6em; text-align:center;display: block;">Cactus on the Madrid Botanical Garden, Danilo L. Bernardineli, 2023</i>
@@ -14,9 +14,6 @@ There are 3 main ways to interact with the model:
 
 ## Introduction
 
-TODO approve as acceptable
-TODO approve as final
-
 This repository provides a cadCAD simulation model of the Aztec system, focusing on the design and implementation of the Fernet Sequencer Selection Protocol. The goal of the model is to understand the effect of design parameters and agent behaviors on the health of the Aztec network, as measured through various Key Performance Indicators (KPIs).
 
 This document provides:
@@ -24,10 +21,7 @@ This document provides:
 * mathematical and software specifications for the cadCAD simulation model for the system, and
 * information about how to use the model. 
 
-## Overview of Aztec System
-
-TODO approve as acceptable
-TODO approve as final 
+## Overview of Aztec System 
 
 The stated goal of [Aztec Network](https://aztec.network/) is "A no-compromises privacy-first Layer 2 on Ethereum."  Aztec uses zero-knowledge infrastructure and economic incentives to publish Layer 2 (L2) transactions, batched into single zero-knowledge "rollup" proofs, on the Layer 1 (L1) Ethereum blockchain. Achieving this goal sustainably and reliably without centralized intermediaries depends on Agents playing different roles through a sequence of phases. 
 
