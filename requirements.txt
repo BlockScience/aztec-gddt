@@ -11,3 +11,4 @@ numpy
 joblib
 dataclasses_json
 scipy
+pydantic
