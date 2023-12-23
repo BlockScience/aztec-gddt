@@ -1,6 +1,7 @@
 cadCAD-legacy-devel
 cadCAD-tools
 millify
+matplotlib
 numpy
 pandas
 ruamel.yaml
@@ -12,3 +13,4 @@ joblib
 dataclasses_json
 scipy
 pydantic
+seaborn
