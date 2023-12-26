@@ -119,9 +119,6 @@ For more general information about the purpose each piece serves in a cadCAD mod
 
 All variables of the Aztec system recorded in the model are implemented in an `AztecModelState` class. The model has the following attributes: 
 
-* `example_var`: an example of a variable that a model might have
-
-
 **Time Progression Variables** 
 * `time_l1`: the current time as measured in L1 blocks 
 * `delta_l1_blocks`: TODO
@@ -136,7 +133,7 @@ All variables of the Aztec system recorded in the model are implemented in an `A
 * `gas_fee_l1`: TODO
 * `gas_fee_blob`: TODO
 
-**Metrics*
+**Metrics**
 * `finalized_blocks_count`: TODO
 * `cumm_block_rewards`: Tokens
 * `cumm_fee_cashback`: Tokens
