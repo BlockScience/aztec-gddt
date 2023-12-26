@@ -94,7 +94,9 @@ At the end of this process, there are two possible outcomes.
 
 #### Purpose of this Model
 
-A healthy Aztec network will be very lively, consistently recording blocks on the underlying Layer 1. Additionally, it will have high throughput: blocks will contain a large number of transactions, according to user demand. Our simulation model is intended to offer insight into how the Aztec network may perform under a variety of circumstances. Of particular interest are situations where the network's Agents act in ways that are not in the best interests of the network. Network agents may be unable to perform their role in a specific moment, due to either simple inability or economic incentives. It can also be used to explore the impact of L1 actors, who may be inclined to censor Aztec transactions. This insight can aid decision-makers in the Aztec network with respect to system attributes, including: economic incentive structure, high-risk scenarios to monitor, and other important questions. 
+A healthy Aztec network will be *lively*, consistently recording blocks on the underlying Layer 1. Additionally, it will have high *throughput*: blocks will contain a large number of transactions, according to user demand. 
+
+Our simulation model is intended to offer insight into how the Aztec network may perform under a variety of circumstances. Of particular interest are situations where the network's Agents act in ways that are not in the best interests of the network, for economic or other reasons. Network agents may be unable to perform their role in a specific moment, due to either simple inability or economic incentives. It can also be used to explore the impact of L1 actors, who may be inclined to censor Aztec transactions. This insight can aid decision-makers in the Aztec network with respect to system attributes, including: economic incentive structure, high-risk scenarios to monitor, and other important questions. 
 
 ## Model Overview
 
@@ -117,66 +119,93 @@ For more general information about the purpose each piece serves in a cadCAD mod
 
 All variables of the Aztec system recorded in the model are implemented in an `AztecModelState` class. The model has the following attributes: 
 
-TODO bullet point list of attributes
-* `example_var`: an example of a variable that a model might have
+**Time Progression Variables** 
+* `time_l1`: the current time as measured in L1 blocks 
+* `delta_l1_blocks`: TODO
+* `advance_l1_blocks`: TODO
 
-### Model  Parameters
+**Agents Variables** 
+* `agents`: a dictionary containing IDs of agents and the agents themselves
+
+**Process State Variables** 
+* `current_process`: TODO
+* `transactions`: TODO
+* `gas_fee_l1`: TODO
+* `gas_fee_blob`: TODO
+
+**Metrics**
+* `finalized_blocks_count`: TODO
+* `cumm_block_rewards`: Tokens
+* `cumm_fee_cashback`: Tokens
+* `cumm_burn`: Tokens
+* `token_supply`: TokenSupply
+
+**Estimator Methods**
+* `GasEstimator`: 
+* `BlobGasEstimator`:
+* `BaseIntEstimator`:
+* `BaseFloatEstimator`:
+
+### Model Parameters
 
 Parameters represent aspects of the simulation which are fixed before the beginning of a single model run. 
 * `example_par`: an example of a parameter that can be set
 
-## cadCAD Model Overview 
-TODO: Link to Readme or copy over?
+**Logistics**
+* `label`: TODO
+* `timestep_in_blocks`: TODO
+
+**Economic Parameters**
+* `uncle_count`: TODO
+* `reward_per_block`: TODO
+* `fee_subsidy_fraction`: TODO
+
+**Time Variables** 
+* `phase_duration_proposal`: TODO
+* `phase_duration_reveal`: TODO
+* `phase_duration_commit_bond`: TODO
+* `phase_duration_rollup`: TODO
+* `phase_duration_race`: TODO
+
+**Time Periods for System Actions**
+* `stake_activation_period`: TODO  # XXX
+* `unstake_cooldown_period`: TODO  # XXX
+
+**Probabilities for Agent Actions**
+ * `block_content_reveal_probability`: the probability that the Lead Sequencer (does not reveal?) reveals the content. 
+* `tx_proof_reveal_probability`: the probability that the Lead Sequencer (does not reveal? ) reveals their proof, thus preventing the Provers from doing their work. 
+* `rollup_proof_reveal_profitability`: the probability that the provers (don't send?) send a rollup proof to the Lead Sequencer, preventing the Sequencer from submitting.
+* `commit_bond_reveal_profitability`: the probability that at least one prover puts up a bond for proving, in which case the Lead Sequencer loses their privilege and we enter Race Mode. 
+* `proving_marketplace_usage_probability`: TODO. NOTE: 8 think this goes here. 
+
+**Rewards Parameters**
+* `rewards_to_provers`: TODO a percentage of something
+* `rewards_to_relay`: TODO a percentage of something
+
+**Gas Threshold Parameters** 
+* `gas_threshold_for_tx`: Gwei
+* `blob_gas_threshold_for_tx`: Gwei
+
+**Estimators to Use**
+* `gas_estimators`: L1GasEstimators
+* `tx_estimators`: UserTransactionEstimators
 
 ### Partial State Update Blocks 
 
 ### Policies
 
+**NOTE:** 8 don't know that we need to include these 
+
 ### State Update Functions
+**NOTE:** Please consider the below. 
 
-
-
-<a name="overview-of-aztec-system"></a>
 
 
 ## Technical Details 
+
+In this section we ensure that the reader will be able to run the model on their own computer, if desired. 
+
 ### How to Install cadCAD
-### Project Directory Structure
-
-## Future Work
-
-## References 
-may be unnecessary due to hyperlinks
--->
-
-<--
-
- # Raw Materials 
-TODO: Take relevant parts from this earlier draft below and use it to fill in the final draft. 
-Note: Jakob took out most of below, as it was used above. 
-
-# Software Stuff
-
-## File structure
-
-```
-├── README.md
-├── aztec_gddt: the `cadCAD` model as encapsulated by a Python Module
-│   ├── __init__.py
-│   ├── __main__.py
-│   ├── experiment.py: Code for running experiments
-│   ├── logic.py: All logic for substeps
-│   ├── params.py: System parameters
-│   ├── structure.py: The PSUB structure
-│   └── types.py: Types used in model
-├── notebooks: Notebooks for aiding in development
-├── requirements-dev.txt: Dev requirements
-├── requirements.txt: Production requirements
-```
-
-## What is cadCAD
-
-### Installing cadCAD for running this repo
 
 #### 1. Pre-installation Virtual Environments with [`venv`](https://docs.python.org/3/library/venv.html) (Optional):
 It's a good package managing practice to create an easy to use virtual environment to install cadCAD. You can use the built in `venv` package.
@@ -209,8 +238,63 @@ $ pip3 install cadcad
 **Install all packages with requirement.txt**
 ```bash
 $ pip3 install -r requirements.txt
+```
 
-]: #
+### Demonstration Notebook
+
+TODO instructions on using the notebooks to gain insight, and modifying them for experiments. 
+
+### Project Directory Structure
+
+```
+├── README.md
+├── LICENSE
+├── aztec_gddt: the `cadCAD` model as encapsulated by a Python Module
+│   ├── __init__.py
+│   ├── __main__.py
+│   ├── experiment.py: Code for running experiments
+│   ├── logic.py: All logic for substeps
+│   ├── params.py: System parameters
+│   ├── structure.py: The PSUB structure
+│   └── types.py: Types used in model
+├── media: TODO images used in the repo
+├── notebooks: Notebooks for aiding in development
+├── tests: Tests for ensuring correct functionality
+├── requirements.txt: Production requirements
+```
+
+## Future Work
+
+-->
+
+<--
+
+ # Raw Materials 
+TODO: Take relevant parts from this earlier draft below and use it to fill in the final draft. 
+Note: Jakob took out most of below, as it was used above. 
+
+# Software Stuff
+
+## File structure
+
+```
+├── README.md
+├── LICENSE
+├── aztec_gddt: the `cadCAD` model as encapsulated by a Python Module
+│   ├── __init__.py
+│   ├── __main__.py
+│   ├── experiment.py: Code for running experiments
+│   ├── logic.py: All logic for substeps
+│   ├── params.py: System parameters
+│   ├── structure.py: The PSUB structure
+│   └── types.py: Types used in model
+├── media: TODO images used in the repo
+├── notebooks: Notebooks for aiding in development
+├── tests: Tests for ensuring correct functionality
+├── requirements.txt: Production requirements
+```
+
+
 
 
  
