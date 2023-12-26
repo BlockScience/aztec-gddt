@@ -115,16 +115,16 @@ SINGLE_RUN_PARAMS = AztecModelParams(label='default',
 
 
                                      # Behavioral Parameters
-                                     proposal_probability_per_user_per_block=0.3, # XXX
-                                     block_content_reveal_probability=0.3, # XXX
-                                     tx_proof_reveal_probability=0.3, # XXX
-                                     rollup_proof_reveal_probability=0.3, # XXX
-                                     commit_bond_reveal_probability=0.3, # XXX
+                                     proposal_probability_per_user_per_block=0.2, # XXX
+                                     block_content_reveal_probability=0.2, # XXX
+                                     tx_proof_reveal_probability=0.2, # XXX
+                                     rollup_proof_reveal_probability=0.2, # XXX
+                                     commit_bond_reveal_probability=0.2, # XXX
                                      gas_threshold_for_tx=70, # HACK
                                      blob_gas_threshold_for_tx=50, # HACK
                                      proving_marketplace_usage_probability=0.3, # XXX
                                      
-                                     rewards_to_provers=0.495, # XXX
+                                     rewards_to_provers=0.3, # XXX
                                      rewards_to_relay=0.01, # XXX
 
                                      gwei_to_tokens=1e-9, 
