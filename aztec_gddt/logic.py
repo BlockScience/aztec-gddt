@@ -501,6 +501,7 @@ def p_race_mode(params: AztecModelParams,
                 state: AztecModelState) -> SignalEvolveProcess:
     process = state['current_process']
     updated_process: Optional[Process] = None
+    new_transactions: list[TransactionL1] = list()
 
     if process is None:
         pass
@@ -511,18 +512,51 @@ def p_race_mode(params: AztecModelParams,
                 updated_process.phase = SelectionPhase.skipped
                 updated_process.duration_in_current_phase = 0
             else:
-                if process.block_content_is_revealed & process.rollup_proof_is_commited:
-                    updated_process = copy(process)
-                    updated_process.phase = SelectionPhase.finalized
-                    updated_process.duration_in_current_phase = 0
-                    # NOTE: this logic may be changed in the future
-                    # to take into account the racing dynamics
-                else:
-                    pass
+                # XXX there is a hard-coded L1 Builder agent
+                # who immediatly ends the race mode.
+                who = 'l1-builder'
+                gas: Gas = params['gas_estimators'].content_reveal(state)
+                fee: Gwei = gas * state['gas_fee_l1']
+                blob_gas: BlobGas = params['gas_estimators'].content_reveal_blob(
+                    state)
+                blob_fee: Gwei = blob_gas * state['gas_fee_blob']
+
+                tx_count = params['tx_estimators'].transaction_count(state)
+                tx_avg_size = int(state['transactions'][process.tx_winning_proposal].size / tx_count) # type: ignore
+                tx_avg_fee_per_size = params['tx_estimators'].transaction_average_fee_per_size(
+                    state)
+                
+                tx_1 = RollupProof(who=who,
+                when=state['time_l1'],
+                uuid=uuid4(),
+                gas=gas,
+                fee=fee)
+
+                tx_2 = ContentReveal(who=who,
+                                when=state['time_l1'],
+                                uuid=uuid4(),
+                                gas=gas,
+                                fee=fee,
+                                blob_gas=blob_gas,
+                                blob_fee=blob_fee,
+                                transaction_count=tx_count,
+                                transaction_avg_size=tx_avg_size,
+                                transaction_avg_fee_per_size=tx_avg_fee_per_size)
+
+                new_transactions.append(tx_1)
+                new_transactions.append(tx_2)
+
+                updated_process = copy(process)
+                updated_process.tx_rollup_proof = tx_1.uuid
+                updated_process.block_content_is_revealed = True
+                updated_process.tx_content_reveal = tx_2.uuid
+                updated_process.phase = SelectionPhase.finalized
+                updated_process.duration_in_current_phase = 0
         else:
             pass
 
-    return {'update_process': updated_process}
+    return {'update_process': updated_process,
+            'new_transactions': new_transactions}
 
 
 def s_process(params: AztecModelParams,
@@ -716,11 +750,10 @@ def s_agents_rewards(params: AztecModelParams,
         rewards_sequencer = total_rewards - (rewards_relay + rewards_prover)
 
         # TODO: How to select the winning sequencer when entering race mode?
-
-        sequencer_uuid = p.leading_sequencer
+        sequencer_uuid = state['transactions'][p.tx_rollup_proof].who
 
         # TODO: add check for whatever the Process went through race-mode or not.
-        if p.entered_race_mode:
+        if not p.entered_race_mode:
             prover_uuid = txs[p.tx_commitment_bond].prover_uuid  # type: ignore
             # TODO: make sure that relays are included. For now, assume no relays
             relay_uuid = sequencer_uuid

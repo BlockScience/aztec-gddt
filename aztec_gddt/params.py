@@ -17,11 +17,21 @@ INITIAL_AGENTS: list[Agent] = [Agent(uuid=uuid4(),
                                for i
                                in range(N_INITIAL_AGENTS)]
 
-INITIAL_AGENTS.append(Agent(uuid=uuid4(),
+# Relay Agent
+INITIAL_AGENTS.append(Agent(uuid='relay',
                             balance=0,
                             is_sequencer=False,
                             is_prover=False,
                             is_relay=True,
+                            staked_amount=0.0))
+
+
+# L1 Builder Agent
+INITIAL_AGENTS.append(Agent(uuid='l1-builder',
+                            balance=0,
+                            is_sequencer=False,
+                            is_prover=False,
+                            is_relay=False,
                             staked_amount=0.0))
 
 AGENTS_DICT: dict[AgentUUID, Agent] = {a.uuid: a for a in INITIAL_AGENTS}
