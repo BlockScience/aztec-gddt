@@ -716,7 +716,7 @@ def p_fee_cashback(params: AztecModelParams,
         total_fees += txs[p.tx_winning_proposal].fee
         total_fees += txs[p.tx_content_reveal].fee
         total_fees += txs[p.tx_rollup_proof].fee
-        total_fees += txs[p.tx_commitment_bond].fee
+        total_fees += txs[p.tx_commitment_bond].fee if p.tx_commitment_bond is not None else 0
 
         # Blob Fees
         total_fees += txs[p.tx_content_reveal].blob_fee  # type: ignore

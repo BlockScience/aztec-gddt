@@ -1,4 +1,5 @@
 from aztec_gddt.logic import *
+from aztec_gddt.types import *
 from copy import deepcopy
 
 AZTEC_MODEL_BLOCKS: list[dict] = [
@@ -75,7 +76,8 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
 
         },
         'variables': {
-            'token_supply': s_token_supply
+            'token_supply': s_token_supply,
+            'finalized_blocks_count': lambda _1, _2, _3, s, _5:  ('finalized_blocks_count', s['finalized_blocks_count'] + 1 if s['current_process'].phase == SelectionPhase.finalized else s['finalized_blocks_count'])
         }
     }
 ]
