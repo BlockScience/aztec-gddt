@@ -296,6 +296,8 @@ class AztecModelParams(TypedDict):
     blob_gas_threshold_for_tx: Gwei
     proving_marketplace_usage_probability: Probability
 
+    gwei_to_tokens: Tokens
+
     rewards_to_provers: Percentage
     rewards_to_relay: Percentage
 
