@@ -294,7 +294,7 @@ def p_select_proposal(params: AztecModelParams,
 
 def p_commit_bond(params: AztecModelParams,
                   _2,
-                  _3,
+                  history: list[list[AztecModelState]],
                   state: AztecModelState) -> SignalEvolveProcess:
     process: Process | None = state['current_process']
     updated_process: Optional[Process] = None
@@ -321,37 +321,46 @@ def p_commit_bond(params: AztecModelParams,
                                     amount=slashed_amount,
                                     kind=TransferKind.slash))
             else:
-                # If duration is not expired, do  a trial to see if bond is commited
-                if bernoulli_trial(probability=params['commit_bond_reveal_probability']) is True and (state['gas_fee_l1'] <= params['gas_threshold_for_tx']):
-                    updated_process = copy(process)
-                    advance_blocks = remaining_time
-                    updated_process.phase = SelectionPhase.pending_reveal
-                    updated_process.duration_in_current_phase = 0
+                # XXX
+                expected_rewards = state['cumm_block_rewards'] - history[-1][0]['cumm_block_rewards']
+                expected_costs = state['cumm_fee_cashback'] - history[-1][0]['cumm_fee_cashback']
+                payoff_reveal = expected_rewards - expected_costs
 
-                    gas: Gas = params['gas_estimators'].commitment_bond(state)
-                    fee = gas * state['gas_fee_l1']
-                    proposal_uuid = updated_process.tx_winning_proposal
+                if payoff_reveal > 0:
+                    # If duration is not expired, do  a trial to see if bond is commited
+                    if bernoulli_trial(probability=params['commit_bond_reveal_probability']) is True and (state['gas_fee_l1'] <= params['gas_threshold_for_tx']):
+                        updated_process = copy(process)
+                        advance_blocks = remaining_time
+                        updated_process.phase = SelectionPhase.pending_reveal
+                        updated_process.duration_in_current_phase = 0
 
-                    if bernoulli_trial(params['proving_marketplace_usage_probability']) is True:
-                        provers: list[AgentUUID] = [
-                            a_id for (a_id, a) in state['agents'].items() if a.is_prover]
-                        # XXX: relays are going to be uniformly sampled
-                        prover: AgentUUID = choice(provers)
-                        bond_amount = 0.0  # TODO: open question - parametrize
+                        gas: Gas = params['gas_estimators'].commitment_bond(state)
+                        fee = gas * state['gas_fee_l1']
+                        proposal_uuid = updated_process.tx_winning_proposal
+
+                        if bernoulli_trial(params['proving_marketplace_usage_probability']) is True:
+                            provers: list[AgentUUID] = [
+                                a_id for (a_id, a) in state['agents'].items() if a.is_prover]
+                            # XXX: relays are going to be uniformly sampled
+                            prover: AgentUUID = choice(provers)
+                            bond_amount = 0.0  # TODO: open question - parametrize
+                        else:
+                            prover = updated_process.leading_sequencer
+                            bond_amount = 0.0  # TODO: open question - parametrize
+
+                        tx = CommitmentBond(who=updated_process.leading_sequencer,
+                                            when=state['time_l1'],
+                                            uuid=uuid4(),
+                                            gas=gas,
+                                            fee=fee,
+                                            proposal_tx_uuid=proposal_uuid,
+                                            prover_uuid=prover,
+                                            bond_amount=bond_amount)
+                        new_transactions.append(tx)
+                        updated_process.tx_commitment_bond = tx.uuid
                     else:
-                        prover = updated_process.leading_sequencer
-                        bond_amount = 0.0  # TODO: open question - parametrize
-
-                    tx = CommitmentBond(who=updated_process.leading_sequencer,
-                                        when=state['time_l1'],
-                                        uuid=uuid4(),
-                                        gas=gas,
-                                        fee=fee,
-                                        proposal_tx_uuid=proposal_uuid,
-                                        prover_uuid=prover,
-                                        bond_amount=bond_amount)
-                    new_transactions.append(tx)
-                    updated_process.tx_commitment_bond = tx.uuid
+                        # Force Race Mode by doing nothing
+                        pass
                 else:
                     # else, nothing happens
                     pass
@@ -366,7 +375,7 @@ def p_commit_bond(params: AztecModelParams,
 
 def p_reveal_content(params: AztecModelParams,
                      _2,
-                     _3,
+                     history: list[list[AztecModelState]],
                      state: AztecModelState) -> SignalEvolveProcess:
     """
     Advances state of Processes that have revealed block content.
@@ -402,38 +411,45 @@ def p_reveal_content(params: AztecModelParams,
                                     amount=slashed_amount,
                                     kind=TransferKind.slash))
             else:
-                if bernoulli_trial(probability=params['block_content_reveal_probability']) is True and (state['gas_fee_l1'] <= params['gas_threshold_for_tx']) and (state['gas_fee_blob'] <= params['blob_gas_threshold_for_tx']):
-                    updated_process = copy(process)
-                    advance_blocks = remaining_time
-                    updated_process.phase = SelectionPhase.pending_rollup_proof
-                    updated_process.duration_in_current_phase = 0
+                # XXX
+                expected_rewards = state['cumm_block_rewards'] - history[-1][0]['cumm_block_rewards']
+                expected_costs = state['cumm_fee_cashback'] - history[-1][0]['cumm_fee_cashback']
+                payoff_reveal = expected_rewards - expected_costs
 
-                    who = updated_process.leading_sequencer  # XXX
-                    gas: Gas = params['gas_estimators'].content_reveal(state)
-                    fee: Gwei = gas * state['gas_fee_l1']
-                    blob_gas: BlobGas = params['gas_estimators'].content_reveal_blob(
-                        state)
-                    blob_fee: Gwei = blob_gas * state['gas_fee_blob']
+                if payoff_reveal > 0:
+                    if bernoulli_trial(probability=params['block_content_reveal_probability']) is True and (state['gas_fee_l1'] <= params['gas_threshold_for_tx']) and (state['gas_fee_blob'] <= params['blob_gas_threshold_for_tx']):
+                        updated_process = copy(process)
+                        advance_blocks = remaining_time
+                        updated_process.phase = SelectionPhase.pending_rollup_proof
+                        updated_process.duration_in_current_phase = 0
 
-                    tx_count = params['tx_estimators'].transaction_count(state)
-                    tx_avg_size = int(state['transactions'][process.tx_winning_proposal].size / tx_count) # type: ignore
-                    tx_avg_fee_per_size = params['tx_estimators'].transaction_average_fee_per_size(
-                        state)
+                        who = updated_process.leading_sequencer  # XXX
+                        gas: Gas = params['gas_estimators'].content_reveal(state)
+                        fee: Gwei = gas * state['gas_fee_l1']
+                        blob_gas: BlobGas = params['gas_estimators'].content_reveal_blob(
+                            state)
+                        blob_fee: Gwei = blob_gas * state['gas_fee_blob']
 
-                    tx = ContentReveal(who=who,
-                                    when=state['time_l1'],
-                                    uuid=uuid4(),
-                                    gas=gas,
-                                    fee=fee,
-                                    blob_gas=blob_gas,
-                                    blob_fee=blob_fee,
-                                    transaction_count=tx_count,
-                                    transaction_avg_size=tx_avg_size,
-                                    transaction_avg_fee_per_size=tx_avg_fee_per_size)
+                        tx_count = params['tx_estimators'].transaction_count(state)
+                        tx_avg_size = int(state['transactions'][process.tx_winning_proposal].size / tx_count) # type: ignore
+                        tx_avg_fee_per_size = params['tx_estimators'].transaction_average_fee_per_size(
+                            state)
 
-                    new_transactions.append(tx)
-                    updated_process.tx_content_reveal = tx.uuid
+                        tx = ContentReveal(who=who,
+                                        when=state['time_l1'],
+                                        uuid=uuid4(),
+                                        gas=gas,
+                                        fee=fee,
+                                        blob_gas=blob_gas,
+                                        blob_fee=blob_fee,
+                                        transaction_count=tx_count,
+                                        transaction_avg_size=tx_avg_size,
+                                        transaction_avg_fee_per_size=tx_avg_fee_per_size)
 
+                        new_transactions.append(tx)
+                        updated_process.tx_content_reveal = tx.uuid
+                    else:
+                        pass # Force race mode by doing nothing
                 else:
                     pass
         else:
