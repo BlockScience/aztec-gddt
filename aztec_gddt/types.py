@@ -248,6 +248,12 @@ class SlashParameters():
     failure_to_reveal_block: Tokens
 
 
+    @property
+    def minimum_stake(self):
+        # XXX
+        return self.failure_to_commit_bond + self.failure_to_reveal_block
+
+
 class AztecModelParams(TypedDict):
     # random_seed: int #Random seed for simulation model variation.
 
