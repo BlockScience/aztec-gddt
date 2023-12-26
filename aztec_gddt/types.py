@@ -90,6 +90,7 @@ class Process:
     # Relevant L1 Transactions
     tx_winning_proposal: Optional[TxUUID] = None
     tx_commitment_bond: Optional[TxUUID] = None
+    
     tx_content_reveal: Optional[TxUUID] = None
     tx_rollup_proof: Optional[TxUUID] = None
 
