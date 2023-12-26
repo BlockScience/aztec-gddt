@@ -335,12 +335,12 @@ def p_commit_bond(params: AztecModelParams,
                     if bernoulli_trial(params['proving_marketplace_usage_probability']) is True:
                         provers: list[AgentUUID] = [
                             a_id for (a_id, a) in state['agents'].items() if a.is_prover]
-                        # TODO: what about relays?
+                        # XXX: relays are going to be uniformly sampled
                         prover: AgentUUID = choice(provers)
-                        bond_amount = 0.0  # TODO: open question
+                        bond_amount = 0.0  # TODO: open question - parametrize
                     else:
                         prover = updated_process.leading_sequencer
-                        bond_amount = 0.0  # TODO: open question
+                        bond_amount = 0.0  # TODO: open question - parametrize
 
                     tx = CommitmentBond(who=updated_process.leading_sequencer,
                                         when=state['time_l1'],
@@ -560,7 +560,8 @@ def s_transactions_new_proposals(params: AztecModelParams,
             potential_proposers: set[AgentUUID] = {u.uuid
                                                    for u in state['agents'].values()
                                                    if u.uuid not in proposers
-                                                   and u.is_sequencer}
+                                                   and u.is_sequencer
+                                                   and u.staked_amount >= params['slash_params'].minimum_stake}
 
             for potential_proposer in potential_proposers:
                 if bernoulli.rvs(params['proposal_probability_per_user_per_block']):
