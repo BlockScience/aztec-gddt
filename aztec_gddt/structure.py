@@ -66,8 +66,8 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
         },
         'variables':{
             'agents': s_agents_rewards,
-            'cumm_block_rewards': lambda _1,_2,_3,s1,s2: ('disbursed_block_rewards', s2['block_reward'] + s1['cumm_block_rewards']),
-            'cumm_fee_cashback': lambda _1,_2,_3,s1,s2: ('disbursed_fee_cashback', s2['fee_cashback'] + s1['cumm_fee_cashback'])
+            'cumm_block_rewards': lambda _1,_2,_3,s1,s2: ('cumm_block_rewards', s2['block_reward'] + s1['cumm_block_rewards']),
+            'cumm_fee_cashback': lambda _1,_2,_3,s1,s2: ('cumm_fee_cashback', s2['fee_cashback'] + s1['cumm_fee_cashback'])
         }
     },
     {

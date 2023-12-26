@@ -9,11 +9,11 @@ N_INITIAL_AGENTS = 3
 
  # XXX
 INITIAL_AGENTS: list[Agent] = [Agent(uuid=uuid4(),
-                                     balance=max(norm.rvs(200, 100), 1),
+                                     balance=max(norm.rvs(200000, 100000), 1),
                                      is_sequencer=True,
                                      is_prover=True,
                                      is_relay=False,
-                                     staked_amount=5.0)
+                                     staked_amount=500000)
                                for i
                                in range(N_INITIAL_AGENTS)]
 
@@ -57,8 +57,8 @@ INITIAL_SUPPLY = TokenSupply(
 
 
 SLASH_PARAMS = SlashParameters(
-    failure_to_commit_bond=1, # XXX
-    failure_to_reveal_block=1 # XXX
+    failure_to_commit_bond=100_000, # XXX
+    failure_to_reveal_block=100_000 # XXX
 )
 
 
