@@ -242,6 +242,11 @@ class UserTransactionEstimators():
     transaction_average_fee_per_size: BaseFloatEstimator
 
 
+@dataclass
+class SlashParameters():
+    failure_to_commit_bond: Tokens
+
+
 class AztecModelParams(TypedDict):
     # random_seed: int #Random seed for simulation model variation.
 
@@ -288,6 +293,7 @@ class AztecModelParams(TypedDict):
 
     gas_estimators: L1GasEstimators
     tx_estimators: UserTransactionEstimators
+    slash_params: SlashParameters
 
 
 class SignalTime(TypedDict, total=False):
