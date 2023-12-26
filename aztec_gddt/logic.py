@@ -603,6 +603,25 @@ def s_transactions(params: AztecModelParams,
     return ('transactions', new_transactions)
 
 
+def s_agent_transfer(params: AztecModelParams,
+                     _2,
+                     _3,
+                     state: AztecModelState,
+                     signal: SignalEvolveProcess) -> VariableUpdate:
+    updated_agents = state['agents'].copy()
+    transfers: Sequence[Transfer] = signal.get('transfers', []) # type: ignore
+
+    for transfer in transfers:
+        if transfer.kind == TransferKind.conventional:
+            updated_agents[transfer.source].balance -= transfer.amount
+            updated_agents[transfer.destination].balance += transfer.amount
+        elif transfer.kind == TransferKind.slash:
+            updated_agents[transfer.source].staked_amount -= transfer.amount
+            updated_agents[transfer.destination].balance += transfer.amount
+
+    return ('agents', updated_agents)
+    
+
 def p_block_reward(params: AztecModelParams,
                    _2,
                    _3,

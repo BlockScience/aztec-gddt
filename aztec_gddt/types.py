@@ -2,7 +2,7 @@ from typing import Annotated, TypedDict, Union, NamedTuple, Optional
 from enum import IntEnum, Enum, auto, Flag
 from math import floor
 from pydantic import BaseModel, PositiveInt, FiniteFloat
-from typing import Callable
+from typing import Callable, Mapping, NamedTuple
 from pydantic.dataclasses import dataclass
 from uuid import uuid4
 from typing import Sequence
@@ -294,10 +294,24 @@ class SignalTime(TypedDict, total=False):
     delta_blocks: L1Blocks
 
 
+
+
+
+class TransferKind(Enum):
+    conventional=auto()
+    slash=auto()
+
+class Transfer(NamedTuple):
+    source: AgentUUID
+    destination: AgentUUID
+    amount: Tokens
+    kind: TransferKind
+
 class SignalEvolveProcess(TypedDict, total=False):
     new_transactions: Sequence[AnyL1Transaction]
-    update_process: Process | None
+    update_process: Optional[Process]
     advance_l1_blocks: Optional[int]
+    transfers: Optional[Sequence[Transfer]]
 
 
 class SignalPayout(TypedDict, total=False):
