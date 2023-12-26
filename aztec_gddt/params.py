@@ -9,11 +9,11 @@ N_INITIAL_AGENTS = 3
 
  # XXX
 INITIAL_AGENTS: list[Agent] = [Agent(uuid=uuid4(),
-                                     balance=max(norm.rvs(200000, 100000), 1),
+                                     balance=max(norm.rvs(5, 2), 1),
                                      is_sequencer=True,
                                      is_prover=True,
                                      is_relay=False,
-                                     staked_amount=500000)
+                                     staked_amount=5)
                                for i
                                in range(N_INITIAL_AGENTS)]
 
@@ -45,7 +45,7 @@ INITIAL_AGENTS.append(Agent(uuid='burnt',
 
 AGENTS_DICT: dict[AgentUUID, Agent] = {a.uuid: a for a in INITIAL_AGENTS}
 
-INITIAL_CUMM_REWARDS = 10000 # XXX
+INITIAL_CUMM_REWARDS = 200 # XXX
 INITIAL_CUMM_CASHBACK = 50 # XXX
 INITIAL_CUMM_BURN = 50 # XXX
 INITIAL_SUPPLY = TokenSupply(
@@ -57,8 +57,8 @@ INITIAL_SUPPLY = TokenSupply(
 
 
 SLASH_PARAMS = SlashParameters(
-    failure_to_commit_bond=100_000, # XXX
-    failure_to_reveal_block=100_000 # XXX
+    failure_to_commit_bond=2, # XXX
+    failure_to_reveal_block=1 # XXX
 )
 
 
@@ -126,6 +126,8 @@ SINGLE_RUN_PARAMS = AztecModelParams(label='default',
                                      
                                      rewards_to_provers=0.495, # XXX
                                      rewards_to_relay=0.01, # XXX
+
+                                     gwei_to_tokens=1e-9, 
 
                                      gas_estimators=GAS_ESTIMATORS,
                                      tx_estimators=TX_ESTIMATORS,

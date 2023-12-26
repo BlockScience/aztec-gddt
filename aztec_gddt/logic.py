@@ -712,7 +712,7 @@ def p_fee_cashback(params: AztecModelParams,
 
         txs: dict[TxUUID, AnyL1Transaction] = state['transactions']
         # L1 Fees
-        total_fees = 0
+        total_fees: float = 0
         total_fees += txs[p.tx_winning_proposal].fee
         total_fees += txs[p.tx_content_reveal].fee
         total_fees += txs[p.tx_rollup_proof].fee
@@ -720,6 +720,8 @@ def p_fee_cashback(params: AztecModelParams,
 
         # Blob Fees
         total_fees += txs[p.tx_content_reveal].blob_fee  # type: ignore
+
+        total_fees *= params['gwei_to_tokens']
     else:
         total_fees = 0
 
