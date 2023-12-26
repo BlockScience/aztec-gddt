@@ -245,6 +245,7 @@ class UserTransactionEstimators():
 @dataclass
 class SlashParameters():
     failure_to_commit_bond: Tokens
+    failure_to_reveal_block: Tokens
 
 
 class AztecModelParams(TypedDict):

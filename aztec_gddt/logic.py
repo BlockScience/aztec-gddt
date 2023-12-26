@@ -379,6 +379,7 @@ def p_reveal_content(params: AztecModelParams,
     updated_process: Optional[Process] = None
     advance_blocks = 0
     new_transactions = list()
+    transfers: list[Transfer] = []
 
     if process is None:
         pass
@@ -392,6 +393,14 @@ def p_reveal_content(params: AztecModelParams,
                 updated_process.entered_race_mode = True
                 updated_process.duration_in_current_phase = 0
                 # TODO: To allow for fixed phase time, we might just add another check here - if duration > params and if content is not revealed -> proof_race
+
+
+                # and slash leading sequencer
+                slashed_amount = params['slash_params'].failure_to_reveal_block
+                transfers.append(Transfer(source=updated_process.leading_sequencer,
+                                    destination='burnt',
+                                    amount=slashed_amount,
+                                    kind=TransferKind.slash))
             else:
                 if bernoulli_trial(probability=params['block_content_reveal_probability']) is True and (state['gas_fee_l1'] <= params['gas_threshold_for_tx']) and (state['gas_fee_blob'] <= params['blob_gas_threshold_for_tx']):
                     updated_process = copy(process)
