@@ -13,7 +13,7 @@ INITIAL_AGENTS: list[Agent] = [Agent(uuid=uuid4(),
                                      is_sequencer=True,
                                      is_prover=True,
                                      is_relay=False,
-                                     staked_amount=0.0)
+                                     staked_amount=5.0)
                                for i
                                in range(N_INITIAL_AGENTS)]
 
@@ -28,6 +28,15 @@ INITIAL_AGENTS.append(Agent(uuid='relay',
 
 # L1 Builder Agent
 INITIAL_AGENTS.append(Agent(uuid='l1-builder',
+                            balance=0,
+                            is_sequencer=False,
+                            is_prover=False,
+                            is_relay=False,
+                            staked_amount=0.0))
+
+
+# Burn sink
+INITIAL_AGENTS.append(Agent(uuid='burnt',
                             balance=0,
                             is_sequencer=False,
                             is_prover=False,
