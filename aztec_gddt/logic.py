@@ -300,18 +300,26 @@ def p_commit_bond(params: AztecModelParams,
     updated_process: Optional[Process] = None
     new_transactions = list()
     advance_blocks = 0
+    transfers: list[Transfer] = []
 
     if process is None:
         pass
     else:
         if process.phase == SelectionPhase.pending_commit_bond:
             remaining_time = params['phase_duration_commit_bond'] - process.duration_in_current_phase
-            # Move to Proof Race mode if duration is expired
             if remaining_time < 0:
+                # Move to Proof Race mode if duration is expired
                 updated_process = copy(process)
                 updated_process.phase = SelectionPhase.proof_race
                 updated_process.entered_race_mode = True
                 updated_process.duration_in_current_phase = 0
+
+                # and slash leading sequencer
+                slashed_amount = params['slash_params'].failure_to_commit_bond
+                transfers.append(Transfer(source=updated_process.leading_sequencer,
+                                    destination='burnt',
+                                    amount=slashed_amount,
+                                    kind=TransferKind.slash))
             else:
                 # If duration is not expired, do  a trial to see if bond is commited
                 if bernoulli_trial(probability=params['commit_bond_reveal_probability']) is True and (state['gas_fee_l1'] <= params['gas_threshold_for_tx']):
@@ -327,12 +335,12 @@ def p_commit_bond(params: AztecModelParams,
                     if bernoulli_trial(params['proving_marketplace_usage_probability']) is True:
                         provers: list[AgentUUID] = [
                             a_id for (a_id, a) in state['agents'].items() if a.is_prover]
-                        # TODO: what about relays?
+                        # XXX: relays are going to be uniformly sampled
                         prover: AgentUUID = choice(provers)
-                        bond_amount = 0.0  # TODO: open question
+                        bond_amount = 0.0  # TODO: open question - parametrize
                     else:
                         prover = updated_process.leading_sequencer
-                        bond_amount = 0.0  # TODO: open question
+                        bond_amount = 0.0  # TODO: open question - parametrize
 
                     tx = CommitmentBond(who=updated_process.leading_sequencer,
                                         when=state['time_l1'],
@@ -352,7 +360,8 @@ def p_commit_bond(params: AztecModelParams,
 
     return {'update_process': updated_process,
             'new_transactions': new_transactions,
-            'advance_l1_blocks': advance_blocks}
+            'advance_l1_blocks': advance_blocks,
+            'transfers': transfers}
 
 
 def p_reveal_content(params: AztecModelParams,
@@ -370,6 +379,7 @@ def p_reveal_content(params: AztecModelParams,
     updated_process: Optional[Process] = None
     advance_blocks = 0
     new_transactions = list()
+    transfers: list[Transfer] = []
 
     if process is None:
         pass
@@ -383,6 +393,14 @@ def p_reveal_content(params: AztecModelParams,
                 updated_process.entered_race_mode = True
                 updated_process.duration_in_current_phase = 0
                 # TODO: To allow for fixed phase time, we might just add another check here - if duration > params and if content is not revealed -> proof_race
+
+
+                # and slash leading sequencer
+                slashed_amount = params['slash_params'].failure_to_reveal_block
+                transfers.append(Transfer(source=updated_process.leading_sequencer,
+                                    destination='burnt',
+                                    amount=slashed_amount,
+                                    kind=TransferKind.slash))
             else:
                 if bernoulli_trial(probability=params['block_content_reveal_probability']) is True and (state['gas_fee_l1'] <= params['gas_threshold_for_tx']) and (state['gas_fee_blob'] <= params['blob_gas_threshold_for_tx']):
                     updated_process = copy(process)
@@ -542,7 +560,8 @@ def s_transactions_new_proposals(params: AztecModelParams,
             potential_proposers: set[AgentUUID] = {u.uuid
                                                    for u in state['agents'].values()
                                                    if u.uuid not in proposers
-                                                   and u.is_sequencer}
+                                                   and u.is_sequencer
+                                                   and u.staked_amount >= params['slash_params'].minimum_stake}
 
             for potential_proposer in potential_proposers:
                 if bernoulli.rvs(params['proposal_probability_per_user_per_block']):
@@ -602,6 +621,25 @@ def s_transactions(params: AztecModelParams,
 
     return ('transactions', new_transactions)
 
+
+def s_agent_transfer(params: AztecModelParams,
+                     _2,
+                     _3,
+                     state: AztecModelState,
+                     signal: SignalEvolveProcess) -> VariableUpdate:
+    updated_agents = state['agents'].copy()
+    transfers: Sequence[Transfer] = signal.get('transfers', []) # type: ignore
+
+    for transfer in transfers:
+        if transfer.kind == TransferKind.conventional:
+            updated_agents[transfer.source].balance -= transfer.amount
+            updated_agents[transfer.destination].balance += transfer.amount
+        elif transfer.kind == TransferKind.slash:
+            updated_agents[transfer.source].staked_amount -= transfer.amount
+            updated_agents[transfer.destination].balance += transfer.amount
+
+    return ('agents', updated_agents)
+    
 
 def p_block_reward(params: AztecModelParams,
                    _2,
