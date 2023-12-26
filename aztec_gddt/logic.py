@@ -300,18 +300,26 @@ def p_commit_bond(params: AztecModelParams,
     updated_process: Optional[Process] = None
     new_transactions = list()
     advance_blocks = 0
+    transfers: list[Transfer] = []
 
     if process is None:
         pass
     else:
         if process.phase == SelectionPhase.pending_commit_bond:
             remaining_time = params['phase_duration_commit_bond'] - process.duration_in_current_phase
-            # Move to Proof Race mode if duration is expired
             if remaining_time < 0:
+                # Move to Proof Race mode if duration is expired
                 updated_process = copy(process)
                 updated_process.phase = SelectionPhase.proof_race
                 updated_process.entered_race_mode = True
                 updated_process.duration_in_current_phase = 0
+
+                # and slash leading sequencer
+                slashed_amount = params['slash_params'].failure_to_commit_bond
+                transfers.append(Transfer(source=updated_process.leading_sequencer,
+                                    destination='burnt',
+                                    amount=slashed_amount,
+                                    kind=TransferKind.slash))
             else:
                 # If duration is not expired, do  a trial to see if bond is commited
                 if bernoulli_trial(probability=params['commit_bond_reveal_probability']) is True and (state['gas_fee_l1'] <= params['gas_threshold_for_tx']):
@@ -352,7 +360,8 @@ def p_commit_bond(params: AztecModelParams,
 
     return {'update_process': updated_process,
             'new_transactions': new_transactions,
-            'advance_l1_blocks': advance_blocks}
+            'advance_l1_blocks': advance_blocks,
+            'transfers': transfers}
 
 
 def p_reveal_content(params: AztecModelParams,
