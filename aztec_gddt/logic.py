@@ -375,7 +375,7 @@ def p_commit_bond(params: AztecModelParams,
 
 def p_reveal_content(params: AztecModelParams,
                      _2,
-                     _3,
+                     history: list[list[AztecModelState]],
                      state: AztecModelState) -> SignalEvolveProcess:
     """
     Advances state of Processes that have revealed block content.
