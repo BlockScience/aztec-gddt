@@ -12,7 +12,7 @@ def standard_run() -> DataFrame:
         DataFrame: A dataframe of simulation data
     """
     # The number of timesteps for each simulation to run
-    N_timesteps = 360
+    N_timesteps = 700
 
     # The number of monte carlo runs per set of parameters tested
     N_samples = 1
