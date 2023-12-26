@@ -37,6 +37,11 @@ INITIAL_SUPPLY = TokenSupply(
 )
 
 
+SLASH_PARAMS = SlashParameters(
+    failure_to_commit_bond=1, # XXX
+    failure_to_reveal_block=1 # XXX
+)
+
 
 INITIAL_STATE = AztecModelState(time_l1=0,
                                 delta_l1_blocks=0,
@@ -104,7 +109,8 @@ SINGLE_RUN_PARAMS = AztecModelParams(label='default',
                                      rewards_to_relay=0.01, # XXX
 
                                      gas_estimators=GAS_ESTIMATORS,
-                                     tx_estimators=TX_ESTIMATORS
+                                     tx_estimators=TX_ESTIMATORS,
+                                     slash_params=SLASH_PARAMS
                                      
                                      
                                      )  # P=92% over 4B
