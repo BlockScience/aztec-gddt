@@ -326,7 +326,7 @@ def p_commit_bond(params: AztecModelParams,
                 expected_costs = state['cumm_fee_cashback'] - history[-1][0]['cumm_fee_cashback']
                 payoff_reveal = expected_rewards - expected_costs
 
-                if payoff_reveal > 0:
+                if payoff_reveal >= 0:
                     # If duration is not expired, do  a trial to see if bond is commited
                     if bernoulli_trial(probability=params['commit_bond_reveal_probability']) is True and (state['gas_fee_l1'] <= params['gas_threshold_for_tx']):
                         updated_process = copy(process)
@@ -416,7 +416,7 @@ def p_reveal_content(params: AztecModelParams,
                 expected_costs = state['cumm_fee_cashback'] - history[-1][0]['cumm_fee_cashback']
                 payoff_reveal = expected_rewards - expected_costs
 
-                if payoff_reveal > 0:
+                if payoff_reveal >= 0:
                     if bernoulli_trial(probability=params['block_content_reveal_probability']) is True and (state['gas_fee_l1'] <= params['gas_threshold_for_tx']) and (state['gas_fee_blob'] <= params['blob_gas_threshold_for_tx']):
                         updated_process = copy(process)
                         advance_blocks = remaining_time
@@ -756,25 +756,19 @@ def s_agents_rewards(params: AztecModelParams,
             'fee_cashback', 0.0) + signal.get('block_reward', 0.0)
         agents: dict[AgentUUID, Agent] = state['agents'].copy()
 
-
-        relays = [a_id for (a_id, a) in state['agents'].items() if a.is_relay]
-
-        relay_uuid: AgentUUID = choice(relays)
-
         rewards_relay = total_rewards * params['rewards_to_relay']
         rewards_prover = total_rewards * params['rewards_to_provers']
         rewards_sequencer = total_rewards - (rewards_relay + rewards_prover)
 
-        # TODO: How to select the winning sequencer when entering race mode?
         sequencer_uuid = state['transactions'][p.tx_rollup_proof].who
 
-        # TODO: add check for whatever the Process went through race-mode or not.
         if not p.entered_race_mode:
             prover_uuid = txs[p.tx_commitment_bond].prover_uuid  # type: ignore
-            # TODO: make sure that relays are included. For now, assume no relays
-            relay_uuid = sequencer_uuid
+            relays = [a_id for (a_id, a) in state['agents'].items() if a.is_relay]
+            relay_uuid: AgentUUID = choice(relays)
         else:
             prover_uuid = sequencer_uuid
+            relay_uuid = sequencer_uuid
 
         # Disburse Rewards
         agents[sequencer_uuid].balance += rewards_sequencer
