@@ -121,8 +121,8 @@ All variables of the Aztec system recorded in the model are implemented in an `A
 
 **Time Progression Variables** 
 * `time_l1`: the current time as measured in L1 blocks 
-* `delta_l1_blocks`: TODO
-* `advance_l1_blocks`: TODO
+* `delta_l1_blocks`
+* `advance_l1_blocks`
 
 **Agents Variables** 
 * `agents`: a dictionary containing IDs of agents and the agents themselves
@@ -134,17 +134,17 @@ All variables of the Aztec system recorded in the model are implemented in an `A
 * `gas_fee_blob`: TODO
 
 **Metrics**
-* `finalized_blocks_count`: TODO
-* `cumm_block_rewards`: Tokens
-* `cumm_fee_cashback`: Tokens
-* `cumm_burn`: Tokens
-* `token_supply`: TokenSupply
+* `finalized_blocks_count`
+* `cumm_block_rewards`
+* `cumm_fee_cashback`
+* `cumm_burn`
+* `token_supply`
 
 **Estimator Methods**
-* `GasEstimator`: 
-* `BlobGasEstimator`:
-* `BaseIntEstimator`:
-* `BaseFloatEstimator`:
+* `GasEstimator`
+* `BlobGasEstimator`
+* `BaseIntEstimator`
+* `BaseFloatEstimator`
 
 ### Model Parameters
 
@@ -152,35 +152,39 @@ Parameters represent aspects of the simulation which are fixed before the beginn
 * `example_par`: an example of a parameter that can be set
 
 **Logistics**
-* `label`: TODO
-* `timestep_in_blocks`: TODO
+* `label`
+* `timestep_in_blocks`
 
 **Economic Parameters**
-* `uncle_count`: TODO
-* `reward_per_block`: TODO
-* `fee_subsidy_fraction`: TODO
+* `uncle_count`: Uncle count
+* `reward_per_block`: Block reward
+* `fee_subsidy_fraction`: Fraction of fee rebates for L1 transactions by agents
 
 **Time Variables** 
-* `phase_duration_proposal`: TODO
-* `phase_duration_reveal`: TODO
-* `phase_duration_commit_bond`: TODO
-* `phase_duration_rollup`: TODO
-* `phase_duration_race`: TODO
+Durations in L1 timesteps for phases
+* `phase_duration_proposal`
+* `phase_duration_reveal`
+* `phase_duration_commit_bond`
+* `phase_duration_rollup`
+* `phase_duration_race`
 
 **Time Periods for System Actions**
-* `stake_activation_period`: TODO  # XXX
-* `unstake_cooldown_period`: TODO  # XXX
+(Un-)Stake (de-)activation period in L1 timesteps
+* `stake_activation_period`
+* `unstake_cooldown_period`
 
 **Probabilities for Agent Actions**
- * `block_content_reveal_probability`: the probability that the Lead Sequencer (does not reveal?) reveals the content. 
-* `tx_proof_reveal_probability`: the probability that the Lead Sequencer (does not reveal? ) reveals their proof, thus preventing the Provers from doing their work. 
-* `rollup_proof_reveal_profitability`: the probability that the provers (don't send?) send a rollup proof to the Lead Sequencer, preventing the Sequencer from submitting.
-* `commit_bond_reveal_profitability`: the probability that at least one prover puts up a bond for proving, in which case the Lead Sequencer loses their privilege and we enter Race Mode. 
-* `proving_marketplace_usage_probability`: TODO. NOTE: 8 think this goes here. 
+Probabilities for agents to take specific actions (which could later be replaced by decision functions)
+ * `block_content_reveal_probability`
+* `tx_proof_reveal_probability`
+* `rollup_proof_reveal_profitability`
+* `commit_bond_reveal_profitability`
+* `proving_marketplace_usage_probability`
 
 **Rewards Parameters**
-* `rewards_to_provers`: TODO a percentage of something
-* `rewards_to_relay`: TODO a percentage of something
+Percentage of rewards going to agents other than lead sequencer (where a lead sequencer can be all of these roles)
+* `rewards_to_provers`
+* `rewards_to_relay`
 
 **Gas Threshold Parameters** 
 * `gas_threshold_for_tx`: Gwei
@@ -189,15 +193,6 @@ Parameters represent aspects of the simulation which are fixed before the beginn
 **Estimators to Use**
 * `gas_estimators`: L1GasEstimators
 * `tx_estimators`: UserTransactionEstimators
-
-### Partial State Update Blocks 
-
-### Policies
-
-**NOTE:** 8 don't know that we need to include these 
-
-### State Update Functions
-**NOTE:** Please consider the below. 
 
 
 
@@ -268,10 +263,6 @@ TODO instructions on using the notebooks to gain insight, and modifying them for
 -->
 
 <--
-
- # Raw Materials 
-TODO: Take relevant parts from this earlier draft below and use it to fill in the final draft. 
-Note: Jakob took out most of below, as it was used above. 
 
 # Software Stuff
 
