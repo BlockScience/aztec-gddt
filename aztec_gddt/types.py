@@ -153,9 +153,7 @@ class Proposal(TransactionL1):
     size: Bytes
     public_composition: Percentage
 
-    # TODO: add bond_uiid: /generaluserUUID
-    # TODO: before, we only needed to track proposals, as that was the only way a block came into existence.
-    # Now with race mode, it might be nice to reuse this container - a Proposal with "score: None" could be a block that was made in race mode. Otherwise, nothing really changes.
+
 
 
 @dataclass
@@ -188,9 +186,6 @@ class RollupProof(TransactionL1):
 AnyL1Transaction = TransactionL1 | Proposal | CommitmentBond | ContentReveal | RollupProof
 
 SelectionResults = dict[ProcessUUID, tuple[Proposal, list[Proposal]]]
-
-# TODO: commit_bond aka Prover Commitment Bond Object -> tracking bond UUID (might be different from sequencer UUID, bond amount).
-# Alternative is to include prover UUID and bond amount in proposal class, but to set to "None" when instantiating.
 
 # Definition for simulation-specific types
 
