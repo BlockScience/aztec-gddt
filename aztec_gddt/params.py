@@ -84,7 +84,7 @@ GAS_ESTIMATORS = L1GasEstimators(
     proposal=lambda _: 100_000,
     commitment_bond=lambda _: 100_000,
     content_reveal=lambda _: 81_000,
-    content_reveal_blob=lambda _: 500_000, # NOTE: this is a HACK assumption
+    content_reveal_blob=lambda _: 500_000, # NOTE: this is a HACK assumption, gas was estimated from various documents by Aztec Labs
     rollup_proof=lambda _: 450_000
 )
 
@@ -99,7 +99,7 @@ TX_ESTIMATORS = UserTransactionEstimators(
 SINGLE_RUN_PARAMS = AztecModelParams(label='default',
                                      timestep_in_blocks=1,
 
-                                     uncle_count=2, # TODO
+                                     uncle_count=0, # TODO
                                      reward_per_block=1.0, # TODO
                                      fee_subsidy_fraction=1.0, # TODO
 
@@ -108,7 +108,7 @@ SINGLE_RUN_PARAMS = AztecModelParams(label='default',
                                      phase_duration_reveal=10, # TODO
                                      phase_duration_commit_bond=10, # TODO
                                      phase_duration_rollup=30, # TODO
-                                     phase_duration_race=25, # TODO
+                                     phase_duration_race=30, # TODO
 
                                      stake_activation_period=40, # TODO
                                      unstake_cooldown_period=40, # TODO
@@ -134,4 +134,4 @@ SINGLE_RUN_PARAMS = AztecModelParams(label='default',
                                      slash_params=SLASH_PARAMS
                                      
                                      
-                                     )  # P=92% over 4B
+                                     )  

@@ -13,7 +13,8 @@ from scipy.stats import bernoulli, uniform, norm  # type: ignore
 
 
 def generic_policy(_1, _2, _3, _4) -> dict:
-    """Function to generate pass through policy
+    """
+    Function to generate pass through policy
 
     Args:
         _1
@@ -44,7 +45,8 @@ def replace_suf(variable: str, default_value=0.0) -> Callable:
 
 
 def add_suf(variable: str, default_value=0.0) -> Callable:
-    """Creates replacing function for state update from string
+    """
+    Creates replacing function for state update from string
 
     Args:
         variable (str): The variable name that is updated
@@ -61,7 +63,8 @@ def add_suf(variable: str, default_value=0.0) -> Callable:
 #######################################
 
 def p_evolve_time(params: AztecModelParams, _2, _3, state: AztecModelState) -> SignalTime:
-    """Policy function giving the change in number of blocks. 
+    """
+    Policy function giving the change in number of blocks. 
 
     Args:
          params (AztecModelParams): The current parameters of the model.
@@ -76,7 +79,8 @@ def p_evolve_time(params: AztecModelParams, _2, _3, state: AztecModelState) -> S
 def s_block_time(params: AztecModelParams, _2, _3,
                  state: AztecModelState,
                  signal: SignalTime) -> VariableUpdate:
-    """State update function advancing block time.  
+    """
+    State update function advancing block time.  
 
     Args:
          params (AztecModelParams): The current parameters of the model.
@@ -105,7 +109,8 @@ def s_delta_blocks(_1, _2, _3, _4, signal: SignalTime) -> VariableUpdate:
 def s_reset_advance(params: AztecModelParams, _2, _3,
                  state: AztecModelState,
                  signal: SignalTime) -> VariableUpdate:
-    """State update function advancing block time.  
+    """
+    State update function advancing block time.  
 
     Args:
          params (AztecModelParams): The current parameters of the model.
@@ -149,7 +154,7 @@ def s_gas_fee_l1(params: AztecModelParams,
                  state: AztecModelState,
                  signal: SignalEvolveProcess) -> VariableUpdate:
     """
-    Logic for submitting new proposals.
+    State update function for change in gas fee.
     """
     return ('gas_fee_l1', state['gas_fee_l1'])
 
@@ -160,7 +165,7 @@ def s_gas_fee_blob(params: AztecModelParams,
                    state: AztecModelState,
                    signal: SignalEvolveProcess) -> VariableUpdate:
     """
-    Logic for submitting new proposals.
+    State update function for change in blob gas fee.
     """
     return ('gas_fee_blob', state['gas_fee_blob'])
 
@@ -401,7 +406,6 @@ def p_reveal_content(params: AztecModelParams,
                 updated_process.phase = SelectionPhase.proof_race
                 updated_process.entered_race_mode = True
                 updated_process.duration_in_current_phase = 0
-                # TODO: To allow for fixed phase time, we might just add another check here - if duration > params and if content is not revealed -> proof_race
 
 
                 # and slash leading sequencer
@@ -465,7 +469,7 @@ def p_submit_proof(params: AztecModelParams,
                    _3,
                    state: AztecModelState) -> SignalEvolveProcess:
     """
-    Advances state of Processes that have submitted valid proofs.
+    Advances state of Processes that have  submitted rollup proofs.
     """
     process = state['current_process']
     updated_process: Optional[Process] = None
@@ -515,6 +519,9 @@ def p_race_mode(params: AztecModelParams,
                 _2,
                 _3,
                 state: AztecModelState) -> SignalEvolveProcess:
+    """
+    Logic for race mode. 
+    """
     process = state['current_process']
     updated_process: Optional[Process] = None
     new_transactions: list[TransactionL1] = list()
@@ -581,7 +588,7 @@ def s_process(params: AztecModelParams,
               state: AztecModelState,
               signal: SignalEvolveProcess) -> VariableUpdate:
     """
-
+    Logic for updating process. 
     """
     updated_process = signal.get('update_process', state['current_process'])
     # Update only if there's an relevant signal.
@@ -658,7 +665,7 @@ def s_transactions(params: AztecModelParams,
                    state: AztecModelState,
                    signal: SignalEvolveProcess) -> VariableUpdate:
     """
-    Logic for submitting new proposals.
+    Logic for new transactions.
     """
 
     new_tx_list: list[TransactionL1] = signal.get(
@@ -677,6 +684,9 @@ def s_agent_transfer(params: AztecModelParams,
                      _3,
                      state: AztecModelState,
                      signal: SignalEvolveProcess) -> VariableUpdate:
+    """
+    Logic for transferring tokens between agents and burn sink.
+    """
     updated_agents = state['agents'].copy()
     transfers: Sequence[Transfer] = signal.get('transfers', []) # type: ignore
 
@@ -787,6 +797,6 @@ def s_token_supply(params: AztecModelParams,
                    state: AztecModelState,
                    signal: SignalEvolveProcess) -> VariableUpdate:
     """
-    Logic for submitting new proposals.
+    Logic for token supply.
     """
     return ('token_supply', TokenSupply.from_state(state))
