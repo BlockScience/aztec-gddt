@@ -100,10 +100,6 @@ Our simulation model is intended to offer insight into how the Aztec network may
 
 ## Model Overview
 
-TODO approve as acceptable
-TODO approve as final
-TODO how to describe cadCAD 
-
 The simulation model is written in cadCAD. In this section we will describe the variables and parameters recorded in the simulation.  We will also describe how various aspects of the cadCAD model structure correspond to specific parts of the Aztec system in general, and the Fernet model in particular. 
 
 There are five important aspects of a cadCAD mode:
@@ -120,7 +116,7 @@ For more general information about the purpose each piece serves in a cadCAD mod
 All variables of the Aztec system recorded in the model are implemented in an `AztecModelState` class. The model has the following attributes: 
 
 **Time Progression Variables** 
-* `time_l1`: the current time as measured in L1 blocks 
+* `time_l1`: 
 * `delta_l1_blocks`
 * `advance_l1_blocks`
 
@@ -128,11 +124,11 @@ All variables of the Aztec system recorded in the model are implemented in an `A
 * `agents`: a dictionary containing IDs of agents and the agents themselves
 
 **Process State Variables** 
-* `current_process`: TODO
-* `transactions`: TODO
-* `gas_fee_l1`: TODO
-* `gas_fee_blob`: TODO
-
+* `current_process`
+* `transactions`
+* `gas_fee_l1`
+* `gas_fee_blob`
+  
 **Metrics**
 * `finalized_blocks_count`
 * `cumm_block_rewards`
@@ -149,7 +145,6 @@ All variables of the Aztec system recorded in the model are implemented in an `A
 ### Model Parameters
 
 Parameters represent aspects of the simulation which are fixed before the beginning of a single model run. 
-* `example_par`: an example of a parameter that can be set
 
 **Logistics**
 * `label`
@@ -194,16 +189,14 @@ Percentage of rewards going to agents other than lead sequencer (where a lead se
 * `gas_estimators`: L1GasEstimators
 * `tx_estimators`: UserTransactionEstimators
 
-
-
 ## Technical Details 
 
-In this section we ensure that the reader will be able to run the model on their own computer, if desired. 
+In this section we describe how to run the model on their own computer, if desired. 
 
 ### How to Install cadCAD
 
 #### 1. Pre-installation Virtual Environments with [`venv`](https://docs.python.org/3/library/venv.html) (Optional):
-It's a good package managing practice to create an easy to use virtual environment to install cadCAD. You can use the built in `venv` package.
+It's a good package managing practice to create an easy to use virtual environment to install cadCAD. You can use the built in `venv` package. Note that this repo requires cadCAD 0.5, which is the latest version released December 2023. 
 
 ***Create** a virtual environment:*
 ```bash
@@ -223,7 +216,7 @@ $
 ```
 
 #### 2. Installation: 
-Requires [>= Python 3.6](https://www.python.org/downloads/) 
+Requires [>= Python 3.11](https://www.python.org/downloads/) 
 
 **Install Using [pip](https://pypi.org/project/cadCAD/)** 
 ```bash
@@ -237,7 +230,7 @@ $ pip3 install -r requirements.txt
 
 ### Demonstration Notebook
 
-TODO instructions on using the notebooks to gain insight, and modifying them for experiments. 
+A basic demonstration notebook is available in `notebooks/demo-notebook.ipynb`. 
 
 ### Project Directory Structure
 
@@ -258,34 +251,3 @@ TODO instructions on using the notebooks to gain insight, and modifying them for
 ├── requirements.txt: Production requirements
 ```
 
-## Future Work
-
--->
-
-<--
-
-# Software Stuff
-
-## File structure
-
-```
-├── README.md
-├── LICENSE
-├── aztec_gddt: the `cadCAD` model as encapsulated by a Python Module
-│   ├── __init__.py
-│   ├── __main__.py
-│   ├── experiment.py: Code for running experiments
-│   ├── logic.py: All logic for substeps
-│   ├── params.py: System parameters
-│   ├── structure.py: The PSUB structure
-│   └── types.py: Types used in model
-├── media: TODO images used in the repo
-├── notebooks: Notebooks for aiding in development
-├── tests: Tests for ensuring correct functionality
-├── requirements.txt: Production requirements
-```
-
-
-
-
- 
