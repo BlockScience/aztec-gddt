@@ -8,7 +8,7 @@
 
 There are 3 main ways to interact with the model:
 1. Through Python CLI: `python -m aztec_gddt`, which is going to run a pre-programmed experiment.
-2. Through Jupyter Notebooks: some examples can be found at `notebooks/`
+2. Through Jupyter Notebooks: an example can be found at `notebooks/`
 3. Through tests: we use `pytest` as the testing framework.
 
 
@@ -25,7 +25,7 @@ This document provides:
 
 ### What This Model Enables
 
-Using the model, it is possible to run simulations and track the effect of various parameter values on final metrics and KPIs of interest. Possibilities include parameter sweeps, A/B testing, visualization of 
+Using the model, it is possible to run simulations and track the effect of various parameter values on final metrics and KPIs of interest. Possibilities include parameter sweeps, A/B testing, visualization of trajectories and more. 
 
 ## Model Overview
 
