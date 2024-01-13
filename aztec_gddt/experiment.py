@@ -1,5 +1,10 @@
+from copy import deepcopy
+
 import pandas as pd # type: ignore
 from pandas import DataFrame
+from typing import Dict, List
+
+from IPython.display import display, Markdown
 
 from aztec_gddt.params import INITIAL_STATE
 from aztec_gddt.params import SINGLE_RUN_PARAMS
@@ -36,7 +41,8 @@ def standard_run() -> DataFrame:
     return sim_df
 
 def custom_run(initial_state:AztecModelState = None,
-               params_to_sweep:AztecModelParams = None,
+               default_params: AztecModelParams = None,
+               params_to_modify: Dict[str,List] = None,
                model_blocks:list[dict] = None,
                N_timesteps:int = 700,
                N_samples:int = 1) -> DataFrame:
@@ -45,7 +51,8 @@ def custom_run(initial_state:AztecModelState = None,
 
     Args:
         initial_state (AztecModelState): The initial state for the simulation
-        params_to_sweep (AztecModelParams): The parameters to sweep during the simulation
+        default_params (AztecModelParams): The default parameters to use. 
+        params_to_sweep (Dict[str, List]): The parameters to sweep during the simulation
         model_blocks (list[dict]): The model blocks for the simulation
         N_timesteps (int): Number of timesteps to run the simulation
         N_samples (int): Number of Monte Carlo runs to perform
@@ -57,23 +64,25 @@ def custom_run(initial_state:AztecModelState = None,
 
     if initial_state is None:
         initial_state = INITIAL_STATE
-    if params_to_sweep is None:
-        params_to_sweep = SINGLE_RUN_PARAMS
+    if default_params is None:
+        default_params = SINGLE_RUN_PARAMS
     if model_blocks is None:
         model_blocks = AZTEC_MODEL_BLOCKS
 
 
-     # Get the sweep params in the form of single length arrays
-    sweep_params = {} # Create empty dict. 
-    for k,v in params_to_sweep.items():
-        if isinstance(v, list):
-            sweep_params[k] = [v]
-        else:
-            sweep_params[k] = v
+     # Begin by copying the indicated default settings. 
+    sweep_params = {k: [v] for k, v in default_params.items()}
 
-    # Load simulation arguments
+    # Modify the parameters that need to be modified. 
+    for k,v in params_to_modify.items():
+        sweep_params[k] = v
+        # if isinstance(v, list):
+        #     sweep_params[k] = v
+        # else:
+        #     sweep_params[k] = [v]
+        # Load simulation arguments
     sim_args = (initial_state,
-                params_to_sweep,
+                sweep_params,
                 model_blocks,
                 N_timesteps,
                 N_samples)
@@ -81,6 +90,87 @@ def custom_run(initial_state:AztecModelState = None,
     # Run simulation
     sim_df = sim_run(*sim_args)
     return sim_df
+    
 
+# TODO: Create method that creates params to sweep. 
+# # Begin by copying the indicated default settings. 
+#     sweep_params = deepcopy(default_params)
+#     # Modify the parameters that need to be modified. 
+#     for k,v in params_to_modify:
+#         if isinstance(v, list):
+#             sweep_params[k] = v
+#         else:
+#             sweep_params[k] = [v]
+
+def create_model_params_table(model_name: str = "Experiment",
+                        default_params: AztecModelParams = None,
+                        params_to_modify: Dict[str, List] = None,
+                        allowed_types: tuple = None, 
+                        params_to_exclude = None,
+                        display_to_screen = False
+                       ) -> str:
+    """
+    Automatically creates a parameter table showing the values used for a given run.
+
+    Args:
+       model_name(str): An identifier for the current experiment or model.
+       params_dict (Dict[str,List]): A dictionary mapping variable names to lists of values.
+       allowed_types (tuple): A tuple of types that should be included. 
+
+
+    Returns:
+    """
+
+    ##############################
+    ## Set standards if needed. ##
+    ##############################
+    
+    if allowed_types is None: 
+        allowed_types = (object)
+    
+    if params_to_exclude is None:
+        params_to_exclude = []
+
+    if default_params is None:
+        default_params = SINGLE_RUN_PARAMS
+
+    ##############################
+    ## Make a final dictionary  ##
+    ## that represents both the ##
+    ## default values and those ##
+    ## being modified.          ##
+    ##############################
+
+    final_params_dict = deepcopy(default_params)
+    final_params_dict.update(params_to_modify)
+
+    ##############################
+    ## Make the table.          ##
+    ##############################
+    
+    params_table_title = f"## Current Parameter Values for {model_name} \n"
+    params_table = "| Parameter | Values to Use |\n| --- | --- |\n"
+    for k, v in final_params_dict.items():
+        if isinstance(v, allowed_types) and not(k in params_to_exclude):
+            params_table += f"| {k} | {v} |\n"
+
+    final_params_markdown = params_table_title + params_table
+
+    ##############################
+    ## Display if desired.      ##
+    ## NOTE that this is only   ##
+    ## valid inside a Jupyter   ##
+    ## notebook.                ##
+    ##############################
+
+    if display_to_screen:
+        display(Markdown(final_params_markdown))
+
+    return final_params_markdown
+
+def process_data(df: pd.DataFrame,
+                inplace: bool = True) -> pd.DataFrame:
+    # TODO: A method that processes the data based on things that have been input. 
+    pass 
 
 
