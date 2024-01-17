@@ -349,6 +349,7 @@ def p_commit_bond(params: AztecModelParams,
                             # XXX: relays are going to be uniformly sampled
                             prover: AgentUUID = choice(provers)
                             bond_amount = 0.0  # TODO: open question - parametrize
+                            #TODO: transfer from Prover to bond_amount? OR just track and slash Prover? 
                         else:
                             prover = updated_process.leading_sequencer
                             bond_amount = 0.0  # TODO: open question - parametrize
@@ -485,12 +486,14 @@ def p_submit_proof(params: AztecModelParams,
                 updated_process = copy(process)
                 updated_process.phase = SelectionPhase.skipped  # TODO: confirm
                 updated_process.duration_in_current_phase = 0
+                #TODO: if time runs out, no rollup proof submitted -> slash from commit bond (or directly from Prover) 
             else:
                 if bernoulli_trial(probability=params['rollup_proof_reveal_probability']) and (state['gas_fee_l1'] <= params['gas_threshold_for_tx']):
                     updated_process = copy(process)
                     advance_blocks = remaining_time
                     updated_process.phase = SelectionPhase.finalized
                     updated_process.duration_in_current_phase = 0
+                    #TODO: Return Commit Bond to Prover as rollup proof was finalized 
 
                     who = updated_process.leading_sequencer  # XXX
                     gas: Gas = params['gas_estimators'].content_reveal(state)
