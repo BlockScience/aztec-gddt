@@ -390,7 +390,10 @@ def p_commit_bond(params: AztecModelParams,
 
                         if bernoulli_trial(params['proving_marketplace_usage_probability']) is True:
                             provers: list[AgentUUID] = [
-                                a_id for (a_id, a) in state['agents'].items() if a.is_prover]
+                                                        a_id 
+                                                        for (a_id, a) 
+                                                        in state['agents'].items() 
+                                                        if a.is_prover]
                             # XXX: relays are going to be uniformly sampled
                             prover: AgentUUID = choice(provers)
                             bond_amount = 0.0  # TODO: open question - parametrize
@@ -521,6 +524,7 @@ def p_submit_proof(params: AztecModelParams,
     updated_process: Optional[Process] = None
     new_transactions = list()
     advance_blocks = 0
+    transfers: list[Transfer] = []
 
     if process is None:
         pass
@@ -531,14 +535,29 @@ def p_submit_proof(params: AztecModelParams,
                 updated_process = copy(process)
                 updated_process.phase = SelectionPhase.skipped  # TODO: confirm
                 updated_process.duration_in_current_phase = 0
-                #TODO: if time runs out, no rollup proof submitted -> slash from commit bond (or directly from Prover) 
+                
+                # Determine who should be slashed, and how much. 
+                transactions = state['transactions']
+                commit_bond_id = updated_process.tx_commitment_bond
+                commit_bond = transactions.get(commit_bond_id)
+                who_to_slash = commit_bond.prover_uuid
+                how_much_to_slash = commit_bond.bond_amount
+
+                # Create a slash_transfer and add it to the transfers. 
+                slash_transfer = Transfer(source = who_to_slash,
+                                          destination = 'burnt',
+                                          amount = how_much_to_slash,
+                                          kind = TransferKind.slash)
+
+                transfers.append(slash_transfer)
+
+
             else:
                 if bernoulli_trial(probability=params['rollup_proof_reveal_probability']) and (state['gas_fee_l1'] <= params['gas_threshold_for_tx']):
                     updated_process = copy(process)
                     advance_blocks = remaining_time
                     updated_process.phase = SelectionPhase.finalized
                     updated_process.duration_in_current_phase = 0
-                    #TODO: Return Commit Bond to Prover as rollup proof was finalized 
 
                     who = updated_process.leading_sequencer  # XXX
                     gas: Gas = params['gas_estimators'].content_reveal(state)
@@ -560,7 +579,8 @@ def p_submit_proof(params: AztecModelParams,
 
     return {'update_process': updated_process,
             'new_transactions': new_transactions,
-            'advance_l1_blocks': advance_blocks}
+            'advance_l1_blocks': advance_blocks,
+            'transfers': transfers}
 
 
 def p_race_mode(params: AztecModelParams,
