@@ -14,7 +14,6 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
             'time_l1': s_block_time,
             'delta_blocks': s_delta_blocks,
             'current_process': s_current_process_time,
-            'advance_l1_blocks': s_reset_advance
         }
     },
     {
@@ -71,9 +70,20 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
         }
     },
     {
+        'label': 'Dynamically Evolve Time',
+        'policies': {
+             'conditionally_evolve_time': p_evolve_time_dynamical
+        },
+        'variables': {
+            'time_l1': s_block_time,
+            'delta_blocks': s_delta_blocks,
+            'current_process': s_current_process_time_dynamical,
+            'advance_l1_blocks': s_reset_advance
+        }
+    },
+    {
         'label': 'Metrics',
         'policies': {
-
         },
         'variables': {
             'token_supply': s_token_supply,

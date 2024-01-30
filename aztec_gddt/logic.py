@@ -10,7 +10,7 @@ from aztec_gddt.helper import *
 from aztec_gddt.types import *
 
 from scipy.stats import bernoulli, uniform, norm  # type: ignore
-
+from random import random
 
 def generic_policy(_1, _2, _3, _4) -> dict:
     """
@@ -73,7 +73,22 @@ def p_evolve_time(params: AztecModelParams, _2, _3, state: AztecModelState) -> S
         Signal: 
             a dictionary of variables that can be used in an update
     """
-    return {'delta_blocks': params['timestep_in_blocks'] + state['advance_l1_blocks']}
+    return {'delta_blocks': params['timestep_in_blocks']}
+
+
+
+def p_evolve_time_dynamical(params: AztecModelParams, _2, _3, state: AztecModelState) -> SignalTime:
+    """
+    Policy function giving the change in number of blocks. 
+
+    Args:
+         params (AztecModelParams): The current parameters of the model.
+
+    Returns:
+        Signal: 
+            a dictionary of variables that can be used in an update
+    """
+    return {'delta_blocks': state['advance_l1_blocks']}
 
 
 def s_block_time(params: AztecModelParams, _2, _3,
@@ -92,6 +107,7 @@ def s_block_time(params: AztecModelParams, _2, _3,
             A two-element tuple that all state update functions must return.
     """
     return ('time_l1', state['time_l1'] + signal['delta_blocks'])  # type: ignore
+
 
 
 def s_delta_blocks(_1, _2, _3, _4, signal: SignalTime) -> VariableUpdate:
@@ -144,6 +160,29 @@ def s_current_process_time(_1,
         updated_process.duration_in_current_phase += signal.get('delta_blocks', 0)
     else:
         pass
+
+    return ('current_process', updated_process)
+
+
+def s_current_process_time_dynamical(_1,
+                           _2,
+                           _3,
+                           state: AztecModelState,
+                           signal: SignalTime) -> VariableUpdate:
+    """
+    State update function for change in block number. 
+
+    Args: 
+        signal (Signal): The Signal, generated in p_evolve_time, of how many blocks to advance time. 
+
+    Returns: 
+        VariableUpdate
+    """
+    delta_blocks = signal.get('delta_blocks', 0)
+    updated_process: Process | None = copy(state['current_process'])
+    if updated_process is not None:
+        if delta_blocks > 0:
+            updated_process.current_phase_init_time += delta_blocks
 
     return ('current_process', updated_process)
 
@@ -278,6 +317,11 @@ def p_select_proposal(params: AztecModelParams,
                         uncle_proposals = []
 
                     updated_process = copy(process)
+
+                    # BUG: do this for all phase evolving logic.
+                    # BUG: make sure that this is compatible when the time evolution is dynamical, eg, 1 ts = many blocks
+                    updated_process.current_phase_init_time = state['time_l1'] 
+
                     updated_process.phase = SelectionPhase.pending_commit_bond
                     updated_process.duration_in_current_phase = 0
                     updated_process.leading_sequencer = winner_proposal.who
@@ -306,6 +350,7 @@ def p_commit_bond(params: AztecModelParams,
     new_transactions = list()
     advance_blocks = 0
     transfers: list[Transfer] = []
+
 
     if process is None:
         pass
@@ -658,8 +703,8 @@ def s_transactions_new_proposals(params: AztecModelParams,
     return ('transactions', new_transactions)
 
 
-def s_advance_blocks(_1, _2, _3, _4, signal: SignalEvolveProcess) -> VariableUpdate:
-    return ('advance_l1_blocks', signal.get('advance_blocks', 0))
+def s_advance_blocks(_1, _2, _3, state, signal: SignalEvolveProcess) -> VariableUpdate:
+    return ('advance_l1_blocks', signal.get('advance_l1_blocks', 0))
 
 
 def s_transactions(params: AztecModelParams,
