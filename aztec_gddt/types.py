@@ -300,6 +300,8 @@ class AztecModelParams(TypedDict):
     tx_estimators: UserTransactionEstimators
     slash_params: SlashParameters
 
+    commit_bond_amount: float
+
 
 class SignalTime(TypedDict, total=False):
     delta_blocks: L1Blocks
