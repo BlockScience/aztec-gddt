@@ -351,8 +351,7 @@ def p_commit_bond(params: AztecModelParams,
     advance_blocks = 0
     transfers: list[Transfer] = []
 
-    MAGIC_BOND_AMOUNT_CONSTANT = 1.0  # HACK: Setting some non-zero bond amount.  
-
+    commit_bond_amount_from_params = params['commit_bond_amount']
 
     if process is None:
         pass
@@ -398,11 +397,11 @@ def p_commit_bond(params: AztecModelParams,
                                                         if a.is_prover]
                             # XXX: relays are going to be uniformly sampled
                             prover: AgentUUID = choice(provers)
-                            bond_amount = MAGIC_BOND_AMOUNT_CONSTANT  # TODO: open question - parametrize
+                            bond_amount = commit_bond_amount_from_params  # TODO: open question - parametrize
                             #TODO: transfer from Prover to bond_amount? OR just track and slash Prover? 
                         else:
                             prover = updated_process.leading_sequencer
-                            bond_amount = MAGIC_BOND_AMOUNT_CONSTANT  # TODO: open question - parametrize
+                            bond_amount = commit_bond_amount_from_params  # TODO: open question - parametrize
 
                         tx = CommitmentBond(who=updated_process.leading_sequencer,
                                             when=state['time_l1'],
