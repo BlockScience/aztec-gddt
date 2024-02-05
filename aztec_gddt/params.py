@@ -131,7 +131,7 @@ SINGLE_RUN_PARAMS = AztecModelParams(label='default',
 
                                      gas_estimators=GAS_ESTIMATORS,
                                      tx_estimators=TX_ESTIMATORS,
-                                     slash_params=SLASH_PARAMS
-                                     
+                                     slash_params=SLASH_PARAMS,
+                                     commit_bond_amount = 10.0
                                      
                                      )  
