@@ -388,7 +388,6 @@ def p_commit_bond(params: AztecModelParams,
                         gas: Gas = params['gas_estimators'].commitment_bond(state)
                         fee = gas * state['gas_fee_l1']
                         proposal_uuid = updated_process.tx_winning_proposal
-                        bond_amount = commit_bond_amount_from_params  
 
 
                         if bernoulli_trial(params['proving_marketplace_usage_probability']) is True:
