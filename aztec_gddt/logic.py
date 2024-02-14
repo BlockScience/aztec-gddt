@@ -397,11 +397,11 @@ def p_commit_bond(params: AztecModelParams,
                                                         if a.is_prover]
                             # XXX: relays are going to be uniformly sampled
                             prover: AgentUUID = choice(provers)
-                            bond_amount = commit_bond_amount_from_params  # TODO: open question - parametrize
-                            #TODO: transfer from Prover to bond_amount? OR just track and slash Prover? 
+                            bond_amount = commit_bond_amount_from_params  
+         
                         else:
                             prover = updated_process.leading_sequencer
-                            bond_amount = commit_bond_amount_from_params  # TODO: open question - parametrize
+                            bond_amount = commit_bond_amount_from_params 
 
                         tx = CommitmentBond(who=updated_process.leading_sequencer,
                                             when=state['time_l1'],
