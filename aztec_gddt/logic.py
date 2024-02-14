@@ -396,7 +396,7 @@ def p_commit_bond(params: AztecModelParams,
                                                         a_id 
                                                         for (a_id, a) 
                                                         in state['agents'].items() 
-                                                        if a.is_prover and a.balance > bond_amount]
+                                                        if a.is_prover and a.balance >= bond_amount]
                             # XXX: relays are going to be uniformly sampled
                             prover: AgentUUID = choice(provers)
          
