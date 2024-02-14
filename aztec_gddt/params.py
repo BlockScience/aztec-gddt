@@ -9,7 +9,7 @@ N_INITIAL_AGENTS = 3
 
  # XXX
 INITIAL_AGENTS: list[Agent] = [Agent(uuid=uuid4(),
-                                     balance=max(norm.rvs(5, 2), 1),
+                                     balance=max(norm.rvs(50, 20), 1),
                                      is_sequencer=True,
                                      is_prover=True,
                                      is_relay=False,
