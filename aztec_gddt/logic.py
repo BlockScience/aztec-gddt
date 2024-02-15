@@ -351,7 +351,7 @@ def p_commit_bond(params: AztecModelParams,
     advance_blocks = 0
     transfers: list[Transfer] = []
 
-    commit_bond_amount_from_params = params['commit_bond_amount']
+    bond_amount = params['commit_bond_amount']
 
     if process is None:
         pass
@@ -389,21 +389,20 @@ def p_commit_bond(params: AztecModelParams,
                         fee = gas * state['gas_fee_l1']
                         proposal_uuid = updated_process.tx_winning_proposal
 
+
                         if bernoulli_trial(params['proving_marketplace_usage_probability']) is True:
                             provers: list[AgentUUID] = [
                                                         a_id 
                                                         for (a_id, a) 
                                                         in state['agents'].items() 
-                                                        if a.is_prover]
+                                                        if a.is_prover and a.balance >= bond_amount]
                             # XXX: relays are going to be uniformly sampled
                             prover: AgentUUID = choice(provers)
-                            bond_amount = commit_bond_amount_from_params  # TODO: open question - parametrize
-                            #TODO: transfer from Prover to bond_amount? OR just track and slash Prover? 
+         
                         else:
                             prover = updated_process.leading_sequencer
-                            bond_amount = commit_bond_amount_from_params  # TODO: open question - parametrize
 
-                        tx = CommitmentBond(who=updated_process.leading_sequencer,
+                        tx = CommitmentBond(who=prover,
                                             when=state['time_l1'],
                                             uuid=uuid4(),
                                             gas=gas,
