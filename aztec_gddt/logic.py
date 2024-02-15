@@ -402,7 +402,7 @@ def p_commit_bond(params: AztecModelParams,
                         else:
                             prover = updated_process.leading_sequencer
 
-                        tx = CommitmentBond(who=updated_process.leading_sequencer,
+                        tx = CommitmentBond(who=prover,
                                             when=state['time_l1'],
                                             uuid=uuid4(),
                                             gas=gas,
