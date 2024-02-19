@@ -290,11 +290,13 @@ def p_select_proposal(params: AztecModelParams,
     process = state['current_process']
     updated_process: Optional[Process] = None
 
+    max_phase_duration = params['phase_duration_proposal'].max
+
     if process is None:
         pass
     else:
         if process.phase == SelectionPhase.pending_proposals:
-            remaining_time = params['phase_duration_proposal'] - process.duration_in_current_phase
+            remaining_time = max_phase_duration - process.duration_in_current_phase
             if remaining_time < 0:
                 # TODO: filter out invalid proposals
                 # J: Which invalid proposals are we expecting here? Anything "spam/invalid" would just be ignored, not sure we need to sim that, unless for blockspace
@@ -351,13 +353,15 @@ def p_commit_bond(params: AztecModelParams,
     advance_blocks = 0
     transfers: list[Transfer] = []
 
+    max_phase_duration = params["phase_duration_commit_bond"].max
+
     bond_amount = params['commit_bond_amount']
 
     if process is None:
         pass
     else:
         if process.phase == SelectionPhase.pending_commit_bond:
-            remaining_time = params['phase_duration_commit_bond'] - process.duration_in_current_phase
+            remaining_time = max_phase_duration - process.duration_in_current_phase
             if remaining_time < 0:
                 # Move to Proof Race mode if duration is expired
                 updated_process = copy(process)
@@ -443,13 +447,14 @@ def p_reveal_content(params: AztecModelParams,
     advance_blocks = 0
     new_transactions = list()
     transfers: list[Transfer] = []
+    max_phase_duration = params['phase_duration_reveal'].max
 
     if process is None:
         pass
     else:
         if process.phase == SelectionPhase.pending_reveal:
             # If the process has blown the phase duration
-            remaining_time = params['phase_duration_reveal'] - process.duration_in_current_phase
+            remaining_time = max_phase_duration - process.duration_in_current_phase
             if remaining_time < 0:
                 updated_process = copy(process)
                 updated_process.phase = SelectionPhase.proof_race
@@ -526,12 +531,14 @@ def p_submit_proof(params: AztecModelParams,
     advance_blocks = 0
     transfers: list[Transfer] = []
 
+    max_phase_duration = params['phase_duration_rollup'].max
+
     if process is None:
         pass
     else:
         if process.phase == SelectionPhase.pending_rollup_proof:
-            remaining_time = params['phase_duration_rollup'] - process.duration_in_current_phase
-            if process.duration_in_current_phase > params['phase_duration_rollup']:
+            remaining_time = max_phase_duration - process.duration_in_current_phase
+            if remaining_time < 0:
                 updated_process = copy(process)
                 updated_process.phase = SelectionPhase.skipped  # TODO: confirm
                 updated_process.duration_in_current_phase = 0
