@@ -26,6 +26,11 @@ Gwei = Annotated[int, 'gwei']
 BlobGas = Annotated[int, 'blob_gas']
 Percentage = Annotated[float, "%"]
 
+# Type for Range of L1Blocks (used for determining phase duration)
+class L1BlocksDuration(NamedTuple):
+    min: L1Blocks = 0 
+    max: L1Blocks 
+
 
 class L1TransactionType(Enum):
     BlockProposal = auto()
