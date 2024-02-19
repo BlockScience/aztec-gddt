@@ -12,7 +12,7 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
         },
         'variables': {
             'time_l1': s_block_time,
-            'delta_blocks': s_delta_blocks,
+            'delta_l1_blocks': s_delta_l1_blocks,
             'current_process': s_current_process_time,
         }
     },
@@ -76,7 +76,7 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
         },
         'variables': {
             'time_l1': s_block_time,
-            'delta_blocks': s_delta_blocks,
+            'delta_l1_blocks': s_delta_l1_blocks,
             'current_process': s_current_process_time_dynamical,
             'advance_l1_blocks': s_reset_advance
         }

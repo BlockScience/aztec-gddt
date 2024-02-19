@@ -73,7 +73,7 @@ def p_evolve_time(params: AztecModelParams, _2, _3, state: AztecModelState) -> S
         Signal: 
             a dictionary of variables that can be used in an update
     """
-    return {'delta_blocks': params['timestep_in_blocks']}
+    return {'delta_l1_blocks': params['timestep_in_blocks']}
 
 
 
@@ -88,7 +88,7 @@ def p_evolve_time_dynamical(params: AztecModelParams, _2, _3, state: AztecModelS
         Signal: 
             a dictionary of variables that can be used in an update
     """
-    return {'delta_blocks': state['advance_l1_blocks']}
+    return {'delta_l1_blocks': state['advance_l1_blocks']}
 
 
 def s_block_time(params: AztecModelParams, _2, _3,
@@ -106,11 +106,11 @@ def s_block_time(params: AztecModelParams, _2, _3,
         VariableUpdate:
             A two-element tuple that all state update functions must return.
     """
-    return ('time_l1', state['time_l1'] + signal['delta_blocks'])  # type: ignore
+    return ('time_l1', state['time_l1'] + signal['delta_l1_blocks'])  # type: ignore
 
 
 
-def s_delta_blocks(_1, _2, _3, _4, signal: SignalTime) -> VariableUpdate:
+def s_delta_l1_blocks(_1, _2, _3, _4, signal: SignalTime) -> VariableUpdate:
     """
     State update function for change in block number. 
 
@@ -120,7 +120,7 @@ def s_delta_blocks(_1, _2, _3, _4, signal: SignalTime) -> VariableUpdate:
     Returns: 
         VariableUpdate
     """
-    return ('delta_blocks', signal.get('delta_blocks', 0))
+    return ('delta_l1_blocks', signal.get('delta_l1_blocks', 0))
 
 def s_reset_advance(params: AztecModelParams, _2, _3,
                  state: AztecModelState,
@@ -157,7 +157,7 @@ def s_current_process_time(_1,
     updated_process: Process | None = copy(state['current_process'])
     if updated_process is not None:
         # type: ignore
-        updated_process.duration_in_current_phase += signal.get('delta_blocks', 0)
+        updated_process.duration_in_current_phase += signal.get('delta_l1_blocks', 0)
     else:
         pass
 
@@ -178,11 +178,11 @@ def s_current_process_time_dynamical(_1,
     Returns: 
         VariableUpdate
     """
-    delta_blocks = signal.get('delta_blocks', 0)
+    delta_l1_blocks = signal.get('delta_l1_blocks', 0)
     updated_process: Process | None = copy(state['current_process'])
     if updated_process is not None:
-        if delta_blocks > 0:
-            updated_process.current_phase_init_time += delta_blocks
+        if delta_l1_blocks > 0:
+            updated_process.current_phase_init_time += delta_l1_blocks
 
     return ('current_process', updated_process)
 
