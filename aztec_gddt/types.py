@@ -28,8 +28,8 @@ Percentage = Annotated[float, "%"]
 
 # Type for Range of L1Blocks (used for determining phase duration)
 class L1BlocksRange(NamedTuple):
-    min: L1Blocks = 0 
-    max: L1Blocks 
+    min_blocks: L1Blocks 
+    max_blocks: L1Blocks 
 
 
 class L1TransactionType(Enum):

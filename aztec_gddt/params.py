@@ -104,11 +104,11 @@ SINGLE_RUN_PARAMS = AztecModelParams(label='default',
                                      fee_subsidy_fraction=1.0, # TODO
 
                                      # Phase Durations
-                                     phase_duration_proposal=10, # TODO
-                                     phase_duration_reveal=10, # TODO
-                                     phase_duration_commit_bond=10, # TODO
-                                     phase_duration_rollup=30, # TODO
-                                     phase_duration_race=30, # TODO
+                                     phase_duration_proposal= L1BlocksRange(0,10), # TODO: change to protocol-provided values
+                                     phase_duration_reveal= L1BlocksRange(0,10), # TODO: change to protocol-provided values
+                                     phase_duration_commit_bond=L1BlocksRange(0,10), # TODO: change to protocol-provided values
+                                     phase_duration_rollup= L1BlocksRange(0,10), # TODO: change to protocol-provided values
+                                     phase_duration_race= L1BlocksRange(0,30), # TODO: change to protocol-provided values
 
                                      stake_activation_period=40, # TODO
                                      unstake_cooldown_period=40, # TODO
