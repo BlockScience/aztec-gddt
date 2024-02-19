@@ -27,7 +27,7 @@ BlobGas = Annotated[int, 'blob_gas']
 Percentage = Annotated[float, "%"]
 
 # Type for Range of L1Blocks (used for determining phase duration)
-class L1BlocksDuration(NamedTuple):
+class L1BlocksRange(NamedTuple):
     min: L1Blocks = 0 
     max: L1Blocks 
 
@@ -267,11 +267,11 @@ class AztecModelParams(TypedDict):
     fee_subsidy_fraction: Percentage
 
     # Phase Durations
-    phase_duration_proposal: L1Blocks
-    phase_duration_reveal: L1Blocks
-    phase_duration_commit_bond: L1Blocks
-    phase_duration_rollup: L1Blocks
-    phase_duration_race: L1Blocks
+    phase_duration_proposal: L1BlocksRange
+    phase_duration_reveal: L1BlocksRange
+    phase_duration_commit_bond: L1BlocksRange
+    phase_duration_rollup: L1BlocksRange
+    phase_duration_race: L1BlocksRange
 
     stake_activation_period: L1Blocks  # XXX
     unstake_cooldown_period: L1Blocks  # XXX
