@@ -444,12 +444,14 @@ def p_reveal_content(params: AztecModelParams,
     new_transactions = list()
     transfers: list[Transfer] = []
 
+    max_phase_duration = params['phase_duration_reveal_max_blocks']
+
     if process is None:
         pass
     else:
         if process.phase == SelectionPhase.pending_reveal:
             # If the process has blown the phase duration
-            remaining_time = params['phase_duration_reveal'] - process.duration_in_current_phase
+            remaining_time = max_phase_duration - process.duration_in_current_phase
             if remaining_time < 0:
                 updated_process = copy(process)
                 updated_process.phase = SelectionPhase.proof_race
