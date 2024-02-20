@@ -263,7 +263,8 @@ class AztecModelParams(TypedDict):
 
     # Phase Durations
     phase_duration_proposal: L1Blocks
-    phase_duration_reveal: L1Blocks
+    phase_duration_reveal_min: L1Blocks
+    phase_duration_reveal_max: L1Blocks
     phase_duration_commit_bond: L1Blocks
     phase_duration_rollup: L1Blocks
     phase_duration_race: L1Blocks
