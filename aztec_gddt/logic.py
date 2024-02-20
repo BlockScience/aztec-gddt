@@ -354,12 +354,13 @@ def p_commit_bond(params: AztecModelParams,
     transfers: list[Transfer] = []
 
     bond_amount = params['commit_bond_amount']
+    max_phase_duration = params['phase_duration_commit_bond_max_blocks']
 
     if process is None:
         pass
     else:
         if process.phase == SelectionPhase.pending_commit_bond:
-            remaining_time = params['phase_duration_commit_bond'] - process.duration_in_current_phase
+            remaining_time = max_phase_duration - process.duration_in_current_phase
             if remaining_time < 0:
                 # Move to Proof Race mode if duration is expired
                 updated_process = copy(process)
@@ -530,12 +531,14 @@ def p_submit_proof(params: AztecModelParams,
     advance_blocks = 0
     transfers: list[Transfer] = []
 
+    max_phase_duration = params['phase_duration_rollup_max_blocks']
+
     if process is None:
         pass
     else:
         if process.phase == SelectionPhase.pending_rollup_proof:
-            remaining_time = params['phase_duration_rollup'] - process.duration_in_current_phase
-            if process.duration_in_current_phase > params['phase_duration_rollup']:
+            remaining_time = max_phase_duration - process.duration_in_current_phase
+            if remaining_time < 0:
                 updated_process = copy(process)
                 updated_process.phase = SelectionPhase.skipped  # TODO: confirm
                 updated_process.duration_in_current_phase = 0
@@ -598,17 +601,20 @@ def p_race_mode(params: AztecModelParams,
     updated_process: Optional[Process] = None
     new_transactions: list[TransactionL1] = list()
 
+    max_phase_duration = params['phase_duration_race_max_blocks']
+
     if process is None:
         pass
     else:
         if process.phase == SelectionPhase.proof_race:
-            if process.duration_in_current_phase > params['phase_duration_race']:
+            remaining_time = max_phase_duration - process.duration_in_current_phase
+            if remaining_time < 0:
                 updated_process = copy(process)
                 updated_process.phase = SelectionPhase.skipped
                 updated_process.duration_in_current_phase = 0
             else:
                 # XXX there is a hard-coded L1 Builder agent
-                # who immediatly ends the race mode.
+                # who immediately ends the race mode.
                 who = 'l1-builder'
                 gas: Gas = params['gas_estimators'].content_reveal(state)
                 fee: Gwei = gas * state['gas_fee_l1']
