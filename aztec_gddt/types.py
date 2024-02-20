@@ -262,12 +262,17 @@ class AztecModelParams(TypedDict):
     fee_subsidy_fraction: Percentage
 
     # Phase Durations
-    phase_duration_proposal: L1Blocks
-    phase_duration_reveal_min: L1Blocks
-    phase_duration_reveal_max: L1Blocks
-    phase_duration_commit_bond: L1Blocks
-    phase_duration_rollup: L1Blocks
-    phase_duration_race: L1Blocks
+    # These have both minimum and maximum numbers of blocks
+    phase_duration_proposal_min_blocks: L1Blocks
+    phase_duration_proposal_max_blocks: L1Blocks
+    phase_duration_reveal_min_blocks: L1Blocks
+    phase_duration_reveal_max_blocks: L1Blocks
+    phase_duration_commit_bond_min_blocks: L1Blocks
+    phase_duration_commit_bond_max_blocks: L1Blocks
+    phase_duration_rollup_min_blocks: L1Blocks
+    phase_duration_rollup_max_blocks: L1Blocks
+    phase_duration_race_min_blocks: L1Blocks
+    phase_duration_race_max_blocks: L1Blocks
 
     stake_activation_period: L1Blocks  # XXX
     unstake_cooldown_period: L1Blocks  # XXX
