@@ -2,8 +2,15 @@ from typing import Union
 from cadCAD.configuration import Experiment # type: ignore
 from cadCAD.configuration.utils import config_sim # type: ignore
 from cadCAD.engine import ExecutionMode, ExecutionContext, Executor # type: ignore
-from cadCAD_tools.execution.easy_run import select_config_M_dict # type: ignore
+from cadCAD.tools.execution.easy_run import select_M_dict # type: ignore
 import pandas as pd # type: ignore
+from typing import Callable
+
+
+def alt_select_config_M_dict(configs: list, i: int, keys: set) -> dict[str, Callable[[object], object]]:
+    param_dict = select_M_dict(configs[i].sim_config['M'], keys)
+    lambda_dict = {k: lambda _df: v for k, v in param_dict.items()}
+    return lambda_dict
 
 
 def policy_aggregator(a, b):
@@ -86,9 +93,9 @@ def sim_run(state_variables,
             selected_params = params_set
 
         # Attribute parameters to each row
-        df = df.assign(**select_config_M_dict(configs, 0, selected_params))
+        df = df.assign(**alt_select_config_M_dict(configs, 0, selected_params))
         for i, (_, n_df) in enumerate(df.groupby(['simulation', 'subset', 'run'])):
-            df.loc[n_df.index] = n_df.assign(**select_config_M_dict(configs,
+            df.loc[n_df.index] = n_df.assign(**alt_select_config_M_dict(configs,
                                                                     i,
                                                                     selected_params))
 
