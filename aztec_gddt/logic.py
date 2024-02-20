@@ -290,11 +290,13 @@ def p_select_proposal(params: AztecModelParams,
     process = state['current_process']
     updated_process: Optional[Process] = None
 
+    max_phase_duration = params['phase_duration_proposal_max_blocks']
+
     if process is None:
         pass
     else:
         if process.phase == SelectionPhase.pending_proposals:
-            remaining_time = params['phase_duration_proposal'] - process.duration_in_current_phase
+            remaining_time = max_phase_duration - process.duration_in_current_phase
             if remaining_time < 0:
                 # TODO: filter out invalid proposals
                 # J: Which invalid proposals are we expecting here? Anything "spam/invalid" would just be ignored, not sure we need to sim that, unless for blockspace

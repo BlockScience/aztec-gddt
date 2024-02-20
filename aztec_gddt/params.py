@@ -104,9 +104,9 @@ SINGLE_RUN_PARAMS = AztecModelParams(label='default',
                                      fee_subsidy_fraction=1.0, # TODO
 
                                      # Phase Durations
-                                     phase_duration_proposal=10, # TODO
-                                     phase_duration_reveal_min_blocks=0, # TODO
-                                     phase_duration_reveal_max_blocks = 10, # TODO
+                                     phase_duration_proposal_min_blocks=0, # TODO
+                                     phase_duration_proposal_max_blocks=10, # TODO
+                                     phase_duration_reveal = 10, # TODO
                                      phase_duration_commit_bond=10, # TODO
                                      phase_duration_rollup=30, # TODO
                                      phase_duration_race=30, # TODO

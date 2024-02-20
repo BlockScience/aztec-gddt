@@ -29,7 +29,7 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
     },
     {
         'label': 'Agent Actions',
-        'ignore' : True, 
+        'ignore' : False, 
         'policies': {
             # TODO Possibly add policies for the users triggering the relevant events
             # eg. making the proofs public
