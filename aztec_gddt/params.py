@@ -1,6 +1,11 @@
 from aztec_gddt.types import *
 from uuid import uuid4
 from scipy.stats import norm  # type: ignore
+import numpy as np
+
+# Note: For numpy 1.26 and above, random calls go through a generator. 
+rng = np.random.default_rng()
+
 
 TIMESTEPS = 1000  # HACK
 SAMPLES = 1  # HACK
@@ -80,13 +85,129 @@ INITIAL_STATE = AztecModelState(time_l1=0,
                                 token_supply=INITIAL_SUPPLY
                                 )
 
-GAS_ESTIMATORS = L1GasEstimators(
-    proposal=lambda _: 100_000,
-    commitment_bond=lambda _: 100_000,
-    content_reveal=lambda _: 81_000,
-    content_reveal_blob=lambda _: 500_000, # NOTE: this is a HACK assumption, gas was estimated from various documents by Aztec Labs
-    rollup_proof=lambda _: 450_000
+#############################################################
+## Begin: Steady state gas estimators defined              ##
+#############################################################
+
+MEAN_STEADY_STATE_L1 = 30
+DEVIATION_STEADY_STATE_L1 = 5
+MEAN_STEADY_STATE_BLOB = 15
+DEVIATION_STEADY_STATE_BLOB = 5
+
+# XXX: Rounding is needed to address the fact that Gas is an integer type. 
+steady_gas_fee_l1_time_series = np.array([max(floor(el), 0) 
+                                         for el in rng.standard_normal(TIMESTEPS) * MEAN_STEADY_STATE_L1 + DEVIATION_STEADY_STATE_L1])
+steady_gas_fee_blob_time_series = np.array([max(floor(el), 0)
+                                            for el in rng.standard_normal(TIMESTEPS) * MEAN_STEADY_STATE_BLOB + DEVIATION_STEADY_STATE_BLOB])
+
+def steady_state_l1_gas_estimate(state: AztecModelState):
+    if state['timestep'] < len(steady_gas_fee_l1_time_series):
+        return steady_gas_fee_l1_time_series[state['timestep']]
+    else:
+        return steady_gas_fee_l1_time_series[-1]
+
+def steady_state_blob_gas_estimate(state: AztecModelState):
+    if state['timestep'] < len(steady_gas_fee_blob_time_series):
+        return steady_gas_fee_blob_time_series[state['timestep']]
+    else:
+        return steady_gas_fee_blob_time_series[-1]
+
+
+STEADY_STATE_GAS_ESTIMATORS = L1GasEstimators(
+    proposal= steady_state_l1_gas_estimate,
+    commitment_bond= steady_state_l1_gas_estimate,
+    content_reveal= steady_state_l1_gas_estimate,
+    content_reveal_blob= steady_state_blob_gas_estimate, # NOTE: this is a HACK assumption, gas was estimated from various documents by Aztec Labs
+    rollup_proof= steady_state_l1_gas_estimate
 )
+
+#############################################################
+## End: Steady state gas estimators defined                ##
+#############################################################
+
+#############################################################
+## Begin: single shock gas estimators defined              ##
+#############################################################
+
+L1_SHOCK_AMOUNT = 100
+BLOB_SHOCK_AMOUNT = 100
+initial_time = floor(0.25 * TIMESTEPS) # XXX: 25% of timesteps
+final_time = floor(0.25 * TIMESTEPS) # XXX: 25% of timesteps
+
+
+single_shock_gas_fee_l1_time_series = np.zeros(TIMESTEPS)
+single_shock_gas_fee_blob_time_series = np.zeros(TIMESTEPS)
+
+single_shock_gas_fee_l1_time_series[0:initial_time] = steady_gas_fee_l1_time_series[0:initial_time].copy()
+single_shock_gas_fee_l1_time_series[-final_time:] = steady_gas_fee_l1_time_series[-final_time:].copy()
+single_shock_gas_fee_l1_time_series[initial_time:TIMESTEPS - final_time] = steady_gas_fee_l1_time_series[initial_time:TIMESTEPS - final_time].copy() + L1_SHOCK_AMOUNT
+
+single_shock_gas_fee_blob_time_series[0:initial_time] = steady_gas_fee_blob_time_series[0:initial_time].copy()
+single_shock_gas_fee_blob_time_series[-final_time:] = steady_gas_fee_blob_time_series[-final_time:].copy()
+single_shock_gas_fee_blob_time_series[initial_time:TIMESTEPS - final_time] = steady_gas_fee_blob_time_series[initial_time:TIMESTEPS - final_time].copy() + L1_SHOCK_AMOUNT
+
+
+def single_shock_l1_gas_estimate(state: AztecModelState):
+    if state['timestep'] < len(single_shock_gas_fee_l1_time_series):
+        return single_shock_gas_fee_l1_time_series[state['timestep']]
+    else:
+        return single_shock_gas_fee_l1_time_series[-1]
+
+def single_shock_blob_gas_estimate(state: AztecModelState):
+    if state['timestep'] < len(single_shock_gas_fee_blob_time_series):
+        return single_shock_gas_fee_blob_time_series[state['timestep']]
+    else:
+        return single_shock_gas_fee_blob_time_series[-1]
+
+SINGLE_SHOCK_GAS_ESTIMATORS = L1GasEstimators(
+    proposal= single_shock_l1_gas_estimate,
+    commitment_bond= single_shock_l1_gas_estimate,
+    content_reveal= single_shock_l1_gas_estimate,
+    content_reveal_blob= single_shock_blob_gas_estimate, # NOTE: this is a HACK assumption, gas was estimated from various documents by Aztec Labs
+    rollup_proof= single_shock_l1_gas_estimate
+)
+
+#############################################################
+## End: single shock gas estimators defined                ##
+#############################################################
+
+#############################################################
+## Begin: intermittent shock gas estimators defined        ##
+#############################################################
+
+L1_INTER_SHOCK_AMPLITUDE = 100 # Amplitude of wave
+L1_INTER_SHOCK_PERIOD = 10 # Period of wave
+num_points = (TIMESTEPS - final_time) - initial_time
+t = np.arange(initial_time, initial_time + num_points)
+
+raw_shock_signal = L1_INTER_SHOCK_AMPLITUDE * np.sin(2 * np.pi * t / L1_INTER_SHOCK_PERIOD) + L1_INTER_SHOCK_AMPLITUDE
+L1_INTER_SHOCK_SIGNAL = np.array([floor(max(x,0)) for x in raw_shock_signal])
+
+
+intermit_shock_gas_fee_l1_time_series = np.zeros(TIMESTEPS)
+intermit_shock_gas_fee_blob_time_series = np.zeros(TIMESTEPS)
+
+intermit_shock_gas_fee_l1_time_series[0:initial_time] = steady_gas_fee_l1_time_series[0:initial_time].copy()
+intermit_shock_gas_fee_l1_time_series[-final_time:] = steady_gas_fee_l1_time_series[-final_time:].copy()
+intermit_shock_gas_fee_l1_time_series[initial_time:TIMESTEPS - final_time] = steady_gas_fee_l1_time_series[initial_time:TIMESTEPS - final_time].copy() + L1_INTER_SHOCK_SIGNAL
+
+def intermit_shock_l1_gas_estimate(state: AztecModelState):
+    if state['timestep'] < len(intermit_shock_gas_fee_l1_time_series):
+        return intermit_shock_gas_fee_l1_time_series[state['timestep']]
+    else:
+        return intermit_shock_gas_fee_l1_time_series[-1]
+
+INTERMIT_SHOCK_GAS_ESTIMATORS = L1GasEstimators(
+    proposal= intermit_shock_l1_gas_estimate,
+    commitment_bond= intermit_shock_l1_gas_estimate,
+    content_reveal= intermit_shock_l1_gas_estimate,
+    content_reveal_blob= single_shock_blob_gas_estimate, 
+    rollup_proof= intermit_shock_l1_gas_estimate
+) 
+
+#############################################################
+## End: intermittent shock gas estimators defined        ##
+#############################################################
 
 # HACK: Gas is 1 for all transactions
 TX_ESTIMATORS = UserTransactionEstimators(
@@ -134,9 +255,9 @@ SINGLE_RUN_PARAMS = AztecModelParams(label='default',
 
                                      gwei_to_tokens=1e-9, 
 
-                                     gas_estimators=GAS_ESTIMATORS,
+                                     gas_estimators=STEADY_STATE_GAS_ESTIMATORS,
                                      tx_estimators=TX_ESTIMATORS,
                                      slash_params=SLASH_PARAMS,
                                      commit_bond_amount = 10.0
-                                     
+                                 
                                      )  
