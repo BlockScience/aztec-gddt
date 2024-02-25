@@ -375,21 +375,23 @@ def p_commit_bond(params: AztecModelParams,
                                     amount=slashed_amount,
                                     kind=TransferKind.slash))
             else:
-                # XXX
+                # NOTE: Costs now include gas fees and safety buffer. 
+                gas: Gas = params['gas_estimators'].commitment_bond(state)
+                fee = gas * state['gas_fee_l1']
+                SAFETY_BUFFER = 2 * fee # HACK: 
                 expected_rewards = state['cumm_block_rewards'] - history[-1][0]['cumm_block_rewards']
-                expected_costs = state['cumm_fee_cashback'] - history[-1][0]['cumm_fee_cashback']
+                expected_costs = state['cumm_fee_cashback'] - history[-1][0]['cumm_fee_cashback'] + fee + SAFETY_BUFFER
                 payoff_reveal = expected_rewards - expected_costs
 
                 if payoff_reveal >= 0:
                     # If duration is not expired, do  a trial to see if bond is commited
                     if bernoulli_trial(probability=params['commit_bond_reveal_probability']) is True and (state['gas_fee_l1'] <= params['gas_threshold_for_tx']):
                         updated_process = copy(process)
-                        advance_blocks = remaining_time
+                        advance_blocks = remaining_time #TODO: double-check this.
                         updated_process.phase = SelectionPhase.pending_reveal
                         updated_process.duration_in_current_phase = 0
 
-                        gas: Gas = params['gas_estimators'].commitment_bond(state)
-                        fee = gas * state['gas_fee_l1']
+                        
                         proposal_uuid = updated_process.tx_winning_proposal
 
 
