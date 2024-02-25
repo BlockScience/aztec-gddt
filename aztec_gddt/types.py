@@ -1,8 +1,9 @@
 from typing import Annotated, TypedDict, Union, NamedTuple, Optional
+from typing import Any, Callable, Mapping
 from enum import IntEnum, Enum, auto, Flag
 from math import floor
+import numpy as np
 from pydantic import BaseModel, PositiveInt, FiniteFloat
-from typing import Callable, Mapping, NamedTuple
 from pydantic.dataclasses import dataclass
 from uuid import uuid4
 from typing import Sequence
@@ -77,7 +78,6 @@ class TokenSupply():
                           burnt=state['cumm_burn'],
                           issued=state['cumm_block_rewards'] + state['cumm_fee_cashback'])
         return obj
-
 
 @dataclass
 class Process:
@@ -216,11 +216,10 @@ class AztecModelState(TypedDict):
     token_supply: TokenSupply
 
 
-GasEstimator = Callable[[AztecModelState], Gas]
-BlobGasEstimator = Callable[[AztecModelState], BlobGas]
-BaseIntEstimator = Callable[[AztecModelState], int]
-BaseFloatEstimator = Callable[[AztecModelState], float]
-
+GasEstimator = Callable[[AztecModelState, Optional[Any]], Gas]
+BlobGasEstimator = Callable[[AztecModelState, Optional[Any]], BlobGas]
+BaseIntEstimator = Callable[[AztecModelState, Optional[Any]], int]
+BaseFloatEstimator = Callable[[AztecModelState, Optional[Any]], float]
 
 @dataclass
 class L1GasEstimators():
@@ -305,6 +304,7 @@ class AztecModelParams(TypedDict):
     gas_estimators: L1GasEstimators
     tx_estimators: UserTransactionEstimators
     slash_params: SlashParameters
+
 
     commit_bond_amount: float
 
