@@ -385,7 +385,9 @@ def p_commit_bond(params: AztecModelParams,
 
                 if payoff_reveal >= 0:
                     # If duration is not expired, do  a trial to see if bond is commited
-                    if bernoulli_trial(probability=params['commit_bond_reveal_probability']) is True and (state['gas_fee_l1'] <= params['gas_threshold_for_tx']):
+                    agent_decides_to_reveal_commit_bond = bernoulli_trial(probability=params['commit_bond_reveal_probability'])
+                    gas_fee_l1_acceptable = (state['gas_fee_l1'] <= params['gas_threshold_for_tx'])
+                    if  agent_decides_to_reveal_commit_bond and gas_fee_l1_acceptable:
                         updated_process = copy(process)
                         advance_blocks = remaining_time #TODO: double-check this.
                         updated_process.phase = SelectionPhase.pending_reveal
@@ -394,8 +396,8 @@ def p_commit_bond(params: AztecModelParams,
                         
                         proposal_uuid = updated_process.tx_winning_proposal
 
-
-                        if bernoulli_trial(params['proving_marketplace_usage_probability']) is True:
+                        proving_market_is_used = bernoulli_trial(params['proving_marketplace_usage_probability'])
+                        if proving_market_is_used:
                             provers: list[AgentUUID] = [
                                                         a_id 
                                                         for (a_id, a) 
@@ -471,7 +473,7 @@ def p_reveal_content(params: AztecModelParams,
                                     amount=slashed_amount,
                                     kind=TransferKind.slash))
             else:
-                # XXX
+                # XXX: Should either costs go here? 
                 expected_rewards = state['cumm_block_rewards'] - history[-1][0]['cumm_block_rewards']
                 expected_costs = state['cumm_fee_cashback'] - history[-1][0]['cumm_fee_cashback']
                 payoff_reveal = expected_rewards - expected_costs
