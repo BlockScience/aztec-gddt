@@ -478,40 +478,42 @@ def p_reveal_content(params: AztecModelParams,
                 expected_costs = state['cumm_fee_cashback'] - history[-1][0]['cumm_fee_cashback']
                 payoff_reveal = expected_rewards - expected_costs
 
-                if payoff_reveal >= 0:
-                    if bernoulli_trial(probability=params['block_content_reveal_probability']) is True and (state['gas_fee_l1'] <= params['gas_threshold_for_tx']) and (state['gas_fee_blob'] <= params['blob_gas_threshold_for_tx']):
-                        updated_process = copy(process)
-                        advance_blocks = remaining_time
-                        updated_process.phase = SelectionPhase.pending_rollup_proof
-                        updated_process.duration_in_current_phase = 0
+                agent_expects_profit = payoff_reveal >= 0
+                agent_decides_to_reveal_block_content = bernoulli_trial(probability=params['block_content_reveal_probability'])
+                gas_fee_l1_acceptable = (state['gas_fee_blob'] <= params['blob_gas_threshold_for_tx'])
 
-                        who = updated_process.leading_sequencer  # XXX
-                        gas: Gas = params['gas_estimators'].content_reveal(state)
-                        fee: Gwei = gas * state['gas_fee_l1']
-                        blob_gas: BlobGas = params['gas_estimators'].content_reveal_blob(
-                            state)
-                        blob_fee: Gwei = blob_gas * state['gas_fee_blob']
+                if agent_expects_profit and agent_decides_to_reveal_block_content and gas_fee_l1_acceptable:
+                    updated_process = copy(process)
+                    advance_blocks = remaining_time
+                    updated_process.phase = SelectionPhase.pending_rollup_proof
+                    updated_process.duration_in_current_phase = 0
 
-                        tx_count = params['tx_estimators'].transaction_count(state)
-                        tx_avg_size = int(state['transactions'][process.tx_winning_proposal].size / tx_count) # type: ignore
-                        tx_avg_fee_per_size = params['tx_estimators'].transaction_average_fee_per_size(
-                            state)
+                    who = updated_process.leading_sequencer  # XXX
+                    gas: Gas = params['gas_estimators'].content_reveal(state)
+                    fee: Gwei = gas * state['gas_fee_l1']
+                    blob_gas: BlobGas = params['gas_estimators'].content_reveal_blob(
+                        state)
+                    blob_fee: Gwei = blob_gas * state['gas_fee_blob']
 
-                        tx = ContentReveal(who=who,
-                                        when=state['time_l1'],
-                                        uuid=uuid4(),
-                                        gas=gas,
-                                        fee=fee,
-                                        blob_gas=blob_gas,
-                                        blob_fee=blob_fee,
-                                        transaction_count=tx_count,
-                                        transaction_avg_size=tx_avg_size,
-                                        transaction_avg_fee_per_size=tx_avg_fee_per_size)
+                    tx_count = params['tx_estimators'].transaction_count(state)
+                    tx_avg_size = int(state['transactions'][process.tx_winning_proposal].size / tx_count) # type: ignore
+                    tx_avg_fee_per_size = params['tx_estimators'].transaction_average_fee_per_size(
+                        state)
 
-                        new_transactions.append(tx)
-                        updated_process.tx_content_reveal = tx.uuid
-                    else:
-                        pass # Force race mode by doing nothing
+                    tx = ContentReveal(who=who,
+                                    when=state['time_l1'],
+                                    uuid=uuid4(),
+                                    gas=gas,
+                                    fee=fee,
+                                    blob_gas=blob_gas,
+                                    blob_fee=blob_fee,
+                                    transaction_count=tx_count,
+                                    transaction_avg_size=tx_avg_size,
+                                    transaction_avg_fee_per_size=tx_avg_fee_per_size)
+
+                    new_transactions.append(tx)
+                    updated_process.tx_content_reveal = tx.uuid
+
                 else:
                     pass
         else:
@@ -564,7 +566,9 @@ def p_submit_proof(params: AztecModelParams,
 
 
             else:
-                if bernoulli_trial(probability=params['rollup_proof_reveal_probability']) and (state['gas_fee_l1'] <= params['gas_threshold_for_tx']):
+                agent_decides_to_reveal_rollup_proof = bernoulli_trial(probability=params['rollup_proof_reveal_probability'])
+                gas_fee_l1_acceptable = state['gas_fee_l1'] <= params['gas_threshold_for_tx']
+                if agent_decides_to_reveal_rollup_proof and gas_fee_l1_acceptable:
                     updated_process = copy(process)
                     advance_blocks = remaining_time
                     updated_process.phase = SelectionPhase.finalized
