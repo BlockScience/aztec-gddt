@@ -1,4 +1,4 @@
-from typing import Annotated, TypedDict, Union, NamedTuple, Optional
+from typing import Annotated, Dict, TypedDict, Union, NamedTuple, Optional
 from typing import Any, Callable, Mapping
 from enum import IntEnum, Enum, auto, Flag
 from math import floor
@@ -128,6 +128,8 @@ class Agent():
     is_prover: bool = False
     is_relay: bool = False
     staked_amount: Tokens = 0.0
+
+    logic: Dict[str, Callable[Dict,Any]] = None #placeholder for general agent logic
 
     def slots(self, tokens_per_slot: Tokens) -> Tokens:
         return floor(self.staked_amount / tokens_per_slot)
@@ -277,6 +279,8 @@ class AztecModelParams(TypedDict):
     unstake_cooldown_period: L1Blocks  # XXX
 
     # Behavioral Parameters
+
+    logic: Dict[str, Callable[Dict, Any]] = None #placeholder for general system logic
 
     # XXX: assume that each interacting user
     # has an fixed probability per L1 block
