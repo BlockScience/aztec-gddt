@@ -308,10 +308,12 @@ class AztecModelParams(TypedDict):
     gas_estimators: L1GasEstimators
     tx_estimators: UserTransactionEstimators
     slash_params: SlashParameters
+    gas_fee_l1_time_series: np.ndarray
+    gas_fee_blob_time_series: np.ndarray
 
 
     commit_bond_amount: float
-    op_costs: float = 0 #HACK: Operating costs, uniform parameter
+    op_costs: Gwei
 
 
 class SignalTime(TypedDict, total=False):
