@@ -1,8 +1,9 @@
-from typing import Annotated, TypedDict, Union, NamedTuple, Optional
+from typing import Annotated, Dict, TypedDict, Union, NamedTuple, Optional
+from typing import Any, Callable, Mapping
 from enum import IntEnum, Enum, auto, Flag
 from math import floor
+import numpy as np
 from pydantic import BaseModel, PositiveInt, FiniteFloat
-from typing import Callable, Mapping, NamedTuple
 from pydantic.dataclasses import dataclass
 from uuid import uuid4
 from typing import Sequence
@@ -78,7 +79,6 @@ class TokenSupply():
                           issued=state['cumm_block_rewards'] + state['cumm_fee_cashback'])
         return obj
 
-
 @dataclass
 class Process:
     uuid: ProcessUUID
@@ -128,6 +128,8 @@ class Agent():
     is_prover: bool = False
     is_relay: bool = False
     staked_amount: Tokens = 0.0
+
+    logic: Dict[str, Callable[Dict,Any]] = None #placeholder for general agent logic
 
     def slots(self, tokens_per_slot: Tokens) -> Tokens:
         return floor(self.staked_amount / tokens_per_slot)
@@ -216,11 +218,10 @@ class AztecModelState(TypedDict):
     token_supply: TokenSupply
 
 
-GasEstimator = Callable[[AztecModelState], Gas]
-BlobGasEstimator = Callable[[AztecModelState], BlobGas]
-BaseIntEstimator = Callable[[AztecModelState], int]
-BaseFloatEstimator = Callable[[AztecModelState], float]
-
+GasEstimator = Callable[[AztecModelState, Optional[Any]], Gas]
+BlobGasEstimator = Callable[[AztecModelState, Optional[Any]], BlobGas]
+BaseIntEstimator = Callable[[AztecModelState, Optional[Any]], int]
+BaseFloatEstimator = Callable[[AztecModelState, Optional[Any]], float]
 
 @dataclass
 class L1GasEstimators():
@@ -258,20 +259,28 @@ class AztecModelParams(TypedDict):
 
     # Economic Parameters
     uncle_count: int
-    reward_per_block: Tokens
+    reward_per_block: Gwei
     fee_subsidy_fraction: Percentage
 
     # Phase Durations
-    phase_duration_proposal: L1Blocks
-    phase_duration_reveal: L1Blocks
-    phase_duration_commit_bond: L1Blocks
-    phase_duration_rollup: L1Blocks
-    phase_duration_race: L1Blocks
+    # These have both minimum and maximum numbers of blocks
+    phase_duration_proposal_min_blocks: L1Blocks
+    phase_duration_proposal_max_blocks: L1Blocks
+    phase_duration_reveal_min_blocks: L1Blocks
+    phase_duration_reveal_max_blocks: L1Blocks
+    phase_duration_commit_bond_min_blocks: L1Blocks
+    phase_duration_commit_bond_max_blocks: L1Blocks
+    phase_duration_rollup_min_blocks: L1Blocks
+    phase_duration_rollup_max_blocks: L1Blocks
+    phase_duration_race_min_blocks: L1Blocks
+    phase_duration_race_max_blocks: L1Blocks
 
     stake_activation_period: L1Blocks  # XXX
     unstake_cooldown_period: L1Blocks  # XXX
 
     # Behavioral Parameters
+
+    logic: Dict[str, Callable[Dict, Any]] = None #placeholder for general system logic
 
     # XXX: assume that each interacting user
     # has an fixed probability per L1 block
@@ -299,8 +308,12 @@ class AztecModelParams(TypedDict):
     gas_estimators: L1GasEstimators
     tx_estimators: UserTransactionEstimators
     slash_params: SlashParameters
+    gas_fee_l1_time_series: np.ndarray
+    gas_fee_blob_time_series: np.ndarray
+
 
     commit_bond_amount: float
+    op_costs: Gwei
 
 
 class SignalTime(TypedDict, total=False):

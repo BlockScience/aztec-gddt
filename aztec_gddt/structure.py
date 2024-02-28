@@ -18,6 +18,7 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
     },
     {
         'label': 'Exogenous Processes',
+        'ignore': False, 
         'policies': {
 
         },
@@ -28,6 +29,7 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
     },
     {
         'label': 'Agent Actions',
+        'ignore' : False, 
         'policies': {
             # TODO Possibly add policies for the users triggering the relevant events
             # eg. making the proofs public
@@ -58,6 +60,7 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
     },
     {
         'label': 'Payouts',
+        'ignore': False, 
         'policies': {
             'block_reward': p_block_reward,
             'fee_cashback': p_fee_cashback,
@@ -71,6 +74,7 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
     },
     {
         'label': 'Dynamically Evolve Time',
+        'ignore': False, 
         'policies': {
              'conditionally_evolve_time': p_evolve_time_dynamical
         },
@@ -83,6 +87,7 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
     },
     {
         'label': 'Metrics',
+        'ignore': False,
         'policies': {
         },
         'variables': {

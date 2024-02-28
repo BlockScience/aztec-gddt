@@ -187,26 +187,24 @@ def s_current_process_time_dynamical(_1,
     return ('current_process', updated_process)
 
 
-def s_gas_fee_l1(params: AztecModelParams,
-                 _2,
-                 _3,
-                 state: AztecModelState,
-                 signal: SignalEvolveProcess) -> VariableUpdate:
-    """
-    State update function for change in gas fee.
-    """
-    return ('gas_fee_l1', state['gas_fee_l1'])
+def value_from_param_timeseries_suf(params,# -> tuple[Any, Any]
+                                     state, 
+                                     param_key, 
+                                     var_value):
+    time_series = params[param_key]
+
+    if state['timestep'] < len(time_series):
+        value = time_series[state['timestep']]
+    else:
+        value = time_series[-1]
+
+    return (var_value, value)
+
+s_gas_fee_l1 = lambda p, _2, _3, s, _5: value_from_param_timeseries_suf(p, s, 'gas_fee_l1_time_series', 'gas_fee_l1')
 
 
-def s_gas_fee_blob(params: AztecModelParams,
-                   _2,
-                   _3,
-                   state: AztecModelState,
-                   signal: SignalEvolveProcess) -> VariableUpdate:
-    """
-    State update function for change in blob gas fee.
-    """
-    return ('gas_fee_blob', state['gas_fee_blob'])
+s_gas_fee_blob = lambda p, _2, _3, s, _5: value_from_param_timeseries_suf(p, s, 'gas_fee_blob_time_series', 'gas_fee_blob')
+
 
 
 def p_init_process(params: AztecModelParams,
@@ -290,11 +288,13 @@ def p_select_proposal(params: AztecModelParams,
     process = state['current_process']
     updated_process: Optional[Process] = None
 
+    max_phase_duration = params['phase_duration_proposal_max_blocks']
+
     if process is None:
         pass
     else:
         if process.phase == SelectionPhase.pending_proposals:
-            remaining_time = params['phase_duration_proposal'] - process.duration_in_current_phase
+            remaining_time = max_phase_duration - process.duration_in_current_phase
             if remaining_time < 0:
                 # TODO: filter out invalid proposals
                 # J: Which invalid proposals are we expecting here? Anything "spam/invalid" would just be ignored, not sure we need to sim that, unless for blockspace
@@ -352,12 +352,13 @@ def p_commit_bond(params: AztecModelParams,
     transfers: list[Transfer] = []
 
     bond_amount = params['commit_bond_amount']
+    max_phase_duration = params['phase_duration_commit_bond_max_blocks']
 
     if process is None:
         pass
     else:
         if process.phase == SelectionPhase.pending_commit_bond:
-            remaining_time = params['phase_duration_commit_bond'] - process.duration_in_current_phase
+            remaining_time = max_phase_duration - process.duration_in_current_phase
             if remaining_time < 0:
                 # Move to Proof Race mode if duration is expired
                 updated_process = copy(process)
@@ -372,25 +373,29 @@ def p_commit_bond(params: AztecModelParams,
                                     amount=slashed_amount,
                                     kind=TransferKind.slash))
             else:
-                # XXX
+                # NOTE: Costs now include gas fees and safety buffer. 
+                gas: Gas = params['gas_estimators'].commitment_bond(state)
+                fee = gas * state['gas_fee_l1']
+                SAFETY_BUFFER = 2 * fee # HACK: 
                 expected_rewards = state['cumm_block_rewards'] - history[-1][0]['cumm_block_rewards']
-                expected_costs = state['cumm_fee_cashback'] - history[-1][0]['cumm_fee_cashback']
+                expected_costs = params['op_costs'] + fee + SAFETY_BUFFER
                 payoff_reveal = expected_rewards - expected_costs
 
                 if payoff_reveal >= 0:
                     # If duration is not expired, do  a trial to see if bond is commited
-                    if bernoulli_trial(probability=params['commit_bond_reveal_probability']) is True and (state['gas_fee_l1'] <= params['gas_threshold_for_tx']):
+                    agent_decides_to_reveal_commit_bond = bernoulli_trial(probability=params['commit_bond_reveal_probability'])
+                    gas_fee_l1_acceptable = (state['gas_fee_l1'] <= params['gas_threshold_for_tx'])
+                    if  agent_decides_to_reveal_commit_bond and gas_fee_l1_acceptable:
                         updated_process = copy(process)
-                        advance_blocks = remaining_time
+                        advance_blocks = remaining_time #TODO: double-check this.
                         updated_process.phase = SelectionPhase.pending_reveal
                         updated_process.duration_in_current_phase = 0
 
-                        gas: Gas = params['gas_estimators'].commitment_bond(state)
-                        fee = gas * state['gas_fee_l1']
+                        
                         proposal_uuid = updated_process.tx_winning_proposal
 
-
-                        if bernoulli_trial(params['proving_marketplace_usage_probability']) is True:
+                        proving_market_is_used = bernoulli_trial(params['proving_marketplace_usage_probability'])
+                        if proving_market_is_used:
                             provers: list[AgentUUID] = [
                                                         a_id 
                                                         for (a_id, a) 
@@ -444,12 +449,14 @@ def p_reveal_content(params: AztecModelParams,
     new_transactions = list()
     transfers: list[Transfer] = []
 
+    max_phase_duration = params['phase_duration_reveal_max_blocks']
+
     if process is None:
         pass
     else:
         if process.phase == SelectionPhase.pending_reveal:
             # If the process has blown the phase duration
-            remaining_time = params['phase_duration_reveal'] - process.duration_in_current_phase
+            remaining_time = max_phase_duration - process.duration_in_current_phase
             if remaining_time < 0:
                 updated_process = copy(process)
                 updated_process.phase = SelectionPhase.proof_race
@@ -464,45 +471,53 @@ def p_reveal_content(params: AztecModelParams,
                                     amount=slashed_amount,
                                     kind=TransferKind.slash))
             else:
-                # XXX
+                # NOTE: Costs now include gas fees and safety buffer. 
+                gas: Gas = params['gas_estimators'].content_reveal(state)
+                fee = gas * state['gas_fee_l1']
+                SAFETY_BUFFER = 2 * fee # HACK: 
+                # XXX: Expected Rewards is the rewards over the last timestep.
                 expected_rewards = state['cumm_block_rewards'] - history[-1][0]['cumm_block_rewards']
-                expected_costs = state['cumm_fee_cashback'] - history[-1][0]['cumm_fee_cashback']
+                expected_costs = params['op_costs'] + fee + SAFETY_BUFFER
                 payoff_reveal = expected_rewards - expected_costs
 
-                if payoff_reveal >= 0:
-                    if bernoulli_trial(probability=params['block_content_reveal_probability']) is True and (state['gas_fee_l1'] <= params['gas_threshold_for_tx']) and (state['gas_fee_blob'] <= params['blob_gas_threshold_for_tx']):
-                        updated_process = copy(process)
-                        advance_blocks = remaining_time
-                        updated_process.phase = SelectionPhase.pending_rollup_proof
-                        updated_process.duration_in_current_phase = 0
+                agent_expects_profit = payoff_reveal >= 0
+                agent_decides_to_reveal_block_content = bernoulli_trial(probability=params['block_content_reveal_probability'])
+                gas_fee_blob_acceptable = (state['gas_fee_blob'] <= params['blob_gas_threshold_for_tx'])
+                gas_fee_l1_acceptable = (state['gas_fee_l1'] <= params['gas_threshold_for_tx'])
 
-                        who = updated_process.leading_sequencer  # XXX
-                        gas: Gas = params['gas_estimators'].content_reveal(state)
-                        fee: Gwei = gas * state['gas_fee_l1']
-                        blob_gas: BlobGas = params['gas_estimators'].content_reveal_blob(
-                            state)
-                        blob_fee: Gwei = blob_gas * state['gas_fee_blob']
 
-                        tx_count = params['tx_estimators'].transaction_count(state)
-                        tx_avg_size = int(state['transactions'][process.tx_winning_proposal].size / tx_count) # type: ignore
-                        tx_avg_fee_per_size = params['tx_estimators'].transaction_average_fee_per_size(
-                            state)
+                if agent_expects_profit and agent_decides_to_reveal_block_content and gas_fee_blob_acceptable and gas_fee_l1_acceptable:
+                    updated_process = copy(process)
+                    advance_blocks = remaining_time
+                    updated_process.phase = SelectionPhase.pending_rollup_proof
+                    updated_process.duration_in_current_phase = 0
 
-                        tx = ContentReveal(who=who,
-                                        when=state['time_l1'],
-                                        uuid=uuid4(),
-                                        gas=gas,
-                                        fee=fee,
-                                        blob_gas=blob_gas,
-                                        blob_fee=blob_fee,
-                                        transaction_count=tx_count,
-                                        transaction_avg_size=tx_avg_size,
-                                        transaction_avg_fee_per_size=tx_avg_fee_per_size)
+                    who = updated_process.leading_sequencer  # XXX
+                    gas: Gas = params['gas_estimators'].content_reveal(state)
+                    fee: Gwei = gas * state['gas_fee_l1']
+                    blob_gas: BlobGas = params['gas_estimators'].content_reveal_blob(
+                        state)
+                    blob_fee: Gwei = blob_gas * state['gas_fee_blob']
 
-                        new_transactions.append(tx)
-                        updated_process.tx_content_reveal = tx.uuid
-                    else:
-                        pass # Force race mode by doing nothing
+                    tx_count = params['tx_estimators'].transaction_count(state)
+                    tx_avg_size = int(state['transactions'][process.tx_winning_proposal].size / tx_count) # type: ignore
+                    tx_avg_fee_per_size = params['tx_estimators'].transaction_average_fee_per_size(
+                        state)
+
+                    tx = ContentReveal(who=who,
+                                    when=state['time_l1'],
+                                    uuid=uuid4(),
+                                    gas=gas,
+                                    fee=fee,
+                                    blob_gas=blob_gas,
+                                    blob_fee=blob_fee,
+                                    transaction_count=tx_count,
+                                    transaction_avg_size=tx_avg_size,
+                                    transaction_avg_fee_per_size=tx_avg_fee_per_size)
+
+                    new_transactions.append(tx)
+                    updated_process.tx_content_reveal = tx.uuid
+
                 else:
                     pass
         else:
@@ -526,12 +541,14 @@ def p_submit_proof(params: AztecModelParams,
     advance_blocks = 0
     transfers: list[Transfer] = []
 
+    max_phase_duration = params['phase_duration_rollup_max_blocks']
+
     if process is None:
         pass
     else:
         if process.phase == SelectionPhase.pending_rollup_proof:
-            remaining_time = params['phase_duration_rollup'] - process.duration_in_current_phase
-            if process.duration_in_current_phase > params['phase_duration_rollup']:
+            remaining_time = max_phase_duration - process.duration_in_current_phase
+            if remaining_time < 0:
                 updated_process = copy(process)
                 updated_process.phase = SelectionPhase.skipped  # TODO: confirm
                 updated_process.duration_in_current_phase = 0
@@ -553,7 +570,9 @@ def p_submit_proof(params: AztecModelParams,
 
 
             else:
-                if bernoulli_trial(probability=params['rollup_proof_reveal_probability']) and (state['gas_fee_l1'] <= params['gas_threshold_for_tx']):
+                agent_decides_to_reveal_rollup_proof = bernoulli_trial(probability=params['rollup_proof_reveal_probability'])
+                gas_fee_l1_acceptable = state['gas_fee_l1'] <= params['gas_threshold_for_tx']
+                if agent_decides_to_reveal_rollup_proof and gas_fee_l1_acceptable:
                     updated_process = copy(process)
                     advance_blocks = remaining_time
                     updated_process.phase = SelectionPhase.finalized
@@ -594,17 +613,20 @@ def p_race_mode(params: AztecModelParams,
     updated_process: Optional[Process] = None
     new_transactions: list[TransactionL1] = list()
 
+    max_phase_duration = params['phase_duration_race_max_blocks']
+
     if process is None:
         pass
     else:
         if process.phase == SelectionPhase.proof_race:
-            if process.duration_in_current_phase > params['phase_duration_race']:
+            remaining_time = max_phase_duration - process.duration_in_current_phase
+            if remaining_time < 0:
                 updated_process = copy(process)
                 updated_process.phase = SelectionPhase.skipped
                 updated_process.duration_in_current_phase = 0
             else:
                 # XXX there is a hard-coded L1 Builder agent
-                # who immediatly ends the race mode.
+                # who immediately ends the race mode.
                 who = 'l1-builder'
                 gas: Gas = params['gas_estimators'].content_reveal(state)
                 fee: Gwei = gas * state['gas_fee_l1']

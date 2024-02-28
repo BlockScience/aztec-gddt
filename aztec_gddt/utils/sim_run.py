@@ -85,12 +85,13 @@ def sim_run(state_variables,
         else:
             selected_params = params_set
 
+        # TODO: evaluate whatever we need to keep track of the `params`
         # Attribute parameters to each row
-        df = df.assign(**select_config_M_dict(configs, 0, selected_params))
-        for i, (_, n_df) in enumerate(df.groupby(['simulation', 'subset', 'run'])):
-            df.loc[n_df.index] = n_df.assign(**select_config_M_dict(configs,
-                                                                    i,
-                                                                    selected_params))
+        # df = df.assign(**select_config_M_dict(configs, 0, selected_params))
+        # for i, (_, n_df) in enumerate(df.groupby(['simulation', 'subset', 'run'])):
+        #     df.loc[n_df.index] = n_df.assign(**select_config_M_dict(configs,
+        #                                                             i,
+        #                                                             selected_params))
 
     # Based on Vitor Marthendal (@marthendalnunes) snippet
     if use_label == True:
