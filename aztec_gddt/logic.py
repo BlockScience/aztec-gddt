@@ -187,26 +187,24 @@ def s_current_process_time_dynamical(_1,
     return ('current_process', updated_process)
 
 
-def s_gas_fee_l1(params: AztecModelParams,
-                 _2,
-                 _3,
-                 state: AztecModelState,
-                 signal: SignalEvolveProcess) -> VariableUpdate:
-    """
-    State update function for change in gas fee.
-    """
-    return ('gas_fee_l1', state['gas_fee_l1'])
+def value_from_param_timeseries_suf(params,# -> tuple[Any, Any]
+                                     state, 
+                                     param_key, 
+                                     var_value):
+    time_series = params[param_key]
+
+    if state['timestep'] < len(time_series):
+        value = time_series[state['timestep']]
+    else:
+        value = time_series[-1]
+
+    return (var_value, value)
+
+s_gas_fee_l1 = lambda p, _2, _3, s, _5: value_from_param_timeseries_suf(p, s, 'gas_fee_l1_time_series', 'gas_fee_l1')
 
 
-def s_gas_fee_blob(params: AztecModelParams,
-                   _2,
-                   _3,
-                   state: AztecModelState,
-                   signal: SignalEvolveProcess) -> VariableUpdate:
-    """
-    State update function for change in blob gas fee.
-    """
-    return ('gas_fee_blob', state['gas_fee_blob'])
+s_gas_fee_blob = lambda p, _2, _3, s, _5: value_from_param_timeseries_suf(p, s, 'gas_fee_blob_time_series', 'gas_fee_blob')
+
 
 
 def p_init_process(params: AztecModelParams,

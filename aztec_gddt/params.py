@@ -138,19 +138,6 @@ single_shock_gas_fee_blob_time_series[0:initial_time] = steady_gas_fee_blob_time
 single_shock_gas_fee_blob_time_series[-final_time:] = steady_gas_fee_blob_time_series[-final_time:].copy()
 single_shock_gas_fee_blob_time_series[initial_time:TIMESTEPS - final_time] = steady_gas_fee_blob_time_series[initial_time:TIMESTEPS - final_time].copy() + L1_SHOCK_AMOUNT
 
-
-def single_shock_l1_gas_estimate(state: AztecModelState):
-    if state['timestep'] < len(single_shock_gas_fee_l1_time_series):
-        return single_shock_gas_fee_l1_time_series[state['timestep']]
-    else:
-        return single_shock_gas_fee_l1_time_series[-1]
-
-def single_shock_blob_gas_estimate(state: AztecModelState):
-    if state['timestep'] < len(single_shock_gas_fee_blob_time_series):
-        return single_shock_gas_fee_blob_time_series[state['timestep']]
-    else:
-        return single_shock_gas_fee_blob_time_series[-1]
-
 #############################################################
 ## End: single shock gas estimators defined                ##
 #############################################################
@@ -175,11 +162,9 @@ intermit_shock_gas_fee_l1_time_series[0:initial_time] = steady_gas_fee_l1_time_s
 intermit_shock_gas_fee_l1_time_series[-final_time:] = steady_gas_fee_l1_time_series[-final_time:].copy()
 intermit_shock_gas_fee_l1_time_series[initial_time:TIMESTEPS - final_time] = steady_gas_fee_l1_time_series[initial_time:TIMESTEPS - final_time].copy() + L1_INTER_SHOCK_SIGNAL
 
-def intermit_shock_l1_gas_estimate(state: AztecModelState):
-    if state['timestep'] < len(intermit_shock_gas_fee_l1_time_series):
-        return intermit_shock_gas_fee_l1_time_series[state['timestep']]
-    else:
-        return intermit_shock_gas_fee_l1_time_series[-1]
+
+GAS_FEE_L1_TIME_SERIES_LIST = [steady_gas_fee_l1_time_series, intermit_shock_gas_fee_l1_time_series, single_shock_gas_fee_l1_time_series]
+GAS_FEE_BLOB_TIME_SERIES_LIST = [steady_gas_fee_blob_time_series, intermit_shock_gas_fee_blob_time_series, single_shock_gas_fee_blob_time_series]
 
 
 #############################################################
@@ -244,6 +229,9 @@ SINGLE_RUN_PARAMS = AztecModelParams(label='default',
                                      gas_estimators=GAS_ESTIMATORS,
                                      tx_estimators=TX_ESTIMATORS,
                                      slash_params=SLASH_PARAMS,
-                                     commit_bond_amount = 10.0
-                                 
+                                     gas_fee_l1_time_series=GAS_FEE_L1_TIME_SERIES_LIST[0],
+                                     gas_fee_blob_time_series=GAS_FEE_BLOB_TIME_SERIES_LIST[0],
+
+                                     commit_bond_amount = 10.0,
+                                     op_costs=0.0 # XXX
                                      )  
