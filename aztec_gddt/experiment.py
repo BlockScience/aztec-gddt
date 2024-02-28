@@ -2,12 +2,12 @@ from pandas import DataFrame
 from typing import Dict, List
 
 from aztec_gddt.params import INITIAL_STATE
-from aztec_gddt.params import SINGLE_RUN_PARAMS
+from aztec_gddt.params import SINGLE_RUN_PARAMS, TIMESTEPS
 from aztec_gddt.structure import AZTEC_MODEL_BLOCKS
 from aztec_gddt.types import AztecModelParams, AztecModelState
 from aztec_gddt.utils import sim_run
 
-def standard_run(N_timesteps=700) -> DataFrame:
+def standard_run(N_timesteps=TIMESTEPS) -> DataFrame:
     """Function which runs the cadCAD simulations
 
     Returns:
@@ -37,7 +37,7 @@ def custom_run(initial_state:AztecModelState = None,
                default_params: AztecModelParams = None,
                params_to_modify: Dict[str,List] = None,
                model_blocks:list[dict] = None,
-               N_timesteps:int = 700,
+               N_timesteps:int = TIMESTEPS,
                N_samples:int = 1) -> DataFrame:
     """
     Function to run a custom cadCAD simulation
