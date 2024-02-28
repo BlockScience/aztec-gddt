@@ -124,7 +124,7 @@ def steady_state_blob_gas_estimate(state: AztecModelState):
 
 
 # NOTE: ideally, this should be mapped either to relative timesteps or L1 time rather than fixed timesteps
-# so that the scenarios are invariant to number of simulation timesteps
+# so that the scenarios are invariant to number
 L1_SHOCK_AMOUNT = 100
 BLOB_SHOCK_AMOUNT = 100
 initial_time = floor(0.25 * TIMESTEPS) # XXX: 25% of timesteps
@@ -221,8 +221,8 @@ SINGLE_RUN_PARAMS = AztecModelParams(label='default',
                                      tx_proof_reveal_probability=0.2, # XXX
                                      rollup_proof_reveal_probability=0.2, # XXX
                                      commit_bond_reveal_probability=0.2, # XXX
-                                     gas_threshold_for_tx=700000000, # HACK
-                                     blob_gas_threshold_for_tx=500000000, # HACK
+                                     gas_threshold_for_tx=70, # HACK
+                                     blob_gas_threshold_for_tx=50, # HACK
                                      proving_marketplace_usage_probability=0.3, # XXX
                                      
                                      rewards_to_provers=0.3, # XXX

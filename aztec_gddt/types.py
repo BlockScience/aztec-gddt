@@ -259,7 +259,7 @@ class AztecModelParams(TypedDict):
 
     # Economic Parameters
     uncle_count: int
-    reward_per_block: Tokens
+    reward_per_block: Gwei
     fee_subsidy_fraction: Percentage
 
     # Phase Durations
