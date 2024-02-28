@@ -380,7 +380,7 @@ def p_commit_bond(params: AztecModelParams,
                 fee = gas * state['gas_fee_l1']
                 SAFETY_BUFFER = 2 * fee # HACK: 
                 expected_rewards = state['cumm_block_rewards'] - history[-1][0]['cumm_block_rewards']
-                expected_costs = state['cumm_fee_cashback'] - history[-1][0]['cumm_fee_cashback'] + fee + SAFETY_BUFFER
+                expected_costs = params['op_costs'] + fee + SAFETY_BUFFER
                 payoff_reveal = expected_rewards - expected_costs
 
                 if payoff_reveal >= 0:
@@ -478,7 +478,7 @@ def p_reveal_content(params: AztecModelParams,
                 fee = gas * state['gas_fee_l1']
                 SAFETY_BUFFER = 2 * fee # HACK: 
                 expected_rewards = state['cumm_block_rewards'] - history[-1][0]['cumm_block_rewards']
-                expected_costs = state['cumm_fee_cashback'] - history[-1][0]['cumm_fee_cashback'] + fee + SAFETY_BUFFER
+                expected_costs = params['op_costs'] + fee + SAFETY_BUFFER
                 payoff_reveal = expected_rewards - expected_costs
 
                 agent_expects_profit = payoff_reveal >= 0

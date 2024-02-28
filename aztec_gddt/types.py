@@ -311,6 +311,7 @@ class AztecModelParams(TypedDict):
 
 
     commit_bond_amount: float
+    op_costs: float = 0 #HACK: Operating costs, uniform parameter
 
 
 class SignalTime(TypedDict, total=False):
