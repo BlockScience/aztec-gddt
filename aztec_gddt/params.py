@@ -113,14 +113,6 @@ def steady_state_blob_gas_estimate(state: AztecModelState):
         return steady_gas_fee_blob_time_series[-1]
 
 
-STEADY_STATE_GAS_ESTIMATORS = L1GasEstimators(
-    proposal= steady_state_l1_gas_estimate,
-    commitment_bond= steady_state_l1_gas_estimate,
-    content_reveal= steady_state_l1_gas_estimate,
-    content_reveal_blob= steady_state_blob_gas_estimate, # NOTE: this is a HACK assumption, gas was estimated from various documents by Aztec Labs
-    rollup_proof= steady_state_l1_gas_estimate
-)
-
 #############################################################
 ## End: Steady state gas estimators defined                ##
 #############################################################
@@ -159,14 +151,6 @@ def single_shock_blob_gas_estimate(state: AztecModelState):
     else:
         return single_shock_gas_fee_blob_time_series[-1]
 
-SINGLE_SHOCK_GAS_ESTIMATORS = L1GasEstimators(
-    proposal= single_shock_l1_gas_estimate,
-    commitment_bond= single_shock_l1_gas_estimate,
-    content_reveal= single_shock_l1_gas_estimate,
-    content_reveal_blob= single_shock_blob_gas_estimate, # NOTE: this is a HACK assumption, gas was estimated from various documents by Aztec Labs
-    rollup_proof= single_shock_l1_gas_estimate
-)
-
 #############################################################
 ## End: single shock gas estimators defined                ##
 #############################################################
@@ -197,13 +181,6 @@ def intermit_shock_l1_gas_estimate(state: AztecModelState):
     else:
         return intermit_shock_gas_fee_l1_time_series[-1]
 
-INTERMIT_SHOCK_GAS_ESTIMATORS = L1GasEstimators(
-    proposal= intermit_shock_l1_gas_estimate,
-    commitment_bond= intermit_shock_l1_gas_estimate,
-    content_reveal= intermit_shock_l1_gas_estimate,
-    content_reveal_blob= single_shock_blob_gas_estimate, 
-    rollup_proof= intermit_shock_l1_gas_estimate
-) 
 
 #############################################################
 ## End: intermittent shock gas estimators defined        ##
@@ -214,6 +191,15 @@ TX_ESTIMATORS = UserTransactionEstimators(
     transaction_count=lambda _: 1,
     proposal_average_size=lambda _: 100,
     transaction_average_fee_per_size=lambda _: 50.5
+)
+
+
+GAS_ESTIMATORS = L1GasEstimators(
+    proposal=lambda _: 100_000,
+    commitment_bond=lambda _: 100_000,
+    content_reveal=lambda _: 81_000,
+    content_reveal_blob=lambda _: 500_000, # NOTE: this is a HACK assumption
+    rollup_proof=lambda _: 450_000
 )
 
 
@@ -255,7 +241,7 @@ SINGLE_RUN_PARAMS = AztecModelParams(label='default',
 
                                      gwei_to_tokens=1e-9, 
 
-                                     gas_estimators=STEADY_STATE_GAS_ESTIMATORS,
+                                     gas_estimators=GAS_ESTIMATORS,
                                      tx_estimators=TX_ESTIMATORS,
                                      slash_params=SLASH_PARAMS,
                                      commit_bond_amount = 10.0

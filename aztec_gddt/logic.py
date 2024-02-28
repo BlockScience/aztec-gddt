@@ -477,6 +477,7 @@ def p_reveal_content(params: AztecModelParams,
                 gas: Gas = params['gas_estimators'].content_reveal(state)
                 fee = gas * state['gas_fee_l1']
                 SAFETY_BUFFER = 2 * fee # HACK: 
+                # XXX: Expected Rewards is the rewards over the last timestep.
                 expected_rewards = state['cumm_block_rewards'] - history[-1][0]['cumm_block_rewards']
                 expected_costs = params['op_costs'] + fee + SAFETY_BUFFER
                 payoff_reveal = expected_rewards - expected_costs
