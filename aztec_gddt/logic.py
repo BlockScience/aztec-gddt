@@ -473,16 +473,21 @@ def p_reveal_content(params: AztecModelParams,
                                     amount=slashed_amount,
                                     kind=TransferKind.slash))
             else:
-                # XXX: Should either costs go here? 
+                # NOTE: Costs now include gas fees and safety buffer. 
+                gas: Gas = params['gas_estimators'].content_reveal(state)
+                fee = gas * state['gas_fee_l1']
+                SAFETY_BUFFER = 2 * fee # HACK: 
                 expected_rewards = state['cumm_block_rewards'] - history[-1][0]['cumm_block_rewards']
-                expected_costs = state['cumm_fee_cashback'] - history[-1][0]['cumm_fee_cashback']
+                expected_costs = state['cumm_fee_cashback'] - history[-1][0]['cumm_fee_cashback'] + fee + SAFETY_BUFFER
                 payoff_reveal = expected_rewards - expected_costs
 
                 agent_expects_profit = payoff_reveal >= 0
                 agent_decides_to_reveal_block_content = bernoulli_trial(probability=params['block_content_reveal_probability'])
-                gas_fee_l1_acceptable = (state['gas_fee_blob'] <= params['blob_gas_threshold_for_tx'])
+                gas_fee_blob_acceptable = (state['gas_fee_blob'] <= params['blob_gas_threshold_for_tx'])
+                gas_fee_l1_acceptable = (state['gas_fee_l1'] <= params['gas_threshold_for_tx'])
 
-                if agent_expects_profit and agent_decides_to_reveal_block_content and gas_fee_l1_acceptable:
+
+                if agent_expects_profit and agent_decides_to_reveal_block_content and gas_fee_blob_acceptable and gas_fee_l1_acceptable:
                     updated_process = copy(process)
                     advance_blocks = remaining_time
                     updated_process.phase = SelectionPhase.pending_rollup_proof
