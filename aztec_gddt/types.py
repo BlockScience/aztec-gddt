@@ -280,7 +280,7 @@ class AztecModelParams(TypedDict):
 
     # Behavioral Parameters
 
-    logic: Dict[str, Callable[Dict, Any]] = None #placeholder for general system logic
+    logic: Dict[str, Callable[Dict, Any]] #placeholder for general system logic
 
     # XXX: assume that each interacting user
     # has an fixed probability per L1 block
