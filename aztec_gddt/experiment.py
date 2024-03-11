@@ -108,11 +108,11 @@ def psuu_exploratory_run():
     
 
     # The number of monte carlo runs per set of parameters tested
-    N_samples = 2
-    N_timesteps = 2
+    N_samples = 10
+    N_timesteps = 1000
 
     # Select a random sample. Let it be equal or below 0 in order to select all
-    N_sweep_samples = 100
+    N_sweep_samples = 1
 
     # Relay Agent
 
