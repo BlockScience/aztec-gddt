@@ -1,11 +1,22 @@
-from pandas import DataFrame
+from pandas import DataFrame # type: ignore
 from typing import Dict, List
 
+
+from cadCAD.tools.preparation import sweep_cartesian_product
+
 from aztec_gddt.params import INITIAL_STATE
-from aztec_gddt.params import SINGLE_RUN_PARAMS, TIMESTEPS
+from aztec_gddt.params import SINGLE_RUN_PARAMS, TIMESTEPS, BASE_AGENTS_DICT
+from aztec_gddt.params import *
 from aztec_gddt.structure import AZTEC_MODEL_BLOCKS
-from aztec_gddt.types import AztecModelParams, AztecModelState
+from aztec_gddt.types import AztecModelParams, AztecModelState, Agent
+from uuid import uuid4
+from scipy.stats import norm # type: ignore
 from aztec_gddt.utils import sim_run
+from typing import Optional
+from random import sample
+
+
+
 
 def standard_run(N_timesteps=TIMESTEPS) -> DataFrame:
     """Function which runs the cadCAD simulations
@@ -33,10 +44,10 @@ def standard_run(N_timesteps=TIMESTEPS) -> DataFrame:
     sim_df = sim_run(*sim_args)
     return sim_df
 
-def custom_run(initial_state:AztecModelState = None,
-               default_params: AztecModelParams = None,
-               params_to_modify: Dict[str,List] = None,
-               model_blocks:list[dict] = None,
+def custom_run(initial_state: Optional[AztecModelState] = None,
+               default_params: Optional[AztecModelParams] = None,
+               params_to_modify: Optional[Dict[str,List]] = None,
+               model_blocks: Optional[list[dict]] = None,
                N_timesteps:int = TIMESTEPS,
                N_samples:int = 1) -> DataFrame:
     """
@@ -84,3 +95,156 @@ def custom_run(initial_state:AztecModelState = None,
     sim_df = sim_run(*sim_args)
     return sim_df
     
+
+
+
+def psuu_exploratory_run():
+    """Function which runs the cadCAD simulations
+
+    Returns:
+        DataFrame: A dataframe of simulation data
+    """
+    # The number of timesteps for each simulation to run
+    
+
+    # The number of monte carlo runs per set of parameters tested
+    N_samples = 2
+    N_timesteps = 100
+
+    # Select a random sample. Let it be equal or below 0 in order to select all
+    N_sweep_samples = 20
+
+    # Relay Agent
+
+
+    Sqn3Prv3_agents = []
+    N_sequencer = 3
+    N_prover = 3
+
+    for i in range(N_sequencer):
+        a = Agent(uuid=uuid4(),
+                                     balance=max(norm.rvs(50, 20), 1),
+                                     is_sequencer=True,
+                                     is_prover=False,
+                                     is_relay=False,
+                                     staked_amount=5)
+        Sqn3Prv3_agents.append(a)
+    for i in range(N_prover):
+        a = Agent(uuid=uuid4(),
+                                     balance=max(norm.rvs(50, 20), 1),
+                                     is_sequencer=False,
+                                     is_prover=True,
+                                     is_relay=False,
+                                     staked_amount=5)
+        Sqn3Prv3_agents.append(a)
+
+    
+    Sqn3Prv3_dict = {a.uuid: a for a in Sqn3Prv3_agents}
+    Sqn3Prv3 = {**BASE_AGENTS_DICT, **Sqn3Prv3_dict}
+
+
+    initial_state = AztecModelState(
+        time_l1=0,
+        delta_l1_blocks=0,
+        advance_l1_blocks=0,
+
+        agents=Sqn3Prv3,
+
+        current_process=None,
+        transactions=dict(),
+
+        gas_fee_l1=None,
+        gas_fee_blob=None,
+
+        finalized_blocks_count=0,
+        cumm_block_rewards=INITIAL_CUMM_REWARDS,
+        cumm_fee_cashback=INITIAL_CUMM_CASHBACK,
+        cumm_burn=INITIAL_CUMM_BURN,
+
+        token_supply=INITIAL_SUPPLY
+    )
+
+
+
+    sweep_params = dict(label=['default'],
+                                        timestep_in_blocks=[1],
+
+                                        uncle_count=[0], # TODO
+                                        reward_per_block=[1.0], # HACK: consider alternate values
+                                        fee_subsidy_fraction=[1.0], # TODO
+
+                                        # Phase Durations
+                                        phase_duration_proposal_min_blocks=[0, 3],# HACK: consider alternate values
+                                        phase_duration_proposal_max_blocks=[3, 12], 
+                                        phase_duration_reveal_min_blocks = [0, 3],# HACK: consider alternate values
+                                        phase_duration_reveal_max_blocks = [3, 24], 
+                                        phase_duration_commit_bond_min_blocks = [0, 3], # HACK: consider alternate values
+                                        phase_duration_commit_bond_max_blocks=[3, 12], 
+                                        phase_duration_rollup_min_blocks = [0, 3], # HACK: consider alternate values
+                                        phase_duration_rollup_max_blocks=[15, 80],
+                                        phase_duration_race_min_blocks = [0, 3], # HACK: consider alternate values 
+                                        phase_duration_race_max_blocks=[3, 6], 
+
+                                        stake_activation_period=[40], # TODO
+                                        unstake_cooldown_period=[40], # TODO
+
+                                        logic=[{}],
+
+
+                                        # Behavioral Parameters
+                                        proposal_probability_per_user_per_block=[0.1],
+                                        block_content_reveal_probability=[0.01, 0.5], 
+                                        tx_proof_reveal_probability=[0.01, 0.5], 
+                                        rollup_proof_reveal_probability=[0.01, 0.5],
+                                        commit_bond_reveal_probability=[0.01, 0.5], 
+
+
+                                        gas_threshold_for_tx=[50], 
+                                        blob_gas_threshold_for_tx=[50], 
+                                        proving_marketplace_usage_probability=[0.0],
+                                        
+                                        rewards_to_provers=[0.5],
+                                        rewards_to_relay=[0.0],
+
+                                        gwei_to_tokens=[1e-9], 
+
+                                        gas_estimators=[DEFAULT_DETERMINISTIC_GAS_ESTIMATOR],
+                                        tx_estimators=[DEFAULT_DETERMINISTIC_TX_ESTIMATOR],
+                                        slash_params=[SLASH_PARAMS],
+                                        gas_fee_l1_time_series=GAS_FEE_L1_TIME_SERIES_LIST,
+                                        gas_fee_blob_time_series=GAS_FEE_BLOB_TIME_SERIES_LIST,
+
+                                        commit_bond_amount = [10.0], # HACK: consider alternate values
+                                        op_costs=[0.0] # XXX
+                                        )  
+    
+
+
+
+    combinations = 1
+    for v in sweep_params.values():
+        combinations *= len(v)
+    combinations *= N_samples
+    print(combinations)
+
+    
+
+    sweep_params_cartesian_product = sweep_cartesian_product(sweep_params)
+
+
+    sweep_params_cartesian_product = {k: list(v) for k, v in sweep_params_cartesian_product.items()}
+
+    sweep_params_cartesian_product = {k: sample(v, N_sweep_samples) if N_sweep_samples > 0 else v 
+                                                               for k, v in sweep_params_cartesian_product.items()}
+
+    # Load simulation arguments
+    sim_args = (initial_state,
+                sweep_params_cartesian_product,
+                AZTEC_MODEL_BLOCKS,
+                N_timesteps,
+                N_samples)
+
+    print('Performing PSuU run')
+    # Run simulation
+    sim_df = sim_run(*sim_args)
+    return sim_df
