@@ -4,8 +4,6 @@ from uuid import uuid4
 
 from random import choice
 
-from cadCAD_tools.types import VariableUpdate  # type: ignore
-
 from aztec_gddt.helper import *
 from aztec_gddt.types import *
 
@@ -93,7 +91,7 @@ def p_evolve_time_dynamical(params: AztecModelParams, _2, _3, state: AztecModelS
 
 def s_block_time(params: AztecModelParams, _2, _3,
                  state: AztecModelState,
-                 signal: SignalTime) -> VariableUpdate:
+                 signal: SignalTime) :
     """
     State update function advancing block time.  
 
@@ -103,14 +101,14 @@ def s_block_time(params: AztecModelParams, _2, _3,
          signal (Signal): The Signal, generated in p_evolve_time, of how many blocks to advance time. 
 
     Returns:
-        VariableUpdate:
+        
             A two-element tuple that all state update functions must return.
     """
     return ('time_l1', state['time_l1'] + signal['delta_blocks'])  # type: ignore
 
 
 
-def s_delta_blocks(_1, _2, _3, _4, signal: SignalTime) -> VariableUpdate:
+def s_delta_blocks(_1, _2, _3, _4, signal: SignalTime) :
     """
     State update function for change in block number. 
 
@@ -124,7 +122,7 @@ def s_delta_blocks(_1, _2, _3, _4, signal: SignalTime) -> VariableUpdate:
 
 def s_reset_advance(params: AztecModelParams, _2, _3,
                  state: AztecModelState,
-                 signal: SignalTime) -> VariableUpdate:
+                 signal: SignalTime) :
     """
     State update function advancing block time.  
 
@@ -134,7 +132,7 @@ def s_reset_advance(params: AztecModelParams, _2, _3,
          signal (Signal): The Signal, generated in p_evolve_time, of how many blocks to advance time. 
 
     Returns:
-        VariableUpdate:
+        
             A two-element tuple that all state update functions must return.
     """
     return ('advance_l1_blocks', 0)  # type: ignore
@@ -144,7 +142,7 @@ def s_current_process_time(_1,
                            _2,
                            _3,
                            state: AztecModelState,
-                           signal: SignalTime) -> VariableUpdate:
+                           signal: SignalTime) :
     """
     State update function for change in block number. 
 
@@ -168,7 +166,7 @@ def s_current_process_time_dynamical(_1,
                            _2,
                            _3,
                            state: AztecModelState,
-                           signal: SignalTime) -> VariableUpdate:
+                           signal: SignalTime) :
     """
     State update function for change in block number. 
 
@@ -676,7 +674,7 @@ def s_process(params: AztecModelParams,
               _2,
               _3,
               state: AztecModelState,
-              signal: SignalEvolveProcess) -> VariableUpdate:
+              signal: SignalEvolveProcess) :
     """
     Logic for updating process. 
     """
@@ -690,7 +688,7 @@ def s_transactions_new_proposals(params: AztecModelParams,
                                  _2,
                                  _3,
                                  state: AztecModelState,
-                                 _5) -> VariableUpdate:
+                                 _5) :
     """
     Logic for submitting new proposals.
     """
@@ -745,7 +743,7 @@ def s_transactions_new_proposals(params: AztecModelParams,
     return ('transactions', new_transactions)
 
 
-def s_advance_blocks(_1, _2, _3, state, signal: SignalEvolveProcess) -> VariableUpdate:
+def s_advance_blocks(_1, _2, _3, state, signal: SignalEvolveProcess) :
     return ('advance_l1_blocks', signal.get('advance_l1_blocks', 0))
 
 
@@ -753,7 +751,7 @@ def s_transactions(params: AztecModelParams,
                    _2,
                    _3,
                    state: AztecModelState,
-                   signal: SignalEvolveProcess) -> VariableUpdate:
+                   signal: SignalEvolveProcess) :
     """
     Logic for new transactions.
     """
@@ -773,7 +771,7 @@ def s_agent_transfer(params: AztecModelParams,
                      _2,
                      _3,
                      state: AztecModelState,
-                     signal: SignalEvolveProcess) -> VariableUpdate:
+                     signal: SignalEvolveProcess) :
     """
     Logic for transferring tokens between agents and burn sink.
     """
@@ -846,7 +844,7 @@ def s_agents_rewards(params: AztecModelParams,
                      _2,
                      _3,
                      state: AztecModelState,
-                     signal: SignalPayout) -> VariableUpdate:
+                     signal: SignalPayout) :
     """
     TODO
     """
@@ -885,7 +883,7 @@ def s_token_supply(params: AztecModelParams,
                    _2,
                    _3,
                    state: AztecModelState,
-                   signal: SignalEvolveProcess) -> VariableUpdate:
+                   signal: SignalEvolveProcess) :
     """
     Logic for token supply.
     """

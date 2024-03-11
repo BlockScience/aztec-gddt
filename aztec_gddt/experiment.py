@@ -237,6 +237,7 @@ def psuu_exploratory_run():
                 N_timesteps,
                 N_samples)
 
+    print('Performing PSuU run')
     # Run simulation
     sim_df = sim_run(*sim_args)
     return sim_df
