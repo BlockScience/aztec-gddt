@@ -10,10 +10,10 @@ from aztec_gddt.params import *
 from aztec_gddt.structure import AZTEC_MODEL_BLOCKS
 from aztec_gddt.types import AztecModelParams, AztecModelState, Agent
 from uuid import uuid4
-import numpy as np
 from scipy.stats import norm # type: ignore
 from aztec_gddt.utils import sim_run
 from typing import Optional
+from random import sample
 
 
 
@@ -111,6 +111,8 @@ def psuu_exploratory_run():
     N_samples = 2
     N_timesteps = 2
 
+    # Select a random sample. Let it be equal or below 0 in order to select all
+    N_sweep_samples = 100
 
     # Relay Agent
 
@@ -222,13 +224,18 @@ def psuu_exploratory_run():
     combinations = 1
     for v in sweep_params.values():
         combinations *= len(v)
+    combinations *= N_samples
     print(combinations)
 
+    
 
     sweep_params_cartesian_product = sweep_cartesian_product(sweep_params)
 
 
     sweep_params_cartesian_product = {k: list(v) for k, v in sweep_params_cartesian_product.items()}
+
+    sweep_params_cartesian_product = {k: sample(v, N_sweep_samples) if N_sweep_samples > 0 else v 
+                                                               for k, v in sweep_params_cartesian_product.items()}
 
     # Load simulation arguments
     sim_args = (initial_state,
