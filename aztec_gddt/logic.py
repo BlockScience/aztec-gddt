@@ -9,6 +9,7 @@ from aztec_gddt.types import *
 
 from scipy.stats import bernoulli, uniform, norm  # type: ignore
 from random import random
+import pickle
 
 def generic_policy(_1, _2, _3, _4) -> dict:
     """
@@ -888,3 +889,19 @@ def s_token_supply(params: AztecModelParams,
     Logic for token supply.
     """
     return ('token_supply', TokenSupply.from_state(state))
+
+
+def s_erase_history(params: AztecModelParams,
+                   _2,
+                   history,
+                   state: AztecModelState,
+                   signal: SignalEvolveProcess) :
+    """
+    Logic for token supply.
+    """
+    for t, timestep_state in enumerate(history):
+        history[t] = [history[t][-1]]
+    #     # for i, substep_state in enumerate(timestep_state):
+    #     #     if i > 0:
+    #     #         history[t]
+    return ('timestep', state['timestep']) # type: ignore
