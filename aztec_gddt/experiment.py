@@ -98,7 +98,7 @@ def custom_run(initial_state: Optional[AztecModelState] = None,
 
 
 
-def psuu_exploratory_run():
+def psuu_exploratory_run() -> DataFrame:
     """Function which runs the cadCAD simulations
 
     Returns:

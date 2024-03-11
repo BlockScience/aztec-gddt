@@ -48,7 +48,7 @@ def sim_run(state_variables,
         _exec_mode = ExecutionMode().local_mode
     elif exec_mode == 'single':
         _exec_mode = ExecutionMode().single_mode
-    exec_context = ExecutionContext(_exec_mode)
+    exec_context = ExecutionContext(_exec_mode, additional_objs={'deepcopy_off': True})
     executor = Executor(exec_context=exec_context, configs=configs)
 
     # Execute the cadCAD experiment
