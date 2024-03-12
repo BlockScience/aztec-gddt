@@ -98,7 +98,7 @@ def custom_run(initial_state: Optional[AztecModelState] = None,
 
 
 
-def psuu_exploratory_run():
+def psuu_exploratory_run() -> DataFrame:
     """Function which runs the cadCAD simulations
 
     Returns:
@@ -108,8 +108,8 @@ def psuu_exploratory_run():
     
 
     # The number of monte carlo runs per set of parameters tested
-    N_samples = 2
-    N_timesteps = 100
+    N_samples = 3
+    N_timesteps = 500
 
     # Select a random sample. Let it be equal or below 0 in order to select all
     N_sweep_samples = 20
@@ -246,5 +246,5 @@ def psuu_exploratory_run():
 
     print('Performing PSuU run')
     # Run simulation
-    sim_df = sim_run(*sim_args)
+    sim_df = sim_run(*sim_args, exec_mode='single')
     return sim_df
