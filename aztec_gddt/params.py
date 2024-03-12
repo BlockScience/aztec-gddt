@@ -12,6 +12,32 @@ SAMPLES = 1  # HACK
 
 N_INITIAL_AGENTS = 3
 
+
+
+
+BASE_AGENTS = [Agent(uuid='relay',
+                            balance=0,
+                            is_sequencer=False,
+                            is_prover=False,
+                            is_relay=True,
+                            staked_amount=0.0),
+                            Agent(uuid='l1-builder',
+                            balance=0,
+                            is_sequencer=False,
+                            is_prover=False,
+                            is_relay=False,
+                            staked_amount=0.0),
+                            Agent(uuid='burnt',
+                            balance=0,
+                            is_sequencer=False,
+                            is_prover=False,
+                            is_relay=False,
+                            staked_amount=0.0)
+                            ]
+
+
+BASE_AGENTS_DICT = {a.uuid: a for a in BASE_AGENTS}
+
  # XXX
 INITIAL_AGENTS: list[Agent] = [Agent(uuid=uuid4(),
                                      balance=max(norm.rvs(50, 20), 1),
@@ -22,33 +48,9 @@ INITIAL_AGENTS: list[Agent] = [Agent(uuid=uuid4(),
                                for i
                                in range(N_INITIAL_AGENTS)]
 
-# Relay Agent
-INITIAL_AGENTS.append(Agent(uuid='relay',
-                            balance=0,
-                            is_sequencer=False,
-                            is_prover=False,
-                            is_relay=True,
-                            staked_amount=0.0))
+INITIAL_AGENTS_DICT: dict[AgentUUID, Agent] = {a.uuid: a for a in INITIAL_AGENTS}
 
-
-# L1 Builder Agent
-INITIAL_AGENTS.append(Agent(uuid='l1-builder',
-                            balance=0,
-                            is_sequencer=False,
-                            is_prover=False,
-                            is_relay=False,
-                            staked_amount=0.0))
-
-
-# Burn sink
-INITIAL_AGENTS.append(Agent(uuid='burnt',
-                            balance=0,
-                            is_sequencer=False,
-                            is_prover=False,
-                            is_relay=False,
-                            staked_amount=0.0))
-
-AGENTS_DICT: dict[AgentUUID, Agent] = {a.uuid: a for a in INITIAL_AGENTS}
+AGENTS_DICT = {**BASE_AGENTS_DICT, **INITIAL_AGENTS_DICT}
 
 INITIAL_CUMM_REWARDS = 200 # XXX
 INITIAL_CUMM_CASHBACK = 50 # XXX
@@ -176,14 +178,14 @@ GAS_FEE_BLOB_TIME_SERIES_LIST = [steady_gas_fee_blob_time_series, intermit_shock
 #############################################################
 
 # HACK: Gas is 1 for all transactions
-TX_ESTIMATORS = UserTransactionEstimators(
+DEFAULT_DETERMINISTIC_TX_ESTIMATOR = UserTransactionEstimators(
     transaction_count=lambda _: 1,
     proposal_average_size=lambda _: 100,
     transaction_average_fee_per_size=lambda _: 50.5
 )
 
 
-GAS_ESTIMATORS = L1GasEstimators(
+DEFAULT_DETERMINISTIC_GAS_ESTIMATOR = L1GasEstimators(
     proposal=lambda _: 100_000,
     commitment_bond=lambda _: 100_000,
     content_reveal=lambda _: 81_000,
@@ -234,8 +236,8 @@ SINGLE_RUN_PARAMS = AztecModelParams(label='default',
 
                                      gwei_to_tokens=1e-9, 
 
-                                     gas_estimators=GAS_ESTIMATORS,
-                                     tx_estimators=TX_ESTIMATORS,
+                                     gas_estimators=DEFAULT_DETERMINISTIC_GAS_ESTIMATOR,
+                                     tx_estimators=DEFAULT_DETERMINISTIC_TX_ESTIMATOR,
                                      slash_params=SLASH_PARAMS,
                                      gas_fee_l1_time_series=GAS_FEE_L1_TIME_SERIES_LIST[-1],
                                      gas_fee_blob_time_series=GAS_FEE_BLOB_TIME_SERIES_LIST[-1],
