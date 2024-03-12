@@ -902,8 +902,10 @@ def s_erase_history(params: AztecModelParams,
 
 
     for t, timestep_state in enumerate(history):
-        history[t] = [{k: v for k, v in history[t][-1].items() if k != 'transactions'}]
-        #history[t] = [history[t][-1]]
+        # We may want to drop the transactions key if running on `multi_mode`
+        #history[t] = [{k: v for k, v in history[t][-1].items() if k != 'transactions'}]
+        # Or not, if on `single_mode`
+        history[t] = [history[t][-1]]
     #     # for i, substep_state in enumerate(timestep_state):
     #     #     if i > 0:
     #     #         history[t]

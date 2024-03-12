@@ -108,11 +108,11 @@ def psuu_exploratory_run() -> DataFrame:
     
 
     # The number of monte carlo runs per set of parameters tested
-    N_samples = 1
-    N_timesteps = 1000
+    N_samples = 3
+    N_timesteps = 500
 
     # Select a random sample. Let it be equal or below 0 in order to select all
-    N_sweep_samples = 4
+    N_sweep_samples = 20
 
     # Relay Agent
 
@@ -246,5 +246,5 @@ def psuu_exploratory_run() -> DataFrame:
 
     print('Performing PSuU run')
     # Run simulation
-    sim_df = sim_run(*sim_args)
+    sim_df = sim_run(*sim_args, exec_mode='single')
     return sim_df
