@@ -102,25 +102,14 @@ def custom_run(initial_state: Optional[AztecModelState] = None,
 
 
 
-def psuu_exploratory_run() -> DataFrame:
+def psuu_exploratory_run(N_sweep_samples=720, N_samples=3, N_timesteps=500) -> DataFrame:
     """Function which runs the cadCAD simulations
 
     Returns:
         DataFrame: A dataframe of simulation data
     """
-    # The number of timesteps for each simulation to run
-    
-
-    # The number of monte carlo runs per set of parameters tested
-    N_samples = 3
-    N_timesteps = 500
-
-    # Select a random sample. Let it be equal or below 0 in order to select all
-    N_sweep_samples = 720
 
     # Relay Agent
-
-
     Sqn3Prv3_agents = []
     N_sequencer = 3
     N_prover = 3
