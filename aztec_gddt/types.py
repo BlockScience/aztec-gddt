@@ -23,7 +23,7 @@ ProcessUUID = Annotated[object, 'uuid']
 
 Bytes = Annotated[int, 'bytes']
 Gas = Annotated[int, 'gas']
-Gwei = Annotated[int, 'gwei']
+Gwei = Annotated[float, 'gwei']
 BlobGas = Annotated[int, 'blob_gas']
 Percentage = Annotated[float, "%"]
 
@@ -129,7 +129,7 @@ class Agent():
     is_relay: bool = False
     staked_amount: Tokens = 0.0
 
-    logic: Dict[str, Callable[Dict,Any]] = None #placeholder for general agent logic
+    logic: Optional[Dict[str, Callable[[Dict], Any]]] = None #placeholder for general agent logic
 
     def slots(self, tokens_per_slot: Tokens) -> Tokens:
         return floor(self.staked_amount / tokens_per_slot)
@@ -280,7 +280,7 @@ class AztecModelParams(TypedDict):
 
     # Behavioral Parameters
 
-    logic: Dict[str, Callable[Dict, Any]] #placeholder for general system logic
+    logic: Optional[Dict[str, Callable[[Dict], Any]]] #placeholder for general system logic
 
     # XXX: assume that each interacting user
     # has an fixed probability per L1 block
