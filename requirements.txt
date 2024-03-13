@@ -8,3 +8,5 @@ cadCAD @ git+https://github.com/longtailfinancial/cadCAD@debugging_utils
 plotly
 seaborn
 matplotlib
+cadCAD_machine_search
+scikit-learn
