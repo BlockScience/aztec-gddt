@@ -55,6 +55,7 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
             'current_process': s_process,
             'transactions': s_transactions,
             'advance_l1_blocks': s_advance_blocks,
+            'slashes': s_update_slashes,
             'agents': s_agent_transfer
         }
     },
