@@ -2,7 +2,7 @@ from pandas import DataFrame # type: ignore
 from typing import Dict, List
 
 
-from cadCAD.tools.preparation import sweep_cartesian_product
+from cadCAD.tools.preparation import sweep_cartesian_product # type: ignore
 
 from aztec_gddt.params import INITIAL_STATE
 from aztec_gddt.params import SINGLE_RUN_PARAMS, TIMESTEPS, BASE_AGENTS_DICT
@@ -77,14 +77,18 @@ def custom_run(initial_state: Optional[AztecModelState] = None,
      # Begin by copying the indicated default settings. 
     sweep_params = {k: [v] for k, v in default_params.items()}
 
-    # Modify the parameters that need to be modified. 
-    for k,v in params_to_modify.items():
-        sweep_params[k] = v
-        # if isinstance(v, list):
-        #     sweep_params[k] = v
-        # else:
-        #     sweep_params[k] = [v]
-        # Load simulation arguments
+    if params_to_modify is not None:
+        # Modify the parameters that need to be modified. 
+        for k,v in params_to_modify.items():
+            sweep_params[k] = v
+            # if isinstance(v, list):
+            #     sweep_params[k] = v
+            # else:
+            #     sweep_params[k] = [v]
+            # Load simulation arguments
+    else:
+        pass
+
     sim_args = (initial_state,
                 sweep_params,
                 model_blocks,
@@ -98,25 +102,14 @@ def custom_run(initial_state: Optional[AztecModelState] = None,
 
 
 
-def psuu_exploratory_run():
+def psuu_exploratory_run(N_sweep_samples=720, N_samples=3, N_timesteps=500) -> DataFrame:
     """Function which runs the cadCAD simulations
 
     Returns:
         DataFrame: A dataframe of simulation data
     """
-    # The number of timesteps for each simulation to run
-    
-
-    # The number of monte carlo runs per set of parameters tested
-    N_samples = 2
-    N_timesteps = 100
-
-    # Select a random sample. Let it be equal or below 0 in order to select all
-    N_sweep_samples = 20
 
     # Relay Agent
-
-
     Sqn3Prv3_agents = []
     N_sequencer = 3
     N_prover = 3
@@ -153,8 +146,8 @@ def psuu_exploratory_run():
         current_process=None,
         transactions=dict(),
 
-        gas_fee_l1=None,
-        gas_fee_blob=None,
+        gas_fee_l1=float('nan'),
+        gas_fee_blob=float('nan'),
 
         finalized_blocks_count=0,
         cumm_block_rewards=INITIAL_CUMM_REWARDS,
@@ -166,7 +159,7 @@ def psuu_exploratory_run():
 
 
 
-    sweep_params = dict(label=['default'],
+    sweep_params: dict[str, list] = dict(label=['default'],
                                         timestep_in_blocks=[1],
 
                                         uncle_count=[0], # TODO
@@ -246,5 +239,8 @@ def psuu_exploratory_run():
 
     print('Performing PSuU run')
     # Run simulation
-    sim_df = sim_run(*sim_args)
+
+    assign_params = {'stake_activation_period', 'phase_duration_commit_bond_min_blocks', 'gas_threshold_for_tx', 'op_costs', 'proving_marketplace_usage_probability', 'gas_fee_l1_time_series', 'phase_duration_reveal_min_blocks', 'gwei_to_tokens', 'slash_params', 'gas_fee_blob_time_series', 'phase_duration_proposal_max_blocks', 'rewards_to_relay', 'phase_duration_rollup_max_blocks', 'phase_duration_rollup_min_blocks', 'phase_duration_reveal_max_blocks', 'fee_subsidy_fraction', 'phase_duration_race_min_blocks', 'timestep_in_blocks', 'rewards_to_provers', 'label', 'reward_per_block', 'blob_gas_threshold_for_tx', 'phase_duration_race_max_blocks', 'unstake_cooldown_period', 'proposal_probability_per_user_per_block', 'block_content_reveal_probability', 'commit_bond_reveal_probability', 'phase_duration_commit_bond_max_blocks', 'commit_bond_amount', 'uncle_count', 'tx_proof_reveal_probability', 'rollup_proof_reveal_probability', 'phase_duration_proposal_min_blocks'}
+
+    sim_df = sim_run(*sim_args, exec_mode='single', assign_params=assign_params)
     return sim_df

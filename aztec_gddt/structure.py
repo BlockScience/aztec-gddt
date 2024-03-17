@@ -94,6 +94,16 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
             'token_supply': s_token_supply,
             'finalized_blocks_count': lambda _1, _2, _3, s, _5:  ('finalized_blocks_count', s['finalized_blocks_count'] + 1 if s['current_process'].phase == SelectionPhase.finalized else s['finalized_blocks_count'])
         }
+    },
+    {
+        'label': 'Meta Stuff',
+        'ignore': False,
+        'policies': {
+
+        },
+        'variables': {
+            'timestep': s_erase_history
+        }
     }
 ]
 

@@ -48,7 +48,7 @@ def sim_run(state_variables,
         _exec_mode = ExecutionMode().local_mode
     elif exec_mode == 'single':
         _exec_mode = ExecutionMode().single_mode
-    exec_context = ExecutionContext(_exec_mode)
+    exec_context = ExecutionContext(_exec_mode, additional_objs={'deepcopy_off': True})
     executor = Executor(exec_context=exec_context, configs=configs)
 
     # Execute the cadCAD experiment
@@ -87,11 +87,20 @@ def sim_run(state_variables,
 
         # TODO: evaluate whatever we need to keep track of the `params`
         # Attribute parameters to each row
-        # df = df.assign(**select_config_M_dict(configs, 0, selected_params))
-        # for i, (_, n_df) in enumerate(df.groupby(['simulation', 'subset', 'run'])):
-        #     df.loc[n_df.index] = n_df.assign(**select_config_M_dict(configs,
-        #                                                             i,
-        #                                                             selected_params))
+        selected_dict = select_config_M_dict(configs, 0, selected_params)
+        for (col, val) in selected_dict.items():
+            if hasattr(val, "__iter__") is False and hasattr(val, "__call__") is False:
+                df[col] = val
+            else:
+                pass
+
+        for i, (_, n_df) in enumerate(df.groupby(['simulation', 'subset', 'run'])):
+            selected_dict = select_config_M_dict(configs, i, selected_params)
+            for (col, val) in selected_dict.items():
+                if hasattr(val, "__iter__") is False and hasattr(val, "__call__") is False:
+                    df.loc[i, col] = val
+                else:
+                    pass
 
     # Based on Vitor Marthendal (@marthendalnunes) snippet
     if use_label == True:
