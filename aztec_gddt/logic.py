@@ -365,12 +365,13 @@ def p_commit_bond(params: AztecModelParams,
                 updated_process.entered_race_mode = True
                 updated_process.duration_in_current_phase = 0
 
-                # and slash leading sequencer
+                # Slash leading sequencer if no commit bond is put down. 
                 slashed_amount = params['slash_params'].failure_to_commit_bond
                 transfers.append(Transfer(source=updated_process.leading_sequencer,
                                     destination='burnt',
                                     amount=slashed_amount,
-                                    kind=TransferKind.slash))
+                                    kind=TransferKind.slash,
+                                    to_sequencer = True))
             else:
                 # NOTE: Costs now include gas fees and safety buffer. 
                 gas: Gas = params['gas_estimators'].commitment_bond(state)
@@ -463,12 +464,13 @@ def p_reveal_content(params: AztecModelParams,
                 updated_process.duration_in_current_phase = 0
 
 
-                # and slash leading sequencer
+                # Slash leading sequencer if content is not revealed. 
                 slashed_amount = params['slash_params'].failure_to_reveal_block
                 transfers.append(Transfer(source=updated_process.leading_sequencer,
                                     destination='burnt',
                                     amount=slashed_amount,
-                                    kind=TransferKind.slash))
+                                    kind=TransferKind.slash,
+                                    to_sequencer = True))
             else:
                 # NOTE: Costs now include gas fees and safety buffer. 
                 gas: Gas = params['gas_estimators'].content_reveal(state)
@@ -559,11 +561,12 @@ def p_submit_proof(params: AztecModelParams,
                 who_to_slash = commit_bond.prover_uuid
                 how_much_to_slash = commit_bond.bond_amount
 
-                # Create a slash_transfer and add it to the transfers. 
+                # Slash the prover for failing to reveal the proof. 
                 slash_transfer = Transfer(source = who_to_slash,
                                           destination = 'burnt',
                                           amount = how_much_to_slash,
-                                          kind = TransferKind.slash)
+                                          kind = TransferKind.slash,
+                                          to_prover = True)
 
                 transfers.append(slash_transfer)
 
