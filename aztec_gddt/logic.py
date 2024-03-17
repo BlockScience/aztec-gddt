@@ -770,6 +770,35 @@ def s_transactions(params: AztecModelParams,
 
     return ('transactions', new_transactions)
 
+def s_update_slashes(params: AztecModelParams,
+                     _2,
+                     _3,
+                     state: AztecModelState,
+                     signal: SignalEvolveProcess) :
+    """
+    Logic for keeping track of how many
+    """
+    slashes = state['slashes']
+    transfers: Sequence[Transfer] = signal.get('transfers', []) # type: ignore
+
+    old_slashes_to_provers = slashes.get("to_provers", 0)
+    old_slashes_to_sequencers = slashes.get("to_sequencers", 0)
+
+    # Calculate the number of slashes of each type to add
+    delta_slashes_provers = len([transfer for transfer in transfers 
+                                if (transfer.kind == TransferKind.slash) and (transfer.to_prover == True)])
+    delta_slashes_sequencers = len([transfer for transfer in transfers 
+                                    if transfer.kind == TransferKind.slash and transfer.to_sequencer])
+
+    updated_slashes = {"to_provers": old_slashes_to_provers + delta_slashes_provers,
+                     "to_sequencers": old_slashes_to_sequencers + delta_slashes_sequencers}
+
+    return ('slashes', updated_slashes)
+
+
+
+
+
 
 def s_agent_transfer(params: AztecModelParams,
                      _2,
@@ -791,6 +820,7 @@ def s_agent_transfer(params: AztecModelParams,
             updated_agents[transfer.destination].balance += transfer.amount
 
     return ('agents', updated_agents)
+
     
 
 def p_block_reward(params: AztecModelParams,
