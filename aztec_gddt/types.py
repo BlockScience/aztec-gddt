@@ -23,7 +23,7 @@ ProcessUUID = Annotated[object, 'uuid']
 
 Bytes = Annotated[int, 'bytes']
 Gas = Annotated[int, 'gas']
-Gwei = Annotated[float, 'gwei']
+Gwei = Annotated[int, 'gwei']
 BlobGas = Annotated[int, 'blob_gas']
 Percentage = Annotated[float, "%"]
 
@@ -129,7 +129,7 @@ class Agent():
     is_relay: bool = False
     staked_amount: Tokens = 0.0
 
-    logic: Optional[Dict[str, Callable[[Dict], Any]]] = None #placeholder for general agent logic
+    logic: Dict[str, Callable[Dict,Any]] = None #placeholder for general agent logic
 
     def slots(self, tokens_per_slot: Tokens) -> Tokens:
         return floor(self.staked_amount / tokens_per_slot)
@@ -197,6 +197,7 @@ class AztecModelState(TypedDict):
     time_l1: L1Blocks
     delta_l1_blocks: L1Blocks
     advance_l1_blocks: L1Blocks
+    slashes: Dict = {"to_provers": 0, "to_sequencers": 0}
 
     # Agents
     agents: dict[AgentUUID, Agent]
@@ -280,7 +281,7 @@ class AztecModelParams(TypedDict):
 
     # Behavioral Parameters
 
-    logic: Optional[Dict[str, Callable[[Dict], Any]]] #placeholder for general system logic
+    logic: Dict[str, Callable[Dict, Any]] #placeholder for general system logic
 
     # XXX: assume that each interacting user
     # has an fixed probability per L1 block
@@ -332,6 +333,8 @@ class Transfer(NamedTuple):
     destination: AgentUUID
     amount: Tokens
     kind: TransferKind
+    to_prover: bool = False
+    to_sequencer: bool = False
 
 class SignalEvolveProcess(TypedDict, total=False):
     new_transactions: Sequence[AnyL1Transaction]
