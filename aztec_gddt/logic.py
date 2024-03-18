@@ -776,7 +776,7 @@ def s_update_slashes(params: AztecModelParams,
                      state: AztecModelState,
                      signal: SignalEvolveProcess) :
     """
-    Logic for keeping track of how many
+    Logic for keeping track of how many slashes have occurred. 
     """
     slashes = state['slashes']
     transfers: Sequence[Transfer] = signal.get('transfers', []) # type: ignore
