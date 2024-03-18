@@ -2,7 +2,7 @@ from pandas import DataFrame # type: ignore
 from typing import Dict, List
 
 
-from cadCAD.tools.preparation import sweep_cartesian_product # type: ignore
+from cadCAD_tools.preparation import sweep_cartesian_product # type: ignore
 
 from aztec_gddt.params import INITIAL_STATE
 from aztec_gddt.params import SINGLE_RUN_PARAMS, TIMESTEPS, BASE_AGENTS_DICT
