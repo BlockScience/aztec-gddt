@@ -165,12 +165,14 @@ def is_below_median_across_trajectories(grouped_data, custom_func: Callable):
     return mapped_values < median_mapped_values
 
 def calc_g1_score(grouped_data: pd.DataFrame) -> float:
-   t1_score = is_below_median_across_trajectories(grouped_data, find_proportion_race_mode)
-   t2_score = is_below_median_across_trajectories(grouped_data, find_proportion_slashed_due_to_prover)
-   t3_score = is_below_median_across_trajectories(grouped_data, find_proportion_slashed_due_to_sequencer)
-   t4_score = is_below_median_across_trajectories(grouped_data, find_proportion_skipped)
-   final_score = t1_score + t2_score + t3_score + t4_score
-   return final_score
+    t1_score = is_below_median_across_trajectories(grouped_data, find_proportion_race_mode)
+    t2_score = is_below_median_across_trajectories(grouped_data, find_proportion_slashed_due_to_prover)
+    t3_score = is_below_median_across_trajectories(grouped_data, find_proportion_slashed_due_to_sequencer)
+    t4_score = is_below_median_across_trajectories(grouped_data, find_proportion_skipped)
+    final_score = t1_score + t2_score + t3_score + t4_score
+    return final_score
+
+
 
 
 def calc_g2_score(grouped_data: pd.DataFrame) -> float:
