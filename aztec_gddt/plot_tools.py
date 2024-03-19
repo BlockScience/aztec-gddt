@@ -3,6 +3,11 @@ from typing import Callable, Dict, List
 
 import matplotlib.pyplot as plt
 import seaborn as sns
+
+from sklearn.tree import plot_tree
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+
 ######################################
 ## Background information for Aztec ##
 ######################################
@@ -23,7 +28,7 @@ governance_surface_params = [
 
 trajectory_id_columns = ['simulation', 'subset', 'run']
 
-agg_columns_to_use = ['simulation', 'subset', 'run'] + governance_surface_params
+default_agg_columns = ['simulation', 'subset', 'run'] + governance_surface_params
 
 def extract_df(df_to_use: DataFrame,
                trajectory_kpis: Dict[str, Callable],
@@ -31,8 +36,8 @@ def extract_df(df_to_use: DataFrame,
                num_rows: int = 1000,
                cols_to_drop: List[str] = None) -> DataFrame:
 
-    if agg_columns_to_use is None:
-        agg_columns = agg_columns_to_use
+    if agg_columns is None:
+        agg_columns = default_agg_columns
     
     group_df = df_to_use.head(num_rows).groupby(agg_columns) #group data
     df_start = group_df.apply(lambda x: True) #create series
@@ -79,19 +84,48 @@ def create_param_impact_dist_plots(df_to_use: DataFrame,
     plt.show()
     return fig, axs
 
+def create_decision_tree_importances_plot(df_to_use: DataFrame,
+                                         params_to_use: List,
+                                         kpi: str):
+    features = list(set(params_to_use) - {kpi})
+    X = df_to_use.loc[:, features]
+    y = df_to_use.loc[:, kpi] > df_to_use.loc[:, kpi].median()
+
+    model = DecisionTreeClassifier(max_depth=3)
+    rf = RandomForestClassifier()
+    model.fit(X, y)
+    rf.fit(X, y)
+
+    rf_df = (DataFrame(list(zip(X.columns, rf.feature_importances_)),
+                        columns=['features', 'importance'])
+            .sort_values(by='importance', ascending=False)
+            )
 
 
+    fig, axes = plt.subplots(nrows=2,
+                                figsize=(36, 12),
+                                dpi=100,
+                                gridspec_kw={'height_ratios': [3, 1]})
 
+    (ax_dt, ax_rf) = axes[0], axes[1]
+    plot_tree(model,
+                rounded=True,
+                proportion=True,
+                fontsize=8,
+                feature_names=X.columns,
+                class_names=['threshold not met', 'threshold met'],
+                filled=True,
+                ax=ax_dt)
+    ax_dt.set_title(
+        f'Decision tree, score: {model.score(X, y) :.0%}. N: {len(X) :.2e}')
+    sns.barplot(data=rf_df,
+                x=rf_df.features,
+                y=rf_df.importance,
+                ax=ax_rf,
+                label='small')
+    plt.setp(ax_rf.xaxis.get_majorticklabels(), rotation=45)
+    ax_rf.set_title('Feature importance')
+    plt.show()
 
-    
-    
+    return fix, axs
 
-
-
-
-
-
-
-
-    
-    
