@@ -63,6 +63,7 @@ def create_param_impact_dist_plots(df_to_use: DataFrame,
                       sharex='row', sharey='row', 
                       gridspec_kw={'hspace': 0.5})
     fig.subplots_adjust(top=0.95)
+    fig.suptitle("Parameter Impact Plot")
 
     for row_num, param in param_cols.enumerate():
         for col_num, kpi in kpi_cols.enumerate():
