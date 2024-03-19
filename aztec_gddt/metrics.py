@@ -9,6 +9,13 @@ from aztec_gddt.types import SelectionPhase
 ## Begin helper functions      ##
 #################################
 
+def process_df(sim_df: pd.DataFrame):
+    new_df = sim_df.copy(deep=True)
+    new_df['process_id'] = new_df['current_process'].apply(lambda x: None if x is None else x.uuid )
+    new_df['process_phase'] = new_df['current_process'].apply(lambda x: None if x is None else x.phase)
+
+
+
 def time_spent(trajectory: pd.DataFrame, process_id: str):
     first_step = trajectory[trajectory['process_id'] == process_id].iloc[0].time_l1
     last_step = trajectory[trajectory['process_id'] == process_id].iloc[-1].time_l1
