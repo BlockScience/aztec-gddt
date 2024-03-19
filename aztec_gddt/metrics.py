@@ -10,10 +10,10 @@ from aztec_gddt.types import SelectionPhase
 #################################
 
 def process_df(sim_df: pd.DataFrame):
-    new_df = sim_df.copy(deep=True)
+    new_df = sim_df.copy(deep=True).dropna(axis='index')
     new_df['process_id'] = new_df['current_process'].apply(lambda x: None if x is None else x.uuid )
     new_df['process_phase'] = new_df['current_process'].apply(lambda x: None if x is None else x.phase)
-
+    return new_df
 
 
 def time_spent(trajectory: pd.DataFrame, process_id: str):
@@ -145,12 +145,12 @@ def find_stddev_duration_nonfinalized_blocks(trajectory: pd.DataFrame) -> float:
 ####################################
 
 def find_stddev_payoffs_to_sequencers(trajectory: pd.DataFrame) -> float:
-   print("Not yet implemented")
-   pass 
+    print("Not yet implemented")
+    pass 
 
 def find_stddev_payoffs_to_provers(trajectory: pd.DataFrame) -> float:
-   print("Not yet implemented")
-   pass 
+    print("Not yet implemented")
+    pass 
 
 ####################################
 ## End Group 3 Metrics            ##
@@ -172,13 +172,18 @@ def is_below_median_across_trajectories(grouped_data, custom_func: Callable):
     return mapped_values < median_mapped_values
 
 def calc_g1_score(grouped_data: pd.DataFrame) -> float:
-   t1_score = is_below_median_across_trajectories(grouped_data, find_proportion_race_mode)
-   t2_score = is_below_median_across_trajectories(grouped_data, find_proportion_slashed_due_to_prover)
-   t3_score = is_below_median_across_trajectories(grouped_data, find_proportion_slashed_due_to_sequencer)
-   t4_score = is_below_median_across_trajectories(grouped_data, find_proportion_skipped)
-   final_score = t1_score + t2_score + t3_score + t4_score
-   return final_score
+    t1_score = is_below_median_across_trajectories(grouped_data, find_proportion_race_mode)
+    t2_score = is_below_median_across_trajectories(grouped_data, find_proportion_slashed_due_to_prover)
+    t3_score = is_below_median_across_trajectories(grouped_data, find_proportion_slashed_due_to_sequencer)
+    t4_score = is_below_median_across_trajectories(grouped_data, find_proportion_skipped)
+    final_score = t1_score + t2_score + t3_score + t4_score
+    return final_score
 
+def calc_mock_g1_score(grouped_data: pd.DataFrame) -> float:
+    t1_score = is_below_median_across_trajectories(grouped_data, find_proportion_race_mode)
+    t4_score = is_below_median_across_trajectories(grouped_data, find_proportion_skipped)
+    final_score = t1_score + t2_score + t3_score + t4_score
+    return final_score
 
 def calc_g2_score(grouped_data: pd.DataFrame) -> float:
     t5_score = is_below_median_across_trajectories(grouped_data, find_average_duration_finalized_blocks)
