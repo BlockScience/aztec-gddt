@@ -127,5 +127,5 @@ def create_decision_tree_importances_plot(df_to_use: DataFrame,
     ax_rf.set_title('Feature importance')
     plt.show()
 
-    return fix, axs
+    return fig, axes
 
