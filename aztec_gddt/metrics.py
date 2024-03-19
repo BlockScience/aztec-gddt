@@ -182,7 +182,7 @@ def calc_g1_score(grouped_data: pd.DataFrame) -> float:
 def calc_mock_g1_score(grouped_data: pd.DataFrame) -> float:
     t1_score = is_below_median_across_trajectories(grouped_data, find_proportion_race_mode)
     t4_score = is_below_median_across_trajectories(grouped_data, find_proportion_skipped)
-    final_score = t1_score + t2_score + t3_score + t4_score
+    final_score = t1_score +  t4_score
     return final_score
 
 def calc_g2_score(grouped_data: pd.DataFrame) -> float:
