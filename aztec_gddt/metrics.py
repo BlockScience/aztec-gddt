@@ -199,3 +199,4 @@ def calc_g3_score(grouped_data: pd.DataFrame) -> float:
     t10_score = is_below_median_across_trajectories(grouped_data, find_stddev_payoffs_to_provers)
     final_score = t9_score + t10_score
     return final_score
+
