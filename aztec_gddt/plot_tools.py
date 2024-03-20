@@ -45,7 +45,7 @@ def extract_df(df_to_use: DataFrame,
     data_values = list(df_start.index.values)
     base_df = DataFrame(columns = col_names, data=data_values)
     for kpi_name, kpi_func in trajectory_kpis.items():
-        base_df[kpi_name] = group_df.apply(kpi_func)
+        base_df[kpi_name] = group_df.apply(kpi_func).to_list()
 
     if not(cols_to_drop is None):
         base_df.drop(columns = cols_to_drop,
@@ -68,13 +68,13 @@ def create_param_impact_dist_plots(df_to_use: DataFrame,
                       sharex='row', sharey='row', 
                       gridspec_kw={'hspace': 0.5})
     fig.subplots_adjust(top=0.95)
-    fig.suptitle("Parameter Impact Plot")
+    fig.suptitle("Parameter Impact Plot"")
 
-    for row_num, param in param_cols.enumerate():
-        for col_num, kpi in kpi_cols.enumerate():
+    for row_num, param in enumerate(param_cols):
+        for col_num, kpi in enumerate(kpi_cols):
             sns.kdeplot(
                         data = df_to_use,
-                        x = kpi[row_num],
+                        x = kpi,
                         hue = param,
                         ax = axs[row_num,col_num],
                         palette = custom_palette
@@ -84,12 +84,17 @@ def create_param_impact_dist_plots(df_to_use: DataFrame,
     plt.show()
     return fig, axs
 
-def create_decision_tree_importances_plot(df_to_use: DataFrame,
-                                         params_to_use: List,
-                                         kpi: str):
-    features = list(set(params_to_use) - {kpi})
-    X = df_to_use.loc[:, features]
-    y = df_to_use.loc[:, kpi] > df_to_use.loc[:, kpi].median()
+def create_decision_tree_importances_plot(data: DataFrame,
+                                         params_to_use: List = None,
+                                         kpi: str = None):
+    if params_to_use is None:
+        cols_to_use = data.columns
+    else:
+        cols_to_use = params_to_use
+
+    features = list(set(cols_to_use) - {kpi})
+    X = data.loc[:, features]
+    y = data.loc[:, kpi] > data.loc[:, kpi].median()
 
     model = DecisionTreeClassifier(max_depth=3)
     rf = RandomForestClassifier()
