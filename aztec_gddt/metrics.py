@@ -157,7 +157,7 @@ def find_stddev_payoffs_to_provers(trajectory: pd.DataFrame) -> float:
 ####################################
 
 ####################################
-## PostProcessing                 ##
+## Begin PostProcessing/KPIs      ##
 ####################################
 
 def is_above_median_across_trajectories(grouped_data, custom_func: Callable):
@@ -200,3 +200,33 @@ def calc_g3_score(grouped_data: pd.DataFrame) -> float:
     final_score = t9_score + t10_score
     return final_score
 
+####################################
+## End PostProcessing/KPIs        ##
+####################################
+
+####################################
+## Begin Mock Metrics             ##
+####################################
+
+def mock_proportion_race_mode(trajectory: pd.DataFrame) -> float:
+    fuzz_val = np.random.uniform()
+    return fuzz_val
+
+def mock_proportion_slashed_due_to_prover(trajectory: pd.DataFrame) -> float:
+    fuzz_val = np.random.uniform()
+    return fuzz_val
+
+def mock_proportion_slashed_due_to_sequencer(trajectory: pd.DataFrame) -> float:
+    fuzz_val = np.random.uniform()
+    return fuzz_val
+
+def mock_proportion_skipped(trajectory: pd.DataFrame) -> float:
+    fuzz_val = np.random.uniform()
+    return fuzz_val
+
+
+
+
+####################################
+## End Mock Metrics               ##
+####################################
