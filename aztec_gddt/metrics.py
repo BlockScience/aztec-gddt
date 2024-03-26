@@ -9,6 +9,13 @@ from aztec_gddt.types import SelectionPhase
 ## Begin helper functions      ##
 #################################
 
+def process_df(sim_df: pd.DataFrame):
+    new_df = sim_df.copy(deep=True).dropna(axis='index')
+    new_df['process_id'] = new_df['current_process'].apply(lambda x: None if x is None else x.uuid )
+    new_df['process_phase'] = new_df['current_process'].apply(lambda x: None if x is None else x.phase)
+    return new_df
+
+
 def time_spent(trajectory: pd.DataFrame, process_id: str):
     first_step = trajectory[trajectory['process_id'] == process_id].iloc[0].time_l1
     last_step = trajectory[trajectory['process_id'] == process_id].iloc[-1].time_l1
@@ -138,19 +145,19 @@ def find_stddev_duration_nonfinalized_blocks(trajectory: pd.DataFrame) -> float:
 ####################################
 
 def find_stddev_payoffs_to_sequencers(trajectory: pd.DataFrame) -> float:
-   print("Not yet implemented")
-   pass 
+    print("Not yet implemented")
+    pass 
 
 def find_stddev_payoffs_to_provers(trajectory: pd.DataFrame) -> float:
-   print("Not yet implemented")
-   pass 
+    print("Not yet implemented")
+    pass 
 
 ####################################
 ## End Group 3 Metrics            ##
 ####################################
 
 ####################################
-## PostProcessing                 ##
+## Begin PostProcessing/KPIs      ##
 ####################################
 
 def is_above_median_across_trajectories(grouped_data, custom_func: Callable):
@@ -165,13 +172,18 @@ def is_below_median_across_trajectories(grouped_data, custom_func: Callable):
     return mapped_values < median_mapped_values
 
 def calc_g1_score(grouped_data: pd.DataFrame) -> float:
-   t1_score = is_below_median_across_trajectories(grouped_data, find_proportion_race_mode)
-   t2_score = is_below_median_across_trajectories(grouped_data, find_proportion_slashed_due_to_prover)
-   t3_score = is_below_median_across_trajectories(grouped_data, find_proportion_slashed_due_to_sequencer)
-   t4_score = is_below_median_across_trajectories(grouped_data, find_proportion_skipped)
-   final_score = t1_score + t2_score + t3_score + t4_score
-   return final_score
+    t1_score = is_below_median_across_trajectories(grouped_data, find_proportion_race_mode)
+    t2_score = is_below_median_across_trajectories(grouped_data, find_proportion_slashed_due_to_prover)
+    t3_score = is_below_median_across_trajectories(grouped_data, find_proportion_slashed_due_to_sequencer)
+    t4_score = is_below_median_across_trajectories(grouped_data, find_proportion_skipped)
+    final_score = t1_score + t2_score + t3_score + t4_score
+    return final_score
 
+def calc_mock_g1_score(grouped_data: pd.DataFrame) -> float:
+    t1_score = is_below_median_across_trajectories(grouped_data, find_proportion_race_mode)
+    t4_score = is_below_median_across_trajectories(grouped_data, find_proportion_skipped)
+    final_score = t1_score +  t4_score
+    return final_score
 
 def calc_g2_score(grouped_data: pd.DataFrame) -> float:
     t5_score = is_below_median_across_trajectories(grouped_data, find_average_duration_finalized_blocks)
@@ -187,3 +199,34 @@ def calc_g3_score(grouped_data: pd.DataFrame) -> float:
     t10_score = is_below_median_across_trajectories(grouped_data, find_stddev_payoffs_to_provers)
     final_score = t9_score + t10_score
     return final_score
+
+####################################
+## End PostProcessing/KPIs        ##
+####################################
+
+####################################
+## Begin Mock Metrics             ##
+####################################
+
+def mock_proportion_race_mode(trajectory: pd.DataFrame) -> float:
+    fuzz_val = np.random.uniform()
+    return fuzz_val
+
+def mock_proportion_slashed_due_to_prover(trajectory: pd.DataFrame) -> float:
+    fuzz_val = np.random.uniform()
+    return fuzz_val
+
+def mock_proportion_slashed_due_to_sequencer(trajectory: pd.DataFrame) -> float:
+    fuzz_val = np.random.uniform()
+    return fuzz_val
+
+def mock_proportion_skipped(trajectory: pd.DataFrame) -> float:
+    fuzz_val = np.random.uniform()
+    return fuzz_val
+
+
+
+
+####################################
+## End Mock Metrics               ##
+####################################

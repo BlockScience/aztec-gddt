@@ -202,6 +202,10 @@ SINGLE_RUN_PARAMS = AztecModelParams(label='default',
                                      reward_per_block=1.0, # TODO
                                      fee_subsidy_fraction=1.0, # TODO
 
+
+                                     # Placeholder Logic
+                                     logic = {},
+
                                      # Phase Durations
                                      phase_duration_proposal_min_blocks=0, # TODO
                                      phase_duration_proposal_max_blocks=10, # TODO
