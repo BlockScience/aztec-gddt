@@ -2,7 +2,7 @@ from pandas import DataFrame # type: ignore
 from typing import Dict, List
 
 
-from cadCAD_tools.preparation import sweep_cartesian_product # type: ignore
+from cadCAD.tools.preparation import sweep_cartesian_product # type: ignore
 
 from aztec_gddt.params import INITIAL_STATE
 from aztec_gddt.params import SINGLE_RUN_PARAMS, TIMESTEPS, BASE_AGENTS_DICT
@@ -14,9 +14,10 @@ from scipy.stats import norm # type: ignore
 from aztec_gddt.utils import sim_run
 from typing import Optional
 from random import sample
-
-
-
+from datetime import datetime
+import math
+from tqdm.auto import tqdm
+from joblib import Parallel, delayed
 
 def standard_run(N_timesteps=TIMESTEPS) -> DataFrame:
     """Function which runs the cadCAD simulations
@@ -102,7 +103,11 @@ def custom_run(initial_state: Optional[AztecModelState] = None,
 
 
 
-def psuu_exploratory_run(N_sweep_samples=720, N_samples=3, N_timesteps=500) -> DataFrame:
+def psuu_exploratory_run(N_sweep_samples=-1,
+                         N_samples=3,
+                         N_timesteps=500,
+                         parallelize=False,
+                         use_joblib=True) -> DataFrame:
     """Function which runs the cadCAD simulations
 
     Returns:
@@ -113,6 +118,8 @@ def psuu_exploratory_run(N_sweep_samples=720, N_samples=3, N_timesteps=500) -> D
     Sqn3Prv3_agents = []
     N_sequencer = 3
     N_prover = 3
+
+    assign_params = {'stake_activation_period', 'phase_duration_commit_bond_min_blocks', 'gas_threshold_for_tx', 'op_costs', 'proving_marketplace_usage_probability', 'gas_fee_l1_time_series', 'phase_duration_reveal_min_blocks', 'gwei_to_tokens', 'slash_params', 'gas_fee_blob_time_series', 'phase_duration_proposal_max_blocks', 'rewards_to_relay', 'phase_duration_rollup_max_blocks', 'phase_duration_rollup_min_blocks', 'phase_duration_reveal_max_blocks', 'fee_subsidy_fraction', 'phase_duration_race_min_blocks', 'timestep_in_blocks', 'rewards_to_provers', 'label', 'reward_per_block', 'blob_gas_threshold_for_tx', 'phase_duration_race_max_blocks', 'unstake_cooldown_period', 'proposal_probability_per_user_per_block', 'block_content_reveal_probability', 'commit_bond_reveal_probability', 'phase_duration_commit_bond_max_blocks', 'commit_bond_amount', 'uncle_count', 'tx_proof_reveal_probability', 'rollup_proof_reveal_probability', 'phase_duration_proposal_min_blocks'}
 
     for i in range(N_sequencer):
         a = Agent(uuid=uuid4(),
@@ -140,6 +147,7 @@ def psuu_exploratory_run(N_sweep_samples=720, N_samples=3, N_timesteps=500) -> D
         time_l1=0,
         delta_l1_blocks=0,
         advance_l1_blocks=0,
+        slashes= {"to_provers": 0, "to_sequencers": 0},
 
         agents=Sqn3Prv3,
 
@@ -154,7 +162,7 @@ def psuu_exploratory_run(N_sweep_samples=720, N_samples=3, N_timesteps=500) -> D
         cumm_fee_cashback=INITIAL_CUMM_CASHBACK,
         cumm_burn=INITIAL_CUMM_BURN,
 
-        token_supply=INITIAL_SUPPLY
+        token_supply=INITIAL_SUPPLY,
     )
 
 
@@ -214,33 +222,66 @@ def psuu_exploratory_run(N_sweep_samples=720, N_samples=3, N_timesteps=500) -> D
 
 
 
-    combinations = 1
+    sweep_combinations: int = 1
     for v in sweep_params.values():
-        combinations *= len(v)
-    combinations *= N_samples
-    print(combinations)
-
-    
+        sweep_combinations *= len(v)
+    traj_combinations = sweep_combinations * N_samples
 
     sweep_params_cartesian_product = sweep_cartesian_product(sweep_params)
 
+    print(f'Performing PSuU run (Trajectory Count: {traj_combinations}, ({parallelize=})')
+
+    
 
     sweep_params_cartesian_product = {k: list(v) for k, v in sweep_params_cartesian_product.items()}
 
     sweep_params_cartesian_product = {k: sample(v, N_sweep_samples) if N_sweep_samples > 0 else v 
                                                                for k, v in sweep_params_cartesian_product.items()}
 
-    # Load simulation arguments
-    sim_args = (initial_state,
-                sweep_params_cartesian_product,
-                AZTEC_MODEL_BLOCKS,
-                N_timesteps,
-                N_samples)
+    if parallelize is False:
+        # Load simulation arguments
+        sim_args = (initial_state,
+                    sweep_params_cartesian_product,
+                    AZTEC_MODEL_BLOCKS,
+                    N_timesteps,
+                    N_samples)
+        # Run simulation
+        sim_df = sim_run(*sim_args, exec_mode='single', assign_params=assign_params)
+        return sim_df
+    else:
+        sweeps_per_process = 100
+        processes = 4
 
-    print('Performing PSuU run')
-    # Run simulation
+        chunk_size = sweeps_per_process
+        split_dicts = [
+            {k: v[i:i + chunk_size] for k, v in sweep_params_cartesian_product.items()}
+            for i in range(0, len(list(sweep_params_cartesian_product.values())[0]), chunk_size)
+        ]
 
-    assign_params = {'stake_activation_period', 'phase_duration_commit_bond_min_blocks', 'gas_threshold_for_tx', 'op_costs', 'proving_marketplace_usage_probability', 'gas_fee_l1_time_series', 'phase_duration_reveal_min_blocks', 'gwei_to_tokens', 'slash_params', 'gas_fee_blob_time_series', 'phase_duration_proposal_max_blocks', 'rewards_to_relay', 'phase_duration_rollup_max_blocks', 'phase_duration_rollup_min_blocks', 'phase_duration_reveal_max_blocks', 'fee_subsidy_fraction', 'phase_duration_race_min_blocks', 'timestep_in_blocks', 'rewards_to_provers', 'label', 'reward_per_block', 'blob_gas_threshold_for_tx', 'phase_duration_race_max_blocks', 'unstake_cooldown_period', 'proposal_probability_per_user_per_block', 'block_content_reveal_probability', 'commit_bond_reveal_probability', 'phase_duration_commit_bond_max_blocks', 'commit_bond_amount', 'uncle_count', 'tx_proof_reveal_probability', 'rollup_proof_reveal_probability', 'phase_duration_proposal_min_blocks'}
+        output_path = f"data/simulations/psuu_run_{datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')}"
 
-    sim_df = sim_run(*sim_args, exec_mode='single', assign_params=assign_params)
-    return sim_df
+        def run_chunk(i_chunk, sweep_params):
+            sim_args = (initial_state,
+                        sweep_params,
+                        AZTEC_MODEL_BLOCKS,
+                        N_timesteps,
+                        N_samples)
+            # Run simulationz
+            sim_df = sim_run(*sim_args, exec_mode='single', assign_params=assign_params)
+            output_filename = output_path + f'-{i_chunk}.pkl.gz'
+            sim_df.to_pickle(output_filename)
+
+        args = enumerate(split_dicts)
+        if use_joblib:
+            Parallel(n_jobs=processes)(delayed(run_chunk)(i_chunk, sweep_params) for (i_chunk, sweep_params) in args)
+        else: 
+            for (i_chunk, sweep_params) in tqdm(args):
+                sim_args = (initial_state,
+                            sweep_params,
+                            AZTEC_MODEL_BLOCKS,
+                            N_timesteps,
+                            N_samples)
+                # Run simulationz
+                sim_df = sim_run(*sim_args, exec_mode='single', assign_params=assign_params)
+                output_filename = output_path + f'-{i_chunk}.pkl.gz'
+                sim_df.to_pickle(output_filename)

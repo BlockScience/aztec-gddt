@@ -197,7 +197,7 @@ class AztecModelState(TypedDict):
     time_l1: L1Blocks
     delta_l1_blocks: L1Blocks
     advance_l1_blocks: L1Blocks
-    slashes: Dict = {"to_provers": 0, "to_sequencers": 0}
+    slashes: Dict
 
     # Agents
     agents: dict[AgentUUID, Agent]

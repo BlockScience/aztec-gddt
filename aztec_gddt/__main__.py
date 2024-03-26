@@ -11,8 +11,12 @@ import os
               default=False,
               is_flag=True,
               help="Make an experiment run instead")
+@click.option('-z', 'parallelize',
+              default=False,
+              is_flag=True,
+              help="")
 @click.option('-p', '--pickle', 'pickle', default=False, is_flag=True)
-def main(experiment_run: bool, pickle: bool) -> None:
+def main(experiment_run: bool, pickle: bool, parallelize: bool) -> None:
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
     prefix ='standard-run'
@@ -21,7 +25,10 @@ def main(experiment_run: bool, pickle: bool) -> None:
         df = sim_run(*default_run_args)
     else:
         prefix = 'psuu-run'
-        df = psuu_exploratory_run()
+        if parallelize == False:
+            df = psuu_exploratory_run()
+        else:
+            psuu_exploratory_run(parallelize=True, N_sweep_samples=300)
     if pickle:
         df.to_pickle(
             f"data/simulations/{prefix}-{timestamp}.pkl.gz", compression="gzip")
