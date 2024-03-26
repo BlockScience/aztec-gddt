@@ -63,7 +63,7 @@ def create_param_impact_dist_plots_by_column(df_to_use: DataFrame,
     custom_palette = ["#000000", "#FF0000"]  
     sns.set_palette(custom_palette)
 
-    dividers = df_to_use[divider_col].unique().to_list()
+    dividers = df_to_use[divider_col].unique().tolist()
     num_dividers = len(df_to_use[divider_col].unique())
 
     fig_width = plot_width * num_dividers
