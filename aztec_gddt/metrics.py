@@ -1,5 +1,5 @@
 import numpy as np
-import pandas as pd
+import pandas as pd # type: ignore
 from typing import Callable
 
 from aztec_gddt.types import SelectionPhase
@@ -117,23 +117,23 @@ def find_proportion_skipped(trajectory: pd.DataFrame) -> float:
 
 # Group 2, Metrics T5 
 
-def find_average_duration_finalized_blocks(trajectory: pd.DataFrame) -> float:
+def find_average_duration_finalized_blocks(trajectory: pd.DataFrame) -> np.floating:
     return np.mean(find_finalized_block_times(trajectory))
 
 # Group 2, Metric T6
 
-def find_stddev_duration_finalized_blocks(trajectory: pd.DataFrame) -> float:
+def find_stddev_duration_finalized_blocks(trajectory: pd.DataFrame) -> np.floating:
     return np.std(find_finalized_block_times(trajectory))
 
 # Group 2, Metric T7
 
-def find_average_duration_nonfinalized_blocks(trajectory: pd.DataFrame) -> float:
+def find_average_duration_nonfinalized_blocks(trajectory: pd.DataFrame) -> np.floating:
     return np.mean(find_nonfinalized_block_times(trajectory))
 
 
 # Group 2, Metric T8
 
-def find_stddev_duration_nonfinalized_blocks(trajectory: pd.DataFrame) -> float:
+def find_stddev_duration_nonfinalized_blocks(trajectory: pd.DataFrame) -> np.floating:
     return np.std(find_nonfinalized_block_times(trajectory))
 
 ####################################
@@ -146,11 +146,11 @@ def find_stddev_duration_nonfinalized_blocks(trajectory: pd.DataFrame) -> float:
 
 def find_stddev_payoffs_to_sequencers(trajectory: pd.DataFrame) -> float:
     print("Not yet implemented")
-    pass 
+    return float('nan') 
 
 def find_stddev_payoffs_to_provers(trajectory: pd.DataFrame) -> float:
     print("Not yet implemented")
-    pass 
+    return float('nan')  
 
 ####################################
 ## End Group 3 Metrics            ##
@@ -160,12 +160,15 @@ def find_stddev_payoffs_to_provers(trajectory: pd.DataFrame) -> float:
 ## Begin PostProcessing/KPIs      ##
 ####################################
 
-def is_above_median_across_trajectories(grouped_data, custom_func: Callable):
+def is_above_median_across_trajectories(grouped_data: pd.DataFrame, custom_func: Callable):
+    """
+    TODO: check if the behavior is matching with the workplan
+    """
     mapped_values = grouped_data.apply(custom_func)
     median_mapped_values = mapped_values.median()
     return mapped_values > median_mapped_values
 
-def is_below_median_across_trajectories(grouped_data, custom_func: Callable):
+def is_below_median_across_trajectories(grouped_data: pd.DataFrame, custom_func: Callable):
     # NOTE: Stingy version. 
     mapped_values = grouped_data.apply(custom_func)
     median_mapped_values = mapped_values.median()
