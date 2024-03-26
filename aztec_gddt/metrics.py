@@ -119,7 +119,7 @@ def find_proportion_skipped(trajectory: pd.DataFrame) -> float:
 
 def find_average_duration_finalized_blocks(trajectory: pd.DataFrame) -> np.floating:
     block_times = find_finalized_block_times(trajectory)
-    if len(trajectory) == 0:
+    if len(block_times) == 0:
         avg_dur = np.nan
     else:
         avg_dur = np.mean(block_times)
@@ -129,7 +129,7 @@ def find_average_duration_finalized_blocks(trajectory: pd.DataFrame) -> np.float
 
 def find_stddev_duration_finalized_blocks(trajectory: pd.DataFrame) -> np.floating:
     block_times = find_finalized_block_times(trajectory)
-    if len(trajectory) == 0:
+    if len(block_times) == 0:
         std_dur = np.nan
     else:
         std_dur = np.std(block_times)
@@ -139,7 +139,7 @@ def find_stddev_duration_finalized_blocks(trajectory: pd.DataFrame) -> np.floati
 
 def find_average_duration_nonfinalized_blocks(trajectory: pd.DataFrame) -> np.floating:
     block_times = find_nonfinalized_block_times(trajectory)
-    if len(trajectory) == 0:
+    if len(block_times) == 0:
         avg_dur = np.nan
     else:
         avg_dur = np.mean(block_times)
@@ -149,7 +149,7 @@ def find_average_duration_nonfinalized_blocks(trajectory: pd.DataFrame) -> np.fl
 
 def find_stddev_duration_nonfinalized_blocks(trajectory: pd.DataFrame) -> np.floating:
     block_times = find_finalized_block_times(trajectory)
-    if len(trajectory) == 0:
+    if len(block_times) == 0:
         std_dur = np.nan
     else:
         std_dur = np.std(block_times)
