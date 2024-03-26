@@ -261,6 +261,7 @@ def psuu_exploratory_run(N_sweep_samples=-1,
         output_path = f"data/simulations/psuu_run_{datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')}"
 
         def run_chunk(i_chunk, sweep_params):
+            print(f"{i_chunk}, {datetime.now()}")
             sim_args = (initial_state,
                         sweep_params,
                         AZTEC_MODEL_BLOCKS,

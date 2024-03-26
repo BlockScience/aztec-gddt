@@ -28,7 +28,7 @@ def main(experiment_run: bool, pickle: bool, parallelize: bool) -> None:
         if parallelize == False:
             df = psuu_exploratory_run()
         else:
-            psuu_exploratory_run(parallelize=True, N_sweep_samples=300)
+            psuu_exploratory_run(parallelize=True, N_sweep_samples=-1, use_joblib=True)
     if pickle:
         df.to_pickle(
             f"data/simulations/{prefix}-{timestamp}.pkl.gz", compression="gzip")
