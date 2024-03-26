@@ -71,7 +71,7 @@ def find_proportion_race_mode(trajectory: pd.DataFrame) -> float:
     """
     processes = [x for x in trajectory['process_id'].unique() if not (x is None)]
 
-    proportion_race_mode = np.array([trajectory[trajectory['process_id'] == proc_id]['process_phase'].apply(lambda x: x == SelectionPhase.proof_race.name).sum() > 0
+    proportion_race_mode = np.array([trajectory[trajectory['process_id'] == proc_id]['process_phase'].apply(lambda x: x == SelectionPhase.proof_race.value).sum() > 0
                 for proc_id in processes]).mean()
     return proportion_race_mode 
 
@@ -103,7 +103,7 @@ def find_proportion_slashed_due_to_sequencer(trajectory: pd.DataFrame) -> float:
 def find_proportion_skipped(trajectory: pd.DataFrame) -> float:
     processes = [x for x in trajectory['process_id'].unique() if not (x is None)]
 
-    proportion_skipped = np.array([trajectory[trajectory['process_id'] == proc_id]['process_phase'].apply(lambda x: x == SelectionPhase.skipped.name).sum() > 0
+    proportion_skipped = np.array([trajectory[trajectory['process_id'] == proc_id]['process_phase'].apply(lambda x: x == SelectionPhase.skipped.value).sum() > 0
                 for proc_id in processes]).mean()
     return proportion_skipped 
 
@@ -118,23 +118,42 @@ def find_proportion_skipped(trajectory: pd.DataFrame) -> float:
 # Group 2, Metrics T5 
 
 def find_average_duration_finalized_blocks(trajectory: pd.DataFrame) -> np.floating:
-    return np.mean(find_finalized_block_times(trajectory))
+    block_times = find_finalized_block_times(trajectory)
+    if len(trajectory) == 0:
+        avg_dur = np.nan
+    else:
+        avg_dur = np.mean(block_times)
+    return avg_dur
 
 # Group 2, Metric T6
 
 def find_stddev_duration_finalized_blocks(trajectory: pd.DataFrame) -> np.floating:
-    return np.std(find_finalized_block_times(trajectory))
+    block_times = find_finalized_block_times(trajectory)
+    if len(trajectory) == 0:
+        std_dur = np.nan
+    else:
+        std_dur = np.std(block_times)
+    return std_dur
 
 # Group 2, Metric T7
 
 def find_average_duration_nonfinalized_blocks(trajectory: pd.DataFrame) -> np.floating:
-    return np.mean(find_nonfinalized_block_times(trajectory))
-
+    block_times = find_nonfinalized_block_times(trajectory)
+    if len(trajectory) == 0:
+        avg_dur = np.nan
+    else:
+        avg_dur = np.mean(block_times)
+    return avg_dur
 
 # Group 2, Metric T8
 
 def find_stddev_duration_nonfinalized_blocks(trajectory: pd.DataFrame) -> np.floating:
-    return np.std(find_nonfinalized_block_times(trajectory))
+    block_times = find_finalized_block_times(trajectory)
+    if len(trajectory) == 0:
+        std_dur = np.nan
+    else:
+        std_dur = np.std(block_times)
+    return std_dur
 
 ####################################
 ## End Group 2 Metrics            ##
