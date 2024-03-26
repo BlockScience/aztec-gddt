@@ -179,25 +179,29 @@ def find_stddev_payoffs_to_provers(trajectory: pd.DataFrame) -> float:
 ## Begin PostProcessing/KPIs      ##
 ####################################
 
-def is_above_median_across_trajectories(grouped_data: pd.DataFrame, custom_func: Callable):
+def is_above_median_across_trajectories(trajectory_df: pd.DataFrame, column_name: str):
     """
-    TODO: check if the behavior is matching with the workplan
+    NOTE: This should be applied to a processed DataFrame where each row corresponds to a single
+    trajectory. The column name should be a KPI. 
     """
-    mapped_values = grouped_data.apply(custom_func)
-    median_mapped_values = mapped_values.median()
-    return mapped_values > median_mapped_values
+    return trajectory_df[column_name] > trajectory_df[column_name].median()
 
-def is_below_median_across_trajectories(grouped_data: pd.DataFrame, custom_func: Callable):
-    # NOTE: Stingy version. 
-    mapped_values = grouped_data.apply(custom_func)
-    median_mapped_values = mapped_values.median()
-    return mapped_values < median_mapped_values
+
+def is_below_median_across_trajectories( trajectory_df: pd.DataFrame, column_name: str):
+    """
+    NOTE: This should be applied to a processed DataFrame where each row corresponds to a single
+    trajectory. The column name should be a KPI. 
+    """
+    return trajectory_df[column_name] < trajectory_df[column_name].median()
+
 
 def calc_g1_score(grouped_data: pd.DataFrame) -> float:
-    t1_score = is_below_median_across_trajectories(grouped_data, find_proportion_race_mode)
-    t2_score = is_below_median_across_trajectories(grouped_data, find_proportion_slashed_due_to_prover)
-    t3_score = is_below_median_across_trajectories(grouped_data, find_proportion_slashed_due_to_sequencer)
-    t4_score = is_below_median_across_trajectories(grouped_data, find_proportion_skipped)
+    """
+    """
+    t1_score = is_below_median_across_trajectories(grouped_data, "proportion_race_mode")
+    t2_score = is_below_median_across_trajectories(grouped_data, "proportion_slashed_due_to_prover")
+    t3_score = is_below_median_across_trajectories(grouped_data, "proportion_slashed_due_to_sequencer")
+    t4_score = is_below_median_across_trajectories(grouped_data, "proportion_skipped")
     final_score = t1_score + t2_score + t3_score + t4_score
     return final_score
 
@@ -208,6 +212,9 @@ def calc_mock_g1_score(grouped_data: pd.DataFrame) -> float:
     return final_score
 
 def calc_g2_score(grouped_data: pd.DataFrame) -> float:
+    """
+    TODO: Change function calls to strings. 
+    """
     t5_score = is_below_median_across_trajectories(grouped_data, find_average_duration_finalized_blocks)
     t6_score = is_below_median_across_trajectories(grouped_data, find_stddev_duration_finalized_blocks)
     t7_score = is_below_median_across_trajectories(grouped_data, find_average_duration_nonfinalized_blocks)
