@@ -53,46 +53,85 @@ def extract_df(df_to_use: DataFrame,
     
     return base_df
 
-def create_param_impact_dist_plots(df_to_use: DataFrame,
+def create_param_impact_dist_plots_by_column(df_to_use: DataFrame,
                                    param_cols: List[str],
-                                   kpi_cols: List[str],
+                                   kpi_col: str,
+                                   divider_col: str,
                                    plot_height: float = 2,                               
                                    plot_width: float = 2):
     # Define the custom color palette 
     custom_palette = ["#000000", "#FF0000"]  
     sns.set_palette(custom_palette)
 
-    fig_width = plot_width * len(kpi_cols)
-    fig_height = plot_height * len(param_cols)
+    dividers = df_to_use[divider_col].unique().to_list()
+    num_dividers = len(df_to_use[divider_col].unique())
 
-# Create a plot object with subplots. 
-    fig, axs = plt.subplots(len(param_cols), len(kpi_cols), 
+    fig_width = plot_width * num_dividers
+    fig_height = plot_height * len(param_cols)
+    
+    # Create a plot object with subplots. 
+    fig, axs = plt.subplots(len(param_cols), num_dividers, 
                       figsize=(fig_width, fig_height), 
                       sharex='row', sharey='row', 
                       gridspec_kw={'hspace': 0.5, 'wspace': 0.5})
     fig.subplots_adjust(top=0.95)
-    fig.suptitle("Parameter Impact Plot")
+    fig.suptitle(f"Impact of {divider_col}")
 
     for row_num, param in enumerate(param_cols):
-        for col_num, kpi in enumerate(kpi_cols):
+        for col_num, divider in enumerate(dividers):
             sns.kdeplot(
-                        data = df_to_use,
-                        x = kpi,
+                        data = df_to_use[df_to_use[divider_col] == divider],
+                        x = kpi_col,
                         hue = param,
                         ax = axs[row_num,col_num],
                         palette = custom_palette
             )
-            axs[row_num, col_num].set_title(f"Impact of \n {param} \n on {kpi}",
+            axs[row_num, col_num].set_title(f"KPI measurements for \n {param} and {divider}.",
                                             fontsize = 10)
     
     plt.show()
     return fig, axs
 
+    def create_param_impact_dist_plots_by_kpi(df_to_use: DataFrame,
+                                   param_cols: List[str],
+                                   kpi_cols: List[str],
+                                   plot_height: float = 2,                               
+                                   plot_width: float = 2):
+        # Define the custom color palette 
+        custom_palette = ["#000000", "#FF0000"]  
+        sns.set_palette(custom_palette)
+
+        fig_width = plot_width * len(kpi_cols)
+        fig_height = plot_height * len(param_cols)
+
+        # Create a plot object with subplots. 
+        fig, axs = plt.subplots(len(param_cols), len(kpi_cols), 
+                        figsize=(fig_width, fig_height), 
+                        sharex='row', sharey='row', 
+                        gridspec_kw={'hspace': 0.5, 'wspace': 0.5})
+        fig.subplots_adjust(top=0.95)
+        fig.suptitle("Parameter Impact Plot")
+
+        for row_num, param in enumerate(param_cols):
+            for col_num, kpi in enumerate(kpi_cols):
+                sns.kdeplot(
+                            data = df_to_use,
+                            x = kpi,
+                            hue = param,
+                            ax = axs[row_num,col_num],
+                            palette = custom_palette
+                )
+                axs[row_num, col_num].set_title(f"Impact of \n {param} \n on {kpi}",
+                                                fontsize = 10)
+        
+        plt.show()
+        return fig, axs
+
 def create_decision_tree_importances_plot(data: DataFrame,
                                          params_to_use: List = None,
                                          kpi: str = None,
-                                         fig_width: float = 36,
-                                         fig_height: float = 12):
+                                         plot_width: float = 36,
+                                         plot_height: float = 12):
     if params_to_use is None:
         cols_to_use = data.columns
     else:
@@ -114,7 +153,7 @@ def create_decision_tree_importances_plot(data: DataFrame,
 
 
     fig, axes = plt.subplots(nrows=2,
-                                figsize=(36, 12),
+                                figsize=(plot_width, plot_height),
                                 dpi=100,
                                 gridspec_kw={'height_ratios': [3, 1]})
 
