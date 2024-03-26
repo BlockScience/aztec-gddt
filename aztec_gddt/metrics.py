@@ -26,7 +26,7 @@ def find_finalized_blocks(trajectory: pd.DataFrame):
     finalized_blocks = [proc_id 
                         for proc_id 
                         in processes 
-                        if trajectory[trajectory['process_id'] == proc_id]['process_phase'].apply(lambda x: x == SelectionPhase.finalized.name).sum() > 0]
+                        if trajectory[trajectory['process_id'] == proc_id]['process_phase'].apply(lambda x: x == SelectionPhase.finalized.value).sum() > 0]
     return finalized_blocks
 
 def find_nonfinalized_blocks(trajectory: pd.DataFrame):
@@ -34,7 +34,7 @@ def find_nonfinalized_blocks(trajectory: pd.DataFrame):
     nonfinalized_blocks = [proc_id 
                            for proc_id 
                            in processes 
-                           if trajectory[trajectory['process_id'] == proc_id]['process_phase'].apply(lambda x: x == SelectionPhase.skipped.name).sum() > 0]
+                           if trajectory[trajectory['process_id'] == proc_id]['process_phase'].apply(lambda x: x == SelectionPhase.skipped.value).sum() > 0]
     return nonfinalized_blocks
 
 def find_finalized_block_times(trajectory: pd.DataFrame):
