@@ -197,7 +197,14 @@ class AztecModelState(TypedDict):
     time_l1: L1Blocks
     delta_l1_blocks: L1Blocks
     advance_l1_blocks: L1Blocks
-    slashes: Dict
+
+    # Rewards and Punishments
+    slashes_to_provers: Tokens = 0
+    slashes_to_sequencers: Tokens = 0
+
+    rewards_to_provers: Tokens = 0
+    rewards_to_sequencers: Tokens = 0
+    rewards_to_relays: Tokens = 0
 
     # Agents
     agents: dict[AgentUUID, Agent]
