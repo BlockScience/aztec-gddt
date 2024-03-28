@@ -72,7 +72,11 @@ SLASH_PARAMS = SlashParameters(
 INITIAL_STATE = AztecModelState(time_l1=0,
                                 delta_l1_blocks=0,
                                 advance_l1_blocks=0,
-                                slashes = {"to_sequencers": 0, "to_provers": 0},
+                                slashes_to_provers=0,
+                                slashes_to_sequencers=0,
+                                rewards_to_provers=0,
+                                rewards_to_sequencers=0,
+                                rewards_to_relays=0,
 
                                 agents=AGENTS_DICT,
                                 current_process=None, # XXX
