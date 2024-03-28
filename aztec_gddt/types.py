@@ -200,14 +200,12 @@ class AztecModelState(TypedDict):
 
     # Rewards and Punishments
 
-    rewards_to_provers: Tokens = 0
-    rewards_to_sequencers: Tokens = 0
-    rewards_to_relays: Tokens = 0
-    
+    total_rewards_provers: Tokens = 0
+    total_rewards_sequencers: Tokens = 0
+    total_rewards_relays: Tokens = 0
+
     slashes_to_provers: Tokens = 0
     slashes_to_sequencers: Tokens = 0
-
-
 
     # Agents
     agents: dict[AgentUUID, Agent]
