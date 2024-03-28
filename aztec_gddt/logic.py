@@ -770,7 +770,7 @@ def s_transactions(params: AztecModelParams,
 
     return ('transactions', new_transactions)
 
-def s_update_slashes(params: AztecModelParams,
+def s_slashes_to_prover(params: AztecModelParams,
                      _2,
                      _3,
                      state: AztecModelState,
@@ -778,25 +778,40 @@ def s_update_slashes(params: AztecModelParams,
     """
     Logic for keeping track of how many slashes have occurred. 
     """
-    slashes = state['slashes']
+    slashes = state['slashes_to_prover']
     transfers: Sequence[Transfer] = signal.get('transfers', []) # type: ignore
 
-    old_slashes_to_provers = slashes.get("to_provers", 0)
-    old_slashes_to_sequencers = slashes.get("to_sequencers", 0)
+
 
     # Calculate the number of slashes of each type to add
-    delta_slashes_provers = len([transfer for transfer in transfers 
+    delta_slashes_prover = len([transfer for transfer in transfers 
                                 if (transfer.kind == TransferKind.slash) and (transfer.to_prover == True)])
+
+    updated_slashes_to_prover = old_slashes_to_prover + delta_slashes_prover
+
+    return ('slashes_to_prover', updated_slashes_to_prover)
+
+
+def s_slashes_to_sequencer(params: AztecModelParams,
+                     _2,
+                     _3,
+                     state: AztecModelState,
+                     signal: SignalEvolveProcess) :
+    """
+    Logic for keeping track of how many slashes have occurred. 
+    """
+    slashes = state['slashes_to_sequencer']
+    transfers: Sequence[Transfer] = signal.get('transfers', []) # type: ignore
+
+
+
+    # Calculate the number of slashes of each type to add
     delta_slashes_sequencers = len([transfer for transfer in transfers 
                                     if transfer.kind == TransferKind.slash and transfer.to_sequencer])
 
-    updated_slashes = {"to_provers": old_slashes_to_provers + delta_slashes_provers,
-                     "to_sequencers": old_slashes_to_sequencers + delta_slashes_sequencers}
+    updated_slashes_to_sequencer = old_slashes_to_sequencers + delta_slashes_sequencers
 
-    return ('slashes', updated_slashes)
-
-
-
+    return ('slashes_to_sequencer', updated_slashes_to_sequencer)
 
 
 
