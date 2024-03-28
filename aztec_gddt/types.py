@@ -199,12 +199,15 @@ class AztecModelState(TypedDict):
     advance_l1_blocks: L1Blocks
 
     # Rewards and Punishments
-    slashes_to_provers: Tokens = 0
-    slashes_to_sequencers: Tokens = 0
 
     rewards_to_provers: Tokens = 0
     rewards_to_sequencers: Tokens = 0
     rewards_to_relays: Tokens = 0
+    
+    slashes_to_provers: Tokens = 0
+    slashes_to_sequencers: Tokens = 0
+
+
 
     # Agents
     agents: dict[AgentUUID, Agent]
