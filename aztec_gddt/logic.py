@@ -778,7 +778,7 @@ def s_slashes_to_prover(params: AztecModelParams,
     """
     Logic for keeping track of how many slashes have occurred. 
     """
-    slashes = state['slashes_to_prover']
+    old_slashes_to_prover = state['slashes_to_prover']
     transfers: Sequence[Transfer] = signal.get('transfers', []) # type: ignore
 
 
@@ -800,7 +800,7 @@ def s_slashes_to_sequencer(params: AztecModelParams,
     """
     Logic for keeping track of how many slashes have occurred. 
     """
-    slashes = state['slashes_to_sequencer']
+    old_slashes_to_sequencers = state['slashes_to_sequencer']
     transfers: Sequence[Transfer] = signal.get('transfers', []) # type: ignore
 
 
