@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd # type: ignore
+
 from typing import Callable
 
 from aztec_gddt.types import SelectionPhase
@@ -26,7 +27,7 @@ def find_finalized_blocks(trajectory: pd.DataFrame):
     finalized_blocks = [proc_id 
                         for proc_id 
                         in processes 
-                        if trajectory[trajectory['process_id'] == proc_id]['process_phase'].apply(lambda x: x == SelectionPhase.finalized.value).sum() > 0]
+                        if trajectory[trajectory['process_id'] == proc_id]['process_phase'].apply(lambda x: x == SelectionPhase.finalized.name).sum() > 0]
     return finalized_blocks
 
 def find_nonfinalized_blocks(trajectory: pd.DataFrame):
@@ -34,7 +35,7 @@ def find_nonfinalized_blocks(trajectory: pd.DataFrame):
     nonfinalized_blocks = [proc_id 
                            for proc_id 
                            in processes 
-                           if trajectory[trajectory['process_id'] == proc_id]['process_phase'].apply(lambda x: x == SelectionPhase.skipped.value).sum() > 0]
+                           if trajectory[trajectory['process_id'] == proc_id]['process_phase'].apply(lambda x: x == SelectionPhase.skipped.name).sum() > 0]
     return nonfinalized_blocks
 
 def find_finalized_block_times(trajectory: pd.DataFrame):
@@ -71,7 +72,7 @@ def find_proportion_race_mode(trajectory: pd.DataFrame) -> float:
     """
     processes = [x for x in trajectory['process_id'].unique() if not (x is None)]
 
-    proportion_race_mode = np.array([trajectory[trajectory['process_id'] == proc_id]['process_phase'].apply(lambda x: x == SelectionPhase.proof_race.value).sum() > 0
+    proportion_race_mode = np.array([trajectory[trajectory['process_id'] == proc_id]['process_phase'].apply(lambda x: x == SelectionPhase.proof_race.name).sum() > 0
                 for proc_id in processes]).mean()
     return proportion_race_mode 
 
@@ -103,7 +104,7 @@ def find_proportion_slashed_due_to_sequencer(trajectory: pd.DataFrame) -> float:
 def find_proportion_skipped(trajectory: pd.DataFrame) -> float:
     processes = [x for x in trajectory['process_id'].unique() if not (x is None)]
 
-    proportion_skipped = np.array([trajectory[trajectory['process_id'] == proc_id]['process_phase'].apply(lambda x: x == SelectionPhase.skipped.value).sum() > 0
+    proportion_skipped = np.array([trajectory[trajectory['process_id'] == proc_id]['process_phase'].apply(lambda x: x == SelectionPhase.skipped.name).sum() > 0
                 for proc_id in processes]).mean()
     return proportion_skipped 
 
@@ -179,29 +180,25 @@ def find_stddev_payoffs_to_provers(trajectory: pd.DataFrame) -> float:
 ## Begin PostProcessing/KPIs      ##
 ####################################
 
-def is_above_median_across_trajectories(trajectory_df: pd.DataFrame, column_name: str):
+def is_above_median_across_trajectories(grouped_data: pd.DataFrame, custom_func: Callable):
     """
-    NOTE: This should be applied to a processed DataFrame where each row corresponds to a single
-    trajectory. The column name should be a KPI. 
+    TODO: check if the behavior is matching with the workplan
     """
-    return trajectory_df[column_name] > trajectory_df[column_name].median()
+    mapped_values = grouped_data.apply(custom_func)
+    median_mapped_values = mapped_values.median()
+    return mapped_values > median_mapped_values
 
-
-def is_below_median_across_trajectories( trajectory_df: pd.DataFrame, column_name: str):
-    """
-    NOTE: This should be applied to a processed DataFrame where each row corresponds to a single
-    trajectory. The column name should be a KPI. 
-    """
-    return trajectory_df[column_name] < trajectory_df[column_name].median()
-
+def is_below_median_across_trajectories(grouped_data: pd.DataFrame, custom_func: Callable):
+    # NOTE: Stingy version. 
+    mapped_values = grouped_data.apply(custom_func)
+    median_mapped_values = mapped_values.median()
+    return mapped_values < median_mapped_values
 
 def calc_g1_score(grouped_data: pd.DataFrame) -> float:
-    """
-    """
-    t1_score = is_below_median_across_trajectories(grouped_data, "proportion_race_mode")
-    t2_score = is_below_median_across_trajectories(grouped_data, "proportion_slashed_due_to_prover")
-    t3_score = is_below_median_across_trajectories(grouped_data, "proportion_slashed_due_to_sequencer")
-    t4_score = is_below_median_across_trajectories(grouped_data, "proportion_skipped")
+    t1_score = is_below_median_across_trajectories(grouped_data, find_proportion_race_mode)
+    t2_score = is_below_median_across_trajectories(grouped_data, find_proportion_slashed_due_to_prover)
+    t3_score = is_below_median_across_trajectories(grouped_data, find_proportion_slashed_due_to_sequencer)
+    t4_score = is_below_median_across_trajectories(grouped_data, find_proportion_skipped)
     final_score = t1_score + t2_score + t3_score + t4_score
     return final_score
 
@@ -212,9 +209,6 @@ def calc_mock_g1_score(grouped_data: pd.DataFrame) -> float:
     return final_score
 
 def calc_g2_score(grouped_data: pd.DataFrame) -> float:
-    """
-    TODO: Change function calls to strings. 
-    """
     t5_score = is_below_median_across_trajectories(grouped_data, find_average_duration_finalized_blocks)
     t6_score = is_below_median_across_trajectories(grouped_data, find_stddev_duration_finalized_blocks)
     t7_score = is_below_median_across_trajectories(grouped_data, find_average_duration_nonfinalized_blocks)
