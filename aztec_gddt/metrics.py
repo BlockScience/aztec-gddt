@@ -1,6 +1,7 @@
 from typing import Callable
 import numpy as np
 import pandas as pd # type: ignore
+from typing import Callable
 from tqdm.auto import tqdm # type: ignore
 
 
@@ -125,43 +126,40 @@ def find_proportion_skipped(trajectory: pd.DataFrame) -> float:
 def find_average_duration_finalized_blocks(trajectory: pd.DataFrame) -> np.floating:
     block_times = find_finalized_block_times(trajectory)
     if len(block_times) == 0:
-        val = np.nan
+        avg_dur = np.nan
     else:
-        val = np.mean(block_times)
-    return val 
-
+        avg_dur = np.mean(block_times)
+    return avg_dur
 
 # Group 2, Metric T6
 
 def find_stddev_duration_finalized_blocks(trajectory: pd.DataFrame) -> np.floating:
     block_times = find_finalized_block_times(trajectory)
     if len(block_times) == 0:
-        val = np.nan
+        std_dur = np.nan
     else:
-        val = np.std(block_times)
-    return val 
+        std_dur = np.std(block_times)
+    return std_dur
 
 # Group 2, Metric T7
 
 def find_average_duration_nonfinalized_blocks(trajectory: pd.DataFrame) -> np.floating:
     block_times = find_nonfinalized_block_times(trajectory)
     if len(block_times) == 0:
-        val = np.nan
+        avg_dur = np.nan
     else:
-        val = np.mean(block_times)
-    return val 
-
-
+        avg_dur = np.mean(block_times)
+    return avg_dur
 
 # Group 2, Metric T8
 
 def find_stddev_duration_nonfinalized_blocks(trajectory: pd.DataFrame) -> np.floating:
-    block_times = find_nonfinalized_block_times(trajectory)
+    block_times = find_finalized_block_times(trajectory)
     if len(block_times) == 0:
-        val = np.nan
+        std_dur = np.nan
     else:
-        val = np.std(block_times)
-    return val 
+        std_dur = np.std(block_times)
+    return std_dur
 
 ####################################
 ## End Group 2 Metrics            ##
