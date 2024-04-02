@@ -193,6 +193,8 @@ SelectionResults = dict[ProcessUUID, tuple[Proposal, list[Proposal]]]
 
 class AztecModelState(TypedDict):
     # Time progression
+    timestep: int
+    substep: int
     time_l1: L1Blocks
     delta_l1_blocks: L1Blocks
     advance_l1_blocks: L1Blocks
@@ -287,7 +289,7 @@ class AztecModelParams(TypedDict):
 
     # Behavioral Parameters
 
-    logic: Dict[str, Callable[Dict, Any]] #placeholder for general system logic
+    logic: Dict[str, Callable[[Dict], Any]] #placeholder for general system logic
 
     # XXX: assume that each interacting user
     # has an fixed probability per L1 block

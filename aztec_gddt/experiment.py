@@ -15,9 +15,8 @@ from aztec_gddt.utils import sim_run
 from typing import Optional
 from random import sample
 from datetime import datetime
-import math
-from tqdm.auto import tqdm
-from joblib import Parallel, delayed
+from tqdm.auto import tqdm # type: ignore
+from joblib import Parallel, delayed # type: ignore
 
 def standard_run(N_timesteps=TIMESTEPS) -> DataFrame:
     """Function which runs the cadCAD simulations
@@ -107,7 +106,7 @@ def psuu_exploratory_run(N_sweep_samples=-1,
                          N_samples=3,
                          N_timesteps=500,
                          parallelize=False,
-                         use_joblib=True) -> DataFrame:
+                         use_joblib=True) -> Optional[DataFrame]:
     """Function which runs the cadCAD simulations
 
     Returns:
@@ -121,7 +120,7 @@ def psuu_exploratory_run(N_sweep_samples=-1,
 
     assign_params = {'stake_activation_period', 'phase_duration_commit_bond_min_blocks', 'gas_threshold_for_tx', 'op_costs', 'proving_marketplace_usage_probability', 'gas_fee_l1_time_series', 'phase_duration_reveal_min_blocks', 'gwei_to_tokens', 'slash_params', 'gas_fee_blob_time_series', 'phase_duration_proposal_max_blocks', 'rewards_to_relay', 'phase_duration_rollup_max_blocks', 'phase_duration_rollup_min_blocks', 'phase_duration_reveal_max_blocks', 'fee_subsidy_fraction', 'phase_duration_race_min_blocks', 'timestep_in_blocks', 'rewards_to_provers', 'label', 'reward_per_block', 'blob_gas_threshold_for_tx', 'phase_duration_race_max_blocks', 'unstake_cooldown_period', 'proposal_probability_per_user_per_block', 'block_content_reveal_probability', 'commit_bond_reveal_probability', 'phase_duration_commit_bond_max_blocks', 'commit_bond_amount', 'uncle_count', 'tx_proof_reveal_probability', 'rollup_proof_reveal_probability', 'phase_duration_proposal_min_blocks'}
 
-    for i in range(N_sequencer):
+    for _ in range(N_sequencer):
         a = Agent(uuid=uuid4(),
                                      balance=max(norm.rvs(50, 20), 1),
                                      is_sequencer=True,
@@ -129,7 +128,7 @@ def psuu_exploratory_run(N_sweep_samples=-1,
                                      is_relay=False,
                                      staked_amount=5)
         Sqn3Prv3_agents.append(a)
-    for i in range(N_prover):
+    for _ in range(N_prover):
         a = Agent(uuid=uuid4(),
                                      balance=max(norm.rvs(50, 20), 1),
                                      is_sequencer=False,
@@ -143,28 +142,8 @@ def psuu_exploratory_run(N_sweep_samples=-1,
     Sqn3Prv3 = {**BASE_AGENTS_DICT, **Sqn3Prv3_dict}
 
 
-    initial_state = AztecModelState(
-        time_l1=0,
-        delta_l1_blocks=0,
-        advance_l1_blocks=0,
-        slashes= {"to_provers": 0, "to_sequencers": 0},
-
-        agents=Sqn3Prv3,
-
-        current_process=None,
-        transactions=dict(),
-
-        gas_fee_l1=float('nan'),
-        gas_fee_blob=float('nan'),
-
-        finalized_blocks_count=0,
-        cumm_block_rewards=INITIAL_CUMM_REWARDS,
-        cumm_fee_cashback=INITIAL_CUMM_CASHBACK,
-        cumm_burn=INITIAL_CUMM_BURN,
-
-        token_supply=INITIAL_SUPPLY,
-    )
-
+    initial_state = INITIAL_STATE.copy()
+    initial_state['agents'] = Sqn3Prv3
 
 
     sweep_params: dict[str, list] = dict(label=['default'],
@@ -286,3 +265,4 @@ def psuu_exploratory_run(N_sweep_samples=-1,
                 sim_df = sim_run(*sim_args, exec_mode='single', assign_params=assign_params)
                 output_filename = output_path + f'-{i_chunk}.pkl.gz'
                 sim_df.to_pickle(output_filename)
+    return sim_df

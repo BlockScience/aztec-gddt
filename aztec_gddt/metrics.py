@@ -1,7 +1,7 @@
 from typing import Callable
 import numpy as np
 import pandas as pd # type: ignore
-from typing import Callable
+from typing import Callable, Any
 from tqdm.auto import tqdm # type: ignore
 
 
@@ -18,12 +18,12 @@ def process_df(sim_df: pd.DataFrame):
     return new_df
 
 
-def time_spent(trajectory: pd.DataFrame, process_id: str):
+def time_spent(trajectory: pd.DataFrame, process_id: str) -> float:
     first_step = trajectory[trajectory['process_id'] == process_id].iloc[0].time_l1
     last_step = trajectory[trajectory['process_id'] == process_id].iloc[-1].time_l1
     return last_step - first_step
 
-def find_finalized_blocks(trajectory: pd.DataFrame):
+def find_finalized_blocks(trajectory: pd.DataFrame) -> list[Any]:
     processes = [x for x in trajectory['process_id'].unique() if not (x is None)]
     finalized_blocks = [proc_id 
                         for proc_id 
@@ -31,7 +31,7 @@ def find_finalized_blocks(trajectory: pd.DataFrame):
                         if trajectory[trajectory['process_id'] == proc_id]['process_phase'].apply(lambda x: x == SelectionPhase.finalized.value).sum() > 0]
     return finalized_blocks
 
-def find_nonfinalized_blocks(trajectory: pd.DataFrame):
+def find_nonfinalized_blocks(trajectory: pd.DataFrame) -> list[Any]:
     processes = [x for x in trajectory['process_id'].unique() if not (x is None)]
     nonfinalized_blocks = [proc_id 
                            for proc_id 
@@ -123,7 +123,7 @@ def find_proportion_skipped(trajectory: pd.DataFrame) -> float:
 
 # Group 2, Metrics T5 
 
-def find_average_duration_finalized_blocks(trajectory: pd.DataFrame) -> np.floating:
+def find_average_duration_finalized_blocks(trajectory: pd.DataFrame) -> float | np.floating:
     block_times = find_finalized_block_times(trajectory)
     if len(block_times) == 0:
         avg_dur = np.nan
@@ -133,7 +133,7 @@ def find_average_duration_finalized_blocks(trajectory: pd.DataFrame) -> np.float
 
 # Group 2, Metric T6
 
-def find_stddev_duration_finalized_blocks(trajectory: pd.DataFrame) -> np.floating:
+def find_stddev_duration_finalized_blocks(trajectory: pd.DataFrame) -> float | np.floating:
     block_times = find_finalized_block_times(trajectory)
     if len(block_times) == 0:
         std_dur = np.nan
@@ -143,7 +143,7 @@ def find_stddev_duration_finalized_blocks(trajectory: pd.DataFrame) -> np.floati
 
 # Group 2, Metric T7
 
-def find_average_duration_nonfinalized_blocks(trajectory: pd.DataFrame) -> np.floating:
+def find_average_duration_nonfinalized_blocks(trajectory: pd.DataFrame) -> float | np.floating:
     block_times = find_nonfinalized_block_times(trajectory)
     if len(block_times) == 0:
         avg_dur = np.nan
@@ -153,7 +153,7 @@ def find_average_duration_nonfinalized_blocks(trajectory: pd.DataFrame) -> np.fl
 
 # Group 2, Metric T8
 
-def find_stddev_duration_nonfinalized_blocks(trajectory: pd.DataFrame) -> np.floating:
+def find_stddev_duration_nonfinalized_blocks(trajectory: pd.DataFrame) -> float | np.floating:
     block_times = find_finalized_block_times(trajectory)
     if len(block_times) == 0:
         std_dur = np.nan
@@ -169,15 +169,15 @@ def find_stddev_duration_nonfinalized_blocks(trajectory: pd.DataFrame) -> np.flo
 ## Begin Group 3 Metrics          ##
 ####################################
 
-def find_stddev_payoffs_to_sequencers(trajectory: pd.DataFrame) -> float:
+def find_stddev_payoffs_to_sequencers(trajectory: pd.DataFrame) -> float | np.floating:
     print("Not yet implemented")
     return float('nan') 
 
-def find_stddev_payoffs_to_provers(trajectory: pd.DataFrame) -> float:
+def find_stddev_payoffs_to_provers(trajectory: pd.DataFrame) -> float | np.floating:
     print("Not yet implemented")
     return float('nan')  
 
-def find_delta_total_revenue_agents(trajectory: pd.DataFrame) -> float:
+def find_delta_total_revenue_agents(trajectory: pd.DataFrame) -> float | np.floating:
     initial_balance_agents = sum([agent.balance for agent in trajectory["agents"].iloc[0].values()])
     final_balance_agents = sum([agent.balance for agent in trajectory["agents"].iloc[-1].values()])
     delta_balance_agents = final_balance_agents - initial_balance_agents

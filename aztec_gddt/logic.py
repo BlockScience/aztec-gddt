@@ -556,20 +556,16 @@ def p_submit_proof(params: AztecModelParams,
                 transactions = state['transactions']
                 commit_bond_id = updated_process.tx_commitment_bond
                 commit_bond: CommitmentBond = transactions.get(commit_bond_id, None) # type: ignore
-                if commit_bond is not None:
-                    who_to_slash = commit_bond.prover_uuid
-                    how_much_to_slash = commit_bond.bond_amount
+                who_to_slash = commit_bond.prover_uuid
+                how_much_to_slash = commit_bond.bond_amount
 
-                    # Slash the prover for failing to reveal the proof. 
-                    slash_transfer = Transfer(source = who_to_slash,
-                                            destination = 'burnt',
-                                            amount = how_much_to_slash,
-                                            kind = TransferKind.slash,
-                                            to_prover = True)
-
-                    transfers.append(slash_transfer)
-                else:
-                    pass
+                # Slash the prover for failing to reveal the proof. 
+                slash_transfer = Transfer(source = who_to_slash,
+                                        destination = 'burnt',
+                                        amount = how_much_to_slash,
+                                        kind = TransferKind.slash,
+                                        to_prover = True)
+                transfers.append(slash_transfer)
 
 
             else:

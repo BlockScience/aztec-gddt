@@ -69,7 +69,9 @@ SLASH_PARAMS = SlashParameters(
 )
 
 
-INITIAL_STATE = AztecModelState(time_l1=0,
+INITIAL_STATE = AztecModelState(timestep=0,
+                                substep=0,
+                                time_l1=0,
                                 delta_l1_blocks=0,
                                 advance_l1_blocks=0,
                                 slashes_to_provers=0,
@@ -185,18 +187,18 @@ GAS_FEE_BLOB_TIME_SERIES_LIST = [steady_gas_fee_blob_time_series, intermit_shock
 
 # HACK: Gas is 1 for all transactions
 DEFAULT_DETERMINISTIC_TX_ESTIMATOR = UserTransactionEstimators(
-    transaction_count=lambda _: 1,
-    proposal_average_size=lambda _: 100,
-    transaction_average_fee_per_size=lambda _: 50.5
+    transaction_count=lambda _: 1, # type: ignore
+    proposal_average_size=lambda _: 100, # type: ignore
+    transaction_average_fee_per_size=lambda _: 50.5 # type: ignore
 )
 
 
 DEFAULT_DETERMINISTIC_GAS_ESTIMATOR = L1GasEstimators(
-    proposal=lambda _: 100_000,
-    commitment_bond=lambda _: 100_000,
-    content_reveal=lambda _: 81_000,
-    content_reveal_blob=lambda _: 500_000, # NOTE: this is a HACK assumption
-    rollup_proof=lambda _: 450_000
+    proposal=lambda _: 100_000, # type: ignore
+    commitment_bond=lambda _: 100_000, # type: ignore
+    content_reveal=lambda _: 81_000, # type: ignore
+    content_reveal_blob=lambda _: 500_000, # type: ignore
+    rollup_proof=lambda _: 450_000 # type: ignore
 )
 
 
@@ -204,7 +206,7 @@ SINGLE_RUN_PARAMS = AztecModelParams(label='default',
                                      timestep_in_blocks=1,
 
                                      uncle_count=0, # TODO
-                                     reward_per_block=1.0, # TODO
+                                     reward_per_block=1, # TODO
                                      fee_subsidy_fraction=1.0, # TODO
 
 
@@ -249,5 +251,5 @@ SINGLE_RUN_PARAMS = AztecModelParams(label='default',
                                      gas_fee_blob_time_series=GAS_FEE_BLOB_TIME_SERIES_LIST[-1],
 
                                      commit_bond_amount = 10.0,
-                                     op_costs=0.0 # XXX
+                                     op_costs=0 # XXX
                                      )  
