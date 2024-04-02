@@ -1,6 +1,6 @@
 from typing import Callable
 import numpy as np
-import pandas as pd # type: ignore
+import pandas as pd
 from typing import Callable, Any
 from tqdm.auto import tqdm # type: ignore
 

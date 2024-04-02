@@ -1,4 +1,4 @@
-from pandas import DataFrame # type: ignore
+from pandas import DataFrame
 from typing import Dict, List
 
 
@@ -106,7 +106,7 @@ def psuu_exploratory_run(N_sweep_samples=-1,
                          N_samples=3,
                          N_timesteps=500,
                          parallelize=False,
-                         use_joblib=True) -> Optional[DataFrame]:
+                         use_joblib=True) -> DataFrame:
     """Function which runs the cadCAD simulations
 
     Returns:

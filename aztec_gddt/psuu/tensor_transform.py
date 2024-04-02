@@ -1,15 +1,18 @@
-import pandas as pd # type: ignore
+import pandas as pd
 import json
 import os
 import time
 from typing import List, Tuple, Iterable
+
+import sys
+sys.path.append(".")
 
 import aztec_gddt.metrics as m
 import aztec_gddt.plot_tools as pt
 from tqdm.auto import tqdm # type: ignore
 
 
-TensorPerTrajectory = object
+TensorPerTrajectory: pd.DataFrame
 
 KPIs = {"proportion_race_mode": m.find_proportion_race_mode,
         "proportion_slashed_prover": m.find_proportion_slashed_due_to_prover,
@@ -30,21 +33,21 @@ KPIs = {"proportion_race_mode": m.find_proportion_race_mode,
 def get_timestep_files_from_info(config_file: str = "config.json",
                                  num_range: List[int] = [0]):
     with open(config_file, "r") as file:
-        config = json.load(file)
+        config: dict = json.load(file)
         data_directory = config['data_directory'] # Where to look for the data. 
         data_prefix = config['data_prefix'] # Take only files with this prefix in the name. 
     
-    files_to_use  = [f"{data_directory}\{data_prefix}-{num}.pkl.gz" 
+    files_to_use  = [f"{data_directory}\\{data_prefix}-{num}.pkl.gz" 
                     for num 
                     in num_range]
     return files_to_use
             
     
 
-def timestep_files_to_trajectory(per_timestep_tensor_paths: list[str]) -> Iterable[TensorPerTrajectory]:
+def timestep_files_to_trajectory(per_timestep_tensor_paths: list[str]) -> Iterable[pd.DataFrame]:
     for path in tqdm(per_timestep_tensor_paths):
         df_per_timestep = pd.read_pickle(path)
-        df_per_trajectory = pt.extract_df(
+        df_per_trajectory: pd.DataFrame = pt.extract_df(
                                           m.process_df(df_per_timestep),   
                                           trajectory_kpis = KPIs                                                    
                                          )
@@ -52,10 +55,11 @@ def timestep_files_to_trajectory(per_timestep_tensor_paths: list[str]) -> Iterab
 
 def process_timestep_files_to_csv(per_timestep_tensor_paths: list[str],
                                   filename: str) -> pd.DataFrame:
-    dfs_to_concat = [df
+    dfs_to_concat: List[pd.DataFrame] = [df
                      for df
                      in timestep_files_to_trajectory(per_timestep_tensor_paths)]
-    final_df = pd.concat(dfs_to_concat).to_csv(filename)
+    final_df = pd.concat(dfs_to_concat)
+    final_df.to_csv(filename)
     return final_df
 
 

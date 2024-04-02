@@ -1,0 +1,1 @@
+1. `python -m aztec_gddt -e -z` will run the `psuu_exploratory_run` experiment.

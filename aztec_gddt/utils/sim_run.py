@@ -3,7 +3,7 @@ from cadCAD.configuration import Experiment # type: ignore
 from cadCAD.configuration.utils import config_sim # type: ignore
 from cadCAD.engine import ExecutionMode, ExecutionContext, Executor # type: ignore
 from cadCAD.tools.execution.easy_run import select_config_M_dict # type: ignore
-import pandas as pd # type: ignore
+import pandas as pd
 
 
 def policy_aggregator(a, b):
