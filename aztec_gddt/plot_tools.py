@@ -37,10 +37,10 @@ def extract_df(df_to_use: DataFrame,
                cols_to_drop: List[str] = None) -> DataFrame:
 
     if params_to_use is None:
-       params_to_use = governance_surface_params
+        params_to_use = governance_surface_params
     
     if agg_columns is None:
-       agg_columns = trajectory_id_columns
+        agg_columns = trajectory_id_columns
 
     group_df = df_to_use.groupby(agg_columns) #group data
     df_start = group_df.apply(lambda x: True) #create series
