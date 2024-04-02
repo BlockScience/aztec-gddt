@@ -12,7 +12,7 @@ from tqdm.auto import tqdm # type: ignore
 TensorPerTrajectory = object
 
 KPIs = {"proportion_race_mode": m.find_proportion_race_mode,
-        "roportion_slashed_prover": m.find_proportion_slashed_due_to_prover,
+        "proportion_slashed_prover": m.find_proportion_slashed_due_to_prover,
         "proportion_slashed_sequencer": m.find_proportion_slashed_due_to_sequencer,
         "proportion_skipped": m.find_proportion_skipped,
         "average_duration_finalized_blocks": m.find_average_duration_finalized_blocks,
