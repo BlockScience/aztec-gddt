@@ -180,8 +180,8 @@ def find_stddev_payoffs_to_provers(trajectory: pd.DataFrame) -> float:
     return float('nan')  
 
 def find_delta_total_revenue_agents(trajectory: pd.DataFrame) -> float:
-    initial_balance_agents = trajectory["agents"].iloc[0].apply(lambda agents: sum([x.balance for x in agents]))
-    final_balance_agents = trajectory["agents"].iloc[-1].apply(lambda agents: sum([x.balance for x in agents]))
+    initial_balance_agents = sum([agent.get("balance", 0) for agent in trajectory["agents"].iloc[0].values()])
+    final_balance_agents = sum([agent.get("balance", 0) for agent in trajectory["agents"].iloc[-1].values()])
     delta_balance_agents = final_balance_agents - initial_balance_agents
     return delta_balance_agents
 
