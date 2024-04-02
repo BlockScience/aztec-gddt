@@ -179,6 +179,13 @@ def find_stddev_payoffs_to_provers(trajectory: pd.DataFrame) -> float:
     print("Not yet implemented")
     return float('nan')  
 
+def find_delta_total_revenue_agents(trajectory: pd.DataFrame) -> float:
+    initial_balance_agents = trajectory["agents"].iloc[0].apply(lambda agents: sum([x.balance for x in agents]))
+    final_balance_agents = trajectory["agents"].iloc[-1].apply(lambda agents: sum([x.balance for x in agents]))
+    delta_balance_agents = final_balance_agents - initial_balance_agents
+    return delta_balance_agents
+
+
 ####################################
 ## End Group 3 Metrics            ##
 ####################################
