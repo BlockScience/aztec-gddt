@@ -15,10 +15,13 @@ KPIs = {"proportion_race_mode": m.find_proportion_race_mode,
         "roportion_slashed_prover": m.find_proportion_slashed_due_to_prover,
         "proportion_slashed_sequencer": m.find_proportion_slashed_due_to_sequencer,
         "proportion_skipped": m.find_proportion_skipped,
-        "find_average_duration_finalized_blocks": m.find_average_duration_finalized_blocks,
-        "find_stddev_duration_finalized_blocks": m.find_stddev_duration_finalized_blocks,
- #       "find_average_duration_nonfinalized_blocks": m.find_average_duration_nonfinalized_blocks,
- #       "find_stddev_duration_nonfinalized_blocks": m.find_stddev_duration_nonfinalized_blocks
+        "average_duration_finalized_blocks": m.find_average_duration_finalized_blocks,
+        "stddev_duration_finalized_blocks": m.find_stddev_duration_finalized_blocks,
+        "average_duration_nonfinalized_blocks": m.find_average_duration_nonfinalized_blocks,
+        "stddev_duration_nonfinalized_blocks": m.find_stddev_duration_nonfinalized_blocks,
+ #       "stddev_payoffs_to_sequencers": m.find_stddev_payoffs_to_sequencers,
+ #       "stddev_payoffs_to_provers": m.find_stddev_payoffs_to_provers,
+         "delta_total_revenue_agents": m.find_delta_total_revenue_agents
         }
 
 
@@ -26,9 +29,11 @@ KPIs = {"proportion_race_mode": m.find_proportion_race_mode,
 
 def get_timestep_files_from_info(config_file: str = "config.json",
                                  num_range: List[int] = [0]):
-    config = json.load(config_file)
-    data_directory = config['data_directory'] # Where to look for the data. 
-    data_prefix = config['data_prefix'] # Take only files with this prefix in the name. 
+    with open(config_file, "r") as file:
+        config = json.load(file)
+        data_directory = config['data_directory'] # Where to look for the data. 
+        data_prefix = config['data_prefix'] # Take only files with this prefix in the name. 
+    
     files_to_use  = [f"{data_directory}\{data_prefix}-{num}.pkl.gz" 
                     for num 
                     in num_range]
