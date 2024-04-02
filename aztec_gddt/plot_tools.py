@@ -28,22 +28,29 @@ governance_surface_params = [
 
 trajectory_id_columns = ['simulation', 'subset', 'run']
 
-default_agg_columns = ['simulation', 'subset', 'run'] + governance_surface_params
+# default_agg_columns = ['simulation', 'subset', 'run'] + governance_surface_params
 
 def extract_df(df_to_use: DataFrame,
-               trajectory_kpis: Dict[str, Callable],
+               params_to_use: List[str] = None,
+               trajectory_kpis: Dict[str, Callable] = None,
                agg_columns: List[str] = None,
-               num_rows: int = 1000,
                cols_to_drop: List[str] = None) -> DataFrame:
 
-    if agg_columns is None:
-        agg_columns = default_agg_columns
+    if params_to_use is None:
+       params_to_use = governance_surface_params
     
-    group_df = df_to_use.head(num_rows).groupby(agg_columns) #group data
+    if agg_columns is None:
+       agg_columns = trajectory_id_columns
+
+    group_df = df_to_use.groupby(agg_columns) #group data
     df_start = group_df.apply(lambda x: True) #create series
-    col_names = list(df_start.index.names)
-    data_values = list(df_start.index.values)
-    base_df = DataFrame(columns = col_names, data=data_values)
+    col_names = list(df_start.index.names) #Extract column names from series
+    data_values = list(df_start.index.values) # Extract column values from series
+    base_df = DataFrame(columns = col_names, data=data_values) # Define initial dataframe to add to
+
+    for param_name in params_to_use:
+        base_df[param_name] = group_df.apply(lambda x: x[param_name].iloc[0]).to_list()
+
     for kpi_name, kpi_func in trajectory_kpis.items():
         base_df[kpi_name] = group_df.apply(kpi_func).to_list()
 
