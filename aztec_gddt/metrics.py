@@ -1,10 +1,11 @@
+from typing import Callable
 import numpy as np
 import pandas as pd # type: ignore
-
 from typing import Callable
+from tqdm.auto import tqdm # type: ignore
+
 
 from aztec_gddt.types import SelectionPhase
-
 
 #################################
 ## Begin helper functions      ##
@@ -27,7 +28,7 @@ def find_finalized_blocks(trajectory: pd.DataFrame):
     finalized_blocks = [proc_id 
                         for proc_id 
                         in processes 
-                        if trajectory[trajectory['process_id'] == proc_id]['process_phase'].apply(lambda x: x == SelectionPhase.finalized.name).sum() > 0]
+                        if trajectory[trajectory['process_id'] == proc_id]['process_phase'].apply(lambda x: x == SelectionPhase.finalized.value).sum() > 0]
     return finalized_blocks
 
 def find_nonfinalized_blocks(trajectory: pd.DataFrame):
@@ -35,17 +36,21 @@ def find_nonfinalized_blocks(trajectory: pd.DataFrame):
     nonfinalized_blocks = [proc_id 
                            for proc_id 
                            in processes 
-                           if trajectory[trajectory['process_id'] == proc_id]['process_phase'].apply(lambda x: x == SelectionPhase.skipped.name).sum() > 0]
+                           if trajectory[trajectory['process_id'] == proc_id]['process_phase'].apply(lambda x: x == SelectionPhase.skipped.value).sum() > 0]
     return nonfinalized_blocks
 
 def find_finalized_block_times(trajectory: pd.DataFrame):
     finalized_blocks = find_finalized_blocks(trajectory)
-    finalized_block_times = np.array([time_spent(trajectory, proc_id) for proc_id in finalized_blocks])
+    finalized_block_times = np.array([time_spent(trajectory, proc_id)
+                                     for proc_id 
+                                     in finalized_blocks])
     return finalized_block_times
 
 def find_nonfinalized_block_times(trajectory: pd.DataFrame):
     nonfinalized_blocks = find_nonfinalized_blocks(trajectory)
-    nonfinalized_block_times = np.array([time_spent(trajectory, proc_id) for proc_id in nonfinalized_blocks])
+    nonfinalized_block_times = np.array([time_spent(trajectory, proc_id)
+                                         for proc_id 
+                                         in nonfinalized_blocks])
     return nonfinalized_block_times
 
 def find_times_sequencer_slashed(trajectory: pd.DataFrame):
@@ -72,7 +77,7 @@ def find_proportion_race_mode(trajectory: pd.DataFrame) -> float:
     """
     processes = [x for x in trajectory['process_id'].unique() if not (x is None)]
 
-    proportion_race_mode = np.array([trajectory[trajectory['process_id'] == proc_id]['process_phase'].apply(lambda x: x == SelectionPhase.proof_race.name).sum() > 0
+    proportion_race_mode = np.array([trajectory[trajectory['process_id'] == proc_id]['process_phase'].apply(lambda x: x == SelectionPhase.proof_race.value).sum() > 0
                 for proc_id in processes]).mean()
     return proportion_race_mode 
 
@@ -104,7 +109,7 @@ def find_proportion_slashed_due_to_sequencer(trajectory: pd.DataFrame) -> float:
 def find_proportion_skipped(trajectory: pd.DataFrame) -> float:
     processes = [x for x in trajectory['process_id'].unique() if not (x is None)]
 
-    proportion_skipped = np.array([trajectory[trajectory['process_id'] == proc_id]['process_phase'].apply(lambda x: x == SelectionPhase.skipped.name).sum() > 0
+    proportion_skipped = np.array([trajectory[trajectory['process_id'] == proc_id]['process_phase'].apply(lambda x: x == SelectionPhase.skipped.value).sum() > 0
                 for proc_id in processes]).mean()
     return proportion_skipped 
 
@@ -171,6 +176,13 @@ def find_stddev_payoffs_to_sequencers(trajectory: pd.DataFrame) -> float:
 def find_stddev_payoffs_to_provers(trajectory: pd.DataFrame) -> float:
     print("Not yet implemented")
     return float('nan')  
+
+def find_delta_total_revenue_agents(trajectory: pd.DataFrame) -> float:
+    initial_balance_agents = sum([agent.balance for agent in trajectory["agents"].iloc[0].values()])
+    final_balance_agents = sum([agent.balance for agent in trajectory["agents"].iloc[-1].values()])
+    delta_balance_agents = final_balance_agents - initial_balance_agents
+    return delta_balance_agents
+
 
 ####################################
 ## End Group 3 Metrics            ##
