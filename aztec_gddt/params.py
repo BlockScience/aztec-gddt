@@ -74,9 +74,10 @@ INITIAL_STATE = AztecModelState(time_l1=0,
                                 advance_l1_blocks=0,
                                 slashes_to_provers=0,
                                 slashes_to_sequencers=0,
-                                rewards_to_provers=0,
-                                rewards_to_sequencers=0,
-                                rewards_to_relays=0,
+                                
+                                total_rewards_provers=0,
+                                total_rewards_relays=0,
+                                total_rewards_sequencers=0,
 
                                 agents=AGENTS_DICT,
                                 current_process=None, # XXX

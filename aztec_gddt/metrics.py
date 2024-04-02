@@ -54,12 +54,12 @@ def find_nonfinalized_block_times(trajectory: pd.DataFrame):
     return nonfinalized_block_times
 
 def find_times_sequencer_slashed(trajectory: pd.DataFrame):
-    slashes_to_sequencer = trajectory['slashes'].iloc[-1].get("to_sequencers", 0)
-    return slashes_to_sequencer
+    slashes_to_sequencers = trajectory['slashes'].iloc[-1].get("to_sequencers", 0)
+    return slashes_to_sequencers
 
 def find_times_prover_slashed(trajectory: pd.DataFrame):
-    slashes_to_prover = trajectory['slashes'].iloc[-1].get("to_provers", 0)
-    return slashes_to_prover
+    slashes_to_provers = trajectory['slashes'].iloc[-1].get("to_provers", 0)
+    return slashes_to_provers
 
 
 ####################################
@@ -87,8 +87,8 @@ def find_proportion_slashed_due_to_prover(trajectory: pd.DataFrame) -> float:
     Determine which proportion of unsuccessful blocks were due to prover.
     """
     num_processes = len([x for x in trajectory['process_id'].unique() if not (x is None)])
-    slashes_to_prover = find_times_prover_slashed(trajectory)
-    proportion_slashed_due_to_prover = slashes_to_prover/num_processes
+    slashes_to_provers = find_times_prover_slashed(trajectory)
+    proportion_slashed_due_to_prover = slashes_to_provers/num_processes
 
     return proportion_slashed_due_to_prover
 
@@ -99,8 +99,8 @@ def find_proportion_slashed_due_to_sequencer(trajectory: pd.DataFrame) -> float:
     """
 
     num_processes = len([x for x in trajectory['process_id'].unique() if not (x is None)])
-    slashes_to_sequencer = find_times_sequencer_slashed(trajectory)
-    proportion_slashed_due_to_sequencer = slashes_to_sequencer/num_processes
+    slashes_to_sequencers = find_times_sequencer_slashed(trajectory)
+    proportion_slashed_due_to_sequencer = slashes_to_sequencers/num_processes
 
     return proportion_slashed_due_to_sequencer 
 

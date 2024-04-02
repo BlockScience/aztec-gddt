@@ -199,7 +199,6 @@ class AztecModelState(TypedDict):
     advance_l1_blocks: L1Blocks
 
     # Rewards and Punishments
-
     total_rewards_provers: Tokens
     total_rewards_sequencers: Tokens
     total_rewards_relays: Tokens

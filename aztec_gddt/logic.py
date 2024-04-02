@@ -778,7 +778,7 @@ def s_slashes_to_prover(params: AztecModelParams,
     """
     Logic for keeping track of how many slashes have occurred. 
     """
-    old_slashes_to_prover = state['slashes_to_prover']
+    old_slashes_to_prover = state['slashes_to_provers']
     transfers: Sequence[Transfer] = signal.get('transfers', []) # type: ignore
 
     # Calculate the number of slashes of each type to add
@@ -787,7 +787,7 @@ def s_slashes_to_prover(params: AztecModelParams,
 
     updated_slashes_to_prover = old_slashes_to_prover + delta_slashes_prover
 
-    return ('slashes_to_prover', updated_slashes_to_prover)
+    return ('slashes_to_provers', updated_slashes_to_prover)
 
 
 def s_slashes_to_sequencer(params: AztecModelParams,
@@ -798,7 +798,7 @@ def s_slashes_to_sequencer(params: AztecModelParams,
     """
     Logic for keeping track of how many slashes have occurred. 
     """
-    old_slashes_to_sequencers = state['slashes_to_sequencer']
+    old_slashes_to_sequencers = state['slashes_to_sequencers']
     transfers: Sequence[Transfer] = signal.get('transfers', []) # type: ignore
 
 
@@ -809,7 +809,7 @@ def s_slashes_to_sequencer(params: AztecModelParams,
 
     updated_slashes_to_sequencer = old_slashes_to_sequencers + delta_slashes_sequencers
 
-    return ('slashes_to_sequencer', updated_slashes_to_sequencer)
+    return ('slashes_to_sequencers', updated_slashes_to_sequencer)
 
 
 
@@ -934,9 +934,9 @@ def s_total_rewards_sequencers(params: AztecModelParams,
         total_rewards = signal.get('block_reward', 0.0)
         agents: dict[AgentUUID, Agent] = state['agents'].copy()
 
-        delta_rewards_sequencer = total_rewards * params['rewards_to_sequencers']
         delta_rewards_relay = total_rewards * params['rewards_to_relay']
-        delta_rewards_prover = total_rewards - (delta_rewards_relay + delta_rewards_prover)
+        delta_rewards_prover = total_rewards * params['rewards_to_provers']
+        delta_rewards_sequencer = total_rewards - (delta_rewards_prover + delta_rewards_relay)
 
         sequencer_uuid = state['transactions'][p.tx_rollup_proof].who
 
@@ -970,9 +970,9 @@ def s_total_rewards_relays(params: AztecModelParams,
         total_rewards = signal.get('block_reward', 0.0)
         agents: dict[AgentUUID, Agent] = state['agents'].copy()
 
-        delta_rewards_sequencer = total_rewards * params['rewards_to_sequencers']
+        delta_rewards_prover = total_rewards * params['rewards_to_provers']
         delta_rewards_relay = total_rewards * params['rewards_to_relay']
-        delta_rewards_prover = total_rewards - (delta_rewards_relay + delta_rewards_prover)
+        delta_rewards_sequencer = total_rewards - (delta_rewards_relay + delta_rewards_prover)
 
         sequencer_uuid = state['transactions'][p.tx_rollup_proof].who
 
