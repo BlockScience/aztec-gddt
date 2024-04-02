@@ -494,8 +494,6 @@ def p_reveal_content(params: AztecModelParams,
                     updated_process.duration_in_current_phase = 0
 
                     who = updated_process.leading_sequencer  # XXX
-                    gas: Gas = params['gas_estimators'].content_reveal(state)
-                    fee: Gwei = gas * state['gas_fee_l1']
                     blob_gas: BlobGas = params['gas_estimators'].content_reveal_blob(
                         state)
                     blob_fee: Gwei = blob_gas * state['gas_fee_blob']
@@ -557,18 +555,21 @@ def p_submit_proof(params: AztecModelParams,
                 # Determine who should be slashed, and how much. 
                 transactions = state['transactions']
                 commit_bond_id = updated_process.tx_commitment_bond
-                commit_bond = transactions.get(commit_bond_id)
-                who_to_slash = commit_bond.prover_uuid
-                how_much_to_slash = commit_bond.bond_amount
+                commit_bond: CommitmentBond = transactions.get(commit_bond_id, None) # type: ignore
+                if commit_bond is not None:
+                    who_to_slash = commit_bond.prover_uuid
+                    how_much_to_slash = commit_bond.bond_amount
 
-                # Slash the prover for failing to reveal the proof. 
-                slash_transfer = Transfer(source = who_to_slash,
-                                          destination = 'burnt',
-                                          amount = how_much_to_slash,
-                                          kind = TransferKind.slash,
-                                          to_prover = True)
+                    # Slash the prover for failing to reveal the proof. 
+                    slash_transfer = Transfer(source = who_to_slash,
+                                            destination = 'burnt',
+                                            amount = how_much_to_slash,
+                                            kind = TransferKind.slash,
+                                            to_prover = True)
 
-                transfers.append(slash_transfer)
+                    transfers.append(slash_transfer)
+                else:
+                    pass
 
 
             else:

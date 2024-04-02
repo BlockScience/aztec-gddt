@@ -1,11 +1,10 @@
-from typing import Annotated, Dict, TypedDict, Union, NamedTuple, Optional
-from typing import Any, Callable, Mapping
-from enum import IntEnum, Enum, auto, Flag
+from typing import Annotated, Dict, TypedDict, NamedTuple, Optional
+from typing import Any, Callable, Concatenate
+from enum import IntEnum, Enum, auto
 from math import floor
 import numpy as np
-from pydantic import BaseModel, PositiveInt, FiniteFloat
+from pydantic import FiniteFloat
 from pydantic.dataclasses import dataclass
-from uuid import uuid4
 from typing import Sequence
 
 # Units
@@ -129,7 +128,7 @@ class Agent():
     is_relay: bool = False
     staked_amount: Tokens = 0.0
 
-    logic: Dict[str, Callable[Dict,Any]] = None #placeholder for general agent logic
+    logic: Optional[Dict[str, Callable[[Dict], Any]]] = None #placeholder for general agent logic
 
     def slots(self, tokens_per_slot: Tokens) -> Tokens:
         return floor(self.staked_amount / tokens_per_slot)
@@ -226,10 +225,10 @@ class AztecModelState(TypedDict):
     token_supply: TokenSupply
 
 
-GasEstimator = Callable[[AztecModelState, Optional[Any]], Gas]
-BlobGasEstimator = Callable[[AztecModelState, Optional[Any]], BlobGas]
-BaseIntEstimator = Callable[[AztecModelState, Optional[Any]], int]
-BaseFloatEstimator = Callable[[AztecModelState, Optional[Any]], float]
+GasEstimator = Callable[Concatenate[AztecModelState, ...], Gas]
+BlobGasEstimator = Callable[Concatenate[AztecModelState, ...], BlobGas]
+BaseIntEstimator = Callable[Concatenate[AztecModelState, ...], int]
+BaseFloatEstimator = Callable[Concatenate[AztecModelState, ...], float]
 
 @dataclass
 class L1GasEstimators():
