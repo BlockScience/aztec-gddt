@@ -244,7 +244,7 @@ def psuu_exploratory_run(N_sweep_samples=-1,
             for i in range(0, len(list(sweep_params_cartesian_product.values())[0]), chunk_size)
         ]
 
-        output_path = f"data/simulations/psuu_run_{datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')}"
+        output_path = f"data/simulations/psuu_run_{invoke_time.strftime('%Y-%m-%dT%H:%M:%SZ')}"
 
         def run_chunk(i_chunk, sweep_params):
             logger.debug(f"{i_chunk}, {datetime.now()}")
