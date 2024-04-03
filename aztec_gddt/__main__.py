@@ -59,7 +59,8 @@ def main(experiment_run: bool, pickle: bool, n_jobs: int, sweep_samples: int, mc
         df = psuu_exploratory_run(N_jobs=n_jobs,
                                   N_timesteps=timesteps,
                                   N_sweep_samples=sweep_samples,
-                                  N_samples=mc_runs)
+                                  N_samples=mc_runs,
+                                  supress_cadCAD_print=True)
     if pickle:
         df.to_pickle(
             f"data/simulations/{prefix}-{timestamp}.pkl.gz", compression="gzip")

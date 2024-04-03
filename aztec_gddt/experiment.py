@@ -13,7 +13,7 @@ from scipy.stats import norm # type: ignore
 from aztec_gddt.utils import sim_run
 from typing import Optional
 from random import sample
-from datetime import datetime
+from datetime import datetime, timedelta
 from tqdm.auto import tqdm # type: ignore
 from joblib import Parallel, delayed # type: ignore
 import logging
@@ -108,13 +108,15 @@ def psuu_exploratory_run(N_sweep_samples=-1,
                          N_samples=3,
                          N_timesteps=500,
                          N_jobs=-1,
-                         parallelize_jobs=True) -> DataFrame:
+                         parallelize_jobs=True,
+                         supress_cadCAD_print=False) -> Optional[DataFrame]:
     """Function which runs the cadCAD simulations
 
     Returns:
         DataFrame: A dataframe of simulation data
     """
-
+    invoke_time = datetime.now()
+    logger.info(f"PSuU Exploratory Run invoked at {invoke_time}")
     # Relay Agent
     Sqn3Prv3_agents = []
     N_sequencer = 3
@@ -210,7 +212,8 @@ def psuu_exploratory_run(N_sweep_samples=-1,
 
     sweep_params_cartesian_product = sweep_cartesian_product(sweep_params)
 
-    logger.info(f'Performing PSuU run (Trajectory Count={traj_combinations:,}, {N_jobs=:,}, {N_timesteps=:,}, N_sweeps={sweep_combinations:,}, {N_samples=:,})')
+    N_measurements = traj_combinations * N_timesteps
+    logger.info(f'PSuU Exploratory Run Dimensions: {N_jobs=:,}, {N_timesteps=:,}, N_sweeps={sweep_combinations:,}, {N_samples=:,}, N_trajectories={traj_combinations:,}, N_measurements={N_measurements:,}')
 
     
 
@@ -219,6 +222,9 @@ def psuu_exploratory_run(N_sweep_samples=-1,
     sweep_params_cartesian_product = {k: sample(v, N_sweep_samples) if N_sweep_samples > 0 else v 
                                                                for k, v in sweep_params_cartesian_product.items()}
 
+
+    sim_start_time = datetime.now()
+    logger.info(f"PSuU Exploratory Run starting at {sim_start_time}, ({sim_start_time - invoke_time} since invoke)")
     if N_jobs <= 1:
         # Load simulation arguments
         sim_args = (initial_state,
@@ -227,8 +233,7 @@ def psuu_exploratory_run(N_sweep_samples=-1,
                     N_timesteps,
                     N_samples)
         # Run simulation
-        sim_df = sim_run(*sim_args, exec_mode='single', assign_params=assign_params)
-        return sim_df
+        sim_df = sim_run(*sim_args, exec_mode='single', assign_params=assign_params, supress_cadCAD_print=supress_cadCAD_print)
     else:
         sweeps_per_process = 100
         processes = 4
@@ -249,14 +254,13 @@ def psuu_exploratory_run(N_sweep_samples=-1,
                         N_timesteps,
                         N_samples)
             # Run simulationz
-            sim_df = sim_run(*sim_args, exec_mode='single', assign_params=assign_params)
+            sim_df = sim_run(*sim_args, exec_mode='single', assign_params=assign_params, supress_cadCAD_print=supress_cadCAD_print)
             output_filename = output_path + f'-{i_chunk}.pkl.gz'
             sim_df.to_pickle(output_filename)
 
         args = enumerate(split_dicts)
         if parallelize_jobs:
             Parallel(n_jobs=processes)(delayed(run_chunk)(i_chunk, sweep_params) for (i_chunk, sweep_params) in tqdm(args, desc='Simulation Chunks', total=len(split_dicts)))
-            sim_df = None
         else: 
             for (i_chunk, sweep_params) in tqdm(args):
                 sim_args = (initial_state,
@@ -265,7 +269,15 @@ def psuu_exploratory_run(N_sweep_samples=-1,
                             N_timesteps,
                             N_samples)
                 # Run simulationz
-                sim_df = sim_run(*sim_args, exec_mode='single', assign_params=assign_params)
+                sim_df = sim_run(*sim_args, exec_mode='single', assign_params=assign_params, supress_cadCAD_print=supress_cadCAD_print)
                 output_filename = output_path + f'-{i_chunk}.pkl.gz'
                 sim_df.to_pickle(output_filename)
-    return sim_df
+    end_start_time = datetime.now()
+    duration: float = (end_start_time - sim_start_time).total_seconds()
+    logger.info(f"PSuU Exploratory Run finished at {end_start_time}, ({end_start_time - sim_start_time} since sim start)")
+    logger.info(f"PSuU Exploratory Run Performance Numbers; Duration (s): {duration:,.2f}, Measurements Per Second: {N_measurements/duration:,.2f} M/s, Measurements per Job * Second: {N_measurements/(duration * N_jobs):,.2f} M/(J*s)")
+
+    if 'sim_df' in locals():
+        return sim_df
+    else:
+        return None
