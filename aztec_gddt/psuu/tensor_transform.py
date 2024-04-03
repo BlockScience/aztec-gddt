@@ -10,7 +10,7 @@ import os
 import time
 from typing import List, Tuple, Iterable
 from pathlib import Path
-from multiprocessing import Pool
+from multiprocessing import Pool, cpu_count
 import logging
 from aztec_gddt import DEFAULT_LOGGER
 logger = logging.getLogger(DEFAULT_LOGGER)
@@ -59,7 +59,7 @@ def timestep_file_to_trajectory(path: str) -> pd.DataFrame:
 
 def process_timestep_files_to_csv(per_timestep_tensor_paths: list[str],
                                   filename: str) -> pd.DataFrame:
-    dfs_to_concat = Pool(4).map(timestep_file_to_trajectory, per_timestep_tensor_paths)
+    dfs_to_concat = Pool(cpu_count()).map(timestep_file_to_trajectory, per_timestep_tensor_paths)
     final_df = pd.concat(dfs_to_concat)
     final_df.to_csv(filename)
     return final_df
