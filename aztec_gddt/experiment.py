@@ -208,12 +208,15 @@ def psuu_exploratory_run(N_sweep_samples=-1,
     sweep_combinations: int = 1
     for v in sweep_params.values():
         sweep_combinations *= len(v)
-    traj_combinations = sweep_combinations * N_samples
+    
+    n_sweeps = N_sweep_samples if N_sweep_samples > 0 else sweep_combinations
 
+    traj_combinations = n_sweeps * N_samples
+    
     sweep_params_cartesian_product = sweep_cartesian_product(sweep_params)
 
-    N_measurements = traj_combinations * N_timesteps
-    logger.info(f'PSuU Exploratory Run Dimensions: {N_jobs=:,}, {N_timesteps=:,}, N_sweeps={sweep_combinations:,}, {N_samples=:,}, N_trajectories={traj_combinations:,}, N_measurements={N_measurements:,}')
+    N_measurements = n_sweeps * N_timesteps
+    logger.info(f'PSuU Exploratory Run Dimensions: {N_jobs=:,}, {N_timesteps=:,}, N_sweeps={n_sweeps:,}, {N_samples=:,}, N_trajectories={traj_combinations:,}, N_measurements={N_measurements:,}')
 
     
 
