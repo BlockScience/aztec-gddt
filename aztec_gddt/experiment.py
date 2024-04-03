@@ -1,6 +1,6 @@
 from pandas import DataFrame
 from typing import Dict, List
-
+from pathlib import Path
 
 from cadCAD.tools.preparation import sweep_cartesian_product # type: ignore
 from aztec_gddt.params import INITIAL_STATE
@@ -109,7 +109,9 @@ def psuu_exploratory_run(N_sweep_samples=-1,
                          N_timesteps=500,
                          N_jobs=-1,
                          parallelize_jobs=True,
-                         supress_cadCAD_print=False) -> Optional[DataFrame]:
+                         supress_cadCAD_print=False,
+                         output_path = '',
+                         timestep_tensor_prefix='') -> Optional[DataFrame]:
     """Function which runs the cadCAD simulations
 
     Returns:
@@ -247,8 +249,6 @@ def psuu_exploratory_run(N_sweep_samples=-1,
             for i in range(0, len(list(sweep_params_cartesian_product.values())[0]), chunk_size)
         ]
 
-        output_path = f"data/simulations/psuu_run_{invoke_time.strftime('%Y-%m-%dT%H:%M:%SZ')}"
-
         def run_chunk(i_chunk, sweep_params):
             logger.debug(f"{i_chunk}, {datetime.now()}")
             sim_args = (initial_state,
@@ -258,7 +258,8 @@ def psuu_exploratory_run(N_sweep_samples=-1,
                         N_samples)
             # Run simulationz
             sim_df = sim_run(*sim_args, exec_mode='single', assign_params=assign_params, supress_cadCAD_print=supress_cadCAD_print)
-            output_filename = output_path + f'-{i_chunk}.pkl.gz'
+            output_filename = output_path / f'{timestep_tensor_prefix}_{i_chunk}.pkl.zip'
+            sim_df['simulation'] = i_chunk
             sim_df.to_pickle(output_filename)
 
         args = enumerate(split_dicts)
@@ -273,7 +274,7 @@ def psuu_exploratory_run(N_sweep_samples=-1,
                             N_samples)
                 # Run simulationz
                 sim_df = sim_run(*sim_args, exec_mode='single', assign_params=assign_params, supress_cadCAD_print=supress_cadCAD_print)
-                output_filename = output_path + f'-{i_chunk}.pkl.gz'
+                output_filename = output_path + f'-{i_chunk}.pkl.zip'
                 sim_df.to_pickle(output_filename)
     end_start_time = datetime.now()
     duration: float = (end_start_time - sim_start_time).total_seconds()

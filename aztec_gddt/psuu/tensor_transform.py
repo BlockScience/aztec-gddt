@@ -35,14 +35,8 @@ KPIs = {"proportion_race_mode": m.find_proportion_race_mode,
 
 # COLS_TO_DROP = ['simulation', 'subset', 'run']
 
-def get_timestep_files_from_info(config_file: str = "config.json",
-                                 num_range: List[int] = [0]):
-    with open(config_file, "r") as file:
-        config: dict = json.load(file)
-        # Where to look for the data.
-        data_directory = Path(config['data_directory'])
-        # Take only files with this prefix in the name.
-        data_prefix = config['data_prefix']
+def get_timestep_files_from_info(data_directory: Path,
+                                 data_prefix: str):
 
     files_to_use = [data_directory / f for f in os.listdir(data_directory)
                     if data_prefix in f
@@ -64,29 +58,34 @@ def process_timestep_files_to_csv(per_timestep_tensor_paths: list[str],
     dfs_to_concat = Pool(cpu_count()).map(timestep_file_to_trajectory, per_timestep_tensor_paths)
     logger.info(f"Concatenating Trajectory Tensors, {datetime.now()}")
     final_df = pd.concat(dfs_to_concat)
+    logger.info(f"Trajectory Tensor Computed. Rows: {len(final_df):,}")
     logger.info(f"Saving the Full Trajectory Tensor, {datetime.now()}")
     final_df.to_csv(filename)
     return final_df
 
 
-if __name__ == "__main__":
-
+def process_folder_files(data_directory: Path,
+                        data_prefix: str, 
+                        output_path: str) -> None:
     start_time = time.time()
+    logger.info(f"Initing Tensor Transform at {datetime.now()}. Output: {output_path}")
+    timestep_files = [str(f) for f in get_timestep_files_from_info(data_directory, data_prefix)]
+    num_files = len(timestep_files)
+    trajectory_list = process_timestep_files_to_csv(per_timestep_tensor_paths=timestep_files,
+                                                    filename=output_path)
+    end_time = time.time()
+    execution_time = end_time - start_time
+    logger.info(f"Processed {num_files} files.")
+    logger.info(f"Execution time: {execution_time} seconds")
+
+if __name__ == "__main__":
 
     config_path = "data/config.json"
     with open(config_path, "r") as file:
         config: dict = json.load(file)
+        data_directory = Path(config['data_directory'])
+        data_prefix = config['data_prefix']
             
     output_path = config['output_path']
-    logger.info(f"Initing Tensor Transform at {datetime.now()}. Output: {output_path}")
-    timestep_files = get_timestep_files_from_info(config_path)
-    num_files = len(timestep_files)
-    trajectory_list = process_timestep_files_to_csv(per_timestep_tensor_paths=timestep_files,
-                                                    filename=output_path)
 
-    end_time = time.time()
-
-    execution_time = end_time - start_time
-
-    logger.info(f"Processed {num_files} files.")
-    logger.info(f"Execution time: {execution_time} seconds")
+    process_folder_files(data_directory, data_prefix, output_path)
