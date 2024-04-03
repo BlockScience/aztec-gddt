@@ -210,7 +210,7 @@ def psuu_exploratory_run(N_sweep_samples=-1,
 
     sweep_params_cartesian_product = sweep_cartesian_product(sweep_params)
 
-    logger.info(f'Performing PSuU run (Trajectory Count={traj_combinations}, {N_jobs=}, {N_timesteps=}, {N_sweep_samples=}, {N_samples=})')
+    logger.info(f'Performing PSuU run (Trajectory Count={traj_combinations:,}, {N_jobs=:,}, {N_timesteps=:,}, N_sweeps={sweep_combinations:,}, {N_samples=:,})')
 
     
 
