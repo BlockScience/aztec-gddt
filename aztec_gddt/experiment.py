@@ -210,7 +210,7 @@ def psuu_exploratory_run(N_sweep_samples=-1,
 
     sweep_params_cartesian_product = sweep_cartesian_product(sweep_params)
 
-    logger.info(f'Performing PSuU run (Trajectory Count: {traj_combinations}, ({N_jobs=})')
+    logger.info(f'Performing PSuU run (Trajectory Count={traj_combinations}, {N_jobs=}, {N_timesteps=}, {N_sweep_samples=}, {N_samples=})')
 
     
 
@@ -255,7 +255,7 @@ def psuu_exploratory_run(N_sweep_samples=-1,
 
         args = enumerate(split_dicts)
         if parallelize_jobs:
-            Parallel(n_jobs=processes)(delayed(run_chunk)(i_chunk, sweep_params) for (i_chunk, sweep_params) in args)
+            Parallel(n_jobs=processes)(delayed(run_chunk)(i_chunk, sweep_params) for (i_chunk, sweep_params) in tqdm(args, desc='Simulation Chunks', total=len(split_dicts)))
             sim_df = None
         else: 
             for (i_chunk, sweep_params) in tqdm(args):
