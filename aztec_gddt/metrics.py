@@ -7,6 +7,9 @@ from tqdm.auto import tqdm # type: ignore
 
 from aztec_gddt.types import SelectionPhase
 
+
+
+
 #################################
 ## Begin helper functions      ##
 #################################
@@ -53,12 +56,12 @@ def find_nonfinalized_block_times(trajectory: pd.DataFrame):
                                          in nonfinalized_blocks])
     return nonfinalized_block_times
 
-def find_times_sequencer_slashed(trajectory: pd.DataFrame):
-    slashes_to_sequencers = trajectory['slashes'].iloc[-1].get("to_sequencers", 0)
+def find_times_sequencer_slashed(trajectory: pd.DataFrame) -> float:
+    slashes_to_sequencers = trajectory['slashes_to_sequencers'].max()
     return slashes_to_sequencers
 
-def find_times_prover_slashed(trajectory: pd.DataFrame):
-    slashes_to_provers = trajectory['slashes'].iloc[-1].get("to_provers", 0)
+def find_times_prover_slashed(trajectory: pd.DataFrame) -> float:
+    slashes_to_provers = trajectory['slashes_to_provers'].max()
     return slashes_to_provers
 
 
@@ -86,7 +89,7 @@ def find_proportion_slashed_due_to_prover(trajectory: pd.DataFrame) -> float:
     """
     Determine which proportion of unsuccessful blocks were due to prover.
     """
-    num_processes = len([x for x in trajectory['process_id'].unique() if not (x is None)])
+    num_processes: int = len([x for x in trajectory['process_id'].unique() if not (x is None)])
     slashes_to_provers = find_times_prover_slashed(trajectory)
     proportion_slashed_due_to_prover = slashes_to_provers/num_processes
 

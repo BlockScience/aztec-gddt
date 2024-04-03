@@ -254,6 +254,7 @@ def psuu_exploratory_run(N_sweep_samples=-1,
         args = enumerate(split_dicts)
         if use_joblib:
             Parallel(n_jobs=processes)(delayed(run_chunk)(i_chunk, sweep_params) for (i_chunk, sweep_params) in args)
+            sim_df = None
         else: 
             for (i_chunk, sweep_params) in tqdm(args):
                 sim_args = (initial_state,

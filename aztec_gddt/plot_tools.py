@@ -1,5 +1,6 @@
-from pandas import DataFrame  # type: ignore
+from pandas import DataFrame
 from typing import Callable, Dict, List, Optional
+import pandas as pd 
 
 import matplotlib.pyplot as plt  # type: ignore
 import seaborn as sns  # type: ignore
@@ -56,33 +57,28 @@ def extract_df(df_to_use: DataFrame,
                trajectory_kpis: Dict[str, Callable] = {},
                agg_columns: List[str] = [],
                cols_to_drop: List[str] = []) -> DataFrame:
+    """
+    Given a Timestep Tensor, return a Trajectory Tensor
+    """
 
-    if params_to_use is None:
+    if len(params_to_use) == 0:
         params_to_use = governance_surface_params
 
-    if agg_columns is None:
+    if len(agg_columns) == 0:
         agg_columns = trajectory_id_columns
 
-    group_df = df_to_use.groupby(agg_columns)  # group data
-    df_start = group_df.apply(lambda x: True)  # create series
-    col_names = list(df_start.index.names)  # Extract column names from series
-    # Extract column values from series
-    data_values = list(df_start.index.values)
-    # Define initial dataframe to add to
-    base_df = DataFrame(columns=col_names, data=data_values)
+    cols_to_group = agg_columns + params_to_use
 
-    for param_name in params_to_use:
-        base_df[param_name] = group_df.apply(
-            lambda x: x[param_name].iloc[0]).to_list()
-
+    kpi_dfs: list[pd.Series] = []
     for kpi_name, kpi_func in trajectory_kpis.items():
-        base_df[kpi_name] = group_df.apply(kpi_func).to_list()
+        kpi_s: pd.Series = df_to_use.groupby(cols_to_group).apply(kpi_func, include_groups=False)
+        kpi_s.name = kpi_name
+        kpi_dfs.append(kpi_s)
 
-    if not (cols_to_drop is None):
-        base_df.drop(columns=cols_to_drop,
-                     inplace=True)
+        
+    all_kpi_df: DataFrame = pd.concat(kpi_dfs, axis=1)
 
-    return base_df
+    return all_kpi_df
 
 
 def add_additional_info(old_df: DataFrame) -> DataFrame:
@@ -197,7 +193,9 @@ def create_decision_tree_importances_plot(data: DataFrame,
     model.fit(X, y)
     rf.fit(X, y)
 
-    rf_df = (DataFrame(list(zip(X.columns, rf.feature_importances_)),
+    X_cols = list(X.columns)
+
+    rf_df = (DataFrame(list(zip(X_cols, rf.feature_importances_)),
                        columns=['features', 'importance'])
              .sort_values(by='importance', ascending=False)
              )
@@ -212,12 +210,12 @@ def create_decision_tree_importances_plot(data: DataFrame,
               rounded=True,
               proportion=True,
               fontsize=8,
-              feature_names=X.columns,
+              feature_names=X_cols,
               class_names=['threshold not met', 'threshold met'],
               filled=True,
               ax=ax_dt)
     ax_dt.set_title(
-        f'Decision tree, score: {model.score(X, y) :.0%}. N: {len(X) :.2e}')
+        f'Decision Tree for the KPI {kpi}, score: {model.score(X, y) :.0%}. N: {len(X) :.2e}')
     sns.barplot(data=rf_df,
                 x=rf_df.features,
                 y=rf_df.importance,
