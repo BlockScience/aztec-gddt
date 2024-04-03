@@ -5,7 +5,7 @@ from aztec_gddt.utils import sim_run
 from datetime import datetime
 import click
 import logging
-
+from multiprocessing import cpu_count
 from aztec_gddt import DEFAULT_LOGGER
 logger = logging.getLogger(DEFAULT_LOGGER)
 log_levels = {
@@ -22,7 +22,7 @@ log_levels = {
               is_flag=True,
               help="Make an experiment run instead")
 @click.option('-z', '--parallelize', 'n_jobs',
-              default=4)
+              default=cpu_count())
 @click.option('-s',
               '--sweep_samples',
               default=-1)
@@ -31,7 +31,7 @@ log_levels = {
               default=3)
 @click.option('-t',
               '--timesteps',
-              default=-500)
+              default=500)
 @click.option('-p',
               '--pickle',
               default=False,
