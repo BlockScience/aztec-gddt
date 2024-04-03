@@ -105,8 +105,8 @@ def custom_run(initial_state: Optional[AztecModelState] = None,
 def psuu_exploratory_run(N_sweep_samples=-1,
                          N_samples=3,
                          N_timesteps=500,
-                         parallelize=False,
-                         use_joblib=True) -> DataFrame:
+                         N_jobs=-1,
+                         parallelize_jobs=True) -> DataFrame:
     """Function which runs the cadCAD simulations
 
     Returns:
@@ -208,7 +208,7 @@ def psuu_exploratory_run(N_sweep_samples=-1,
 
     sweep_params_cartesian_product = sweep_cartesian_product(sweep_params)
 
-    print(f'Performing PSuU run (Trajectory Count: {traj_combinations}, ({parallelize=})')
+    print(f'Performing PSuU run (Trajectory Count: {traj_combinations}, ({N_jobs=})')
 
     
 
@@ -217,7 +217,7 @@ def psuu_exploratory_run(N_sweep_samples=-1,
     sweep_params_cartesian_product = {k: sample(v, N_sweep_samples) if N_sweep_samples > 0 else v 
                                                                for k, v in sweep_params_cartesian_product.items()}
 
-    if parallelize is False:
+    if N_jobs <= 1:
         # Load simulation arguments
         sim_args = (initial_state,
                     sweep_params_cartesian_product,
@@ -252,7 +252,7 @@ def psuu_exploratory_run(N_sweep_samples=-1,
             sim_df.to_pickle(output_filename)
 
         args = enumerate(split_dicts)
-        if use_joblib:
+        if parallelize_jobs:
             Parallel(n_jobs=processes)(delayed(run_chunk)(i_chunk, sweep_params) for (i_chunk, sweep_params) in args)
             sim_df = None
         else: 
