@@ -1,5 +1,5 @@
 from typing import Annotated, Dict, TypedDict, NamedTuple, Optional
-from typing import Any, Callable, Concatenate
+from typing import Any, Callable, Concatenate, ParamSpec
 from enum import IntEnum, Enum, auto
 from math import floor
 import numpy as np
@@ -227,10 +227,11 @@ class AztecModelState(TypedDict):
     token_supply: TokenSupply
 
 
-GasEstimator = Callable[Concatenate[AztecModelState, ...], Gas]
-BlobGasEstimator = Callable[Concatenate[AztecModelState, ...], BlobGas]
-BaseIntEstimator = Callable[Concatenate[AztecModelState, ...], int]
-BaseFloatEstimator = Callable[Concatenate[AztecModelState, ...], float]
+P = ParamSpec("P")
+GasEstimator = Callable[Concatenate[AztecModelState, P], Gas]
+BlobGasEstimator = Callable[Concatenate[AztecModelState, P], BlobGas]
+BaseIntEstimator = Callable[Concatenate[AztecModelState, P], int]
+BaseFloatEstimator = Callable[Concatenate[AztecModelState, P], float]
 
 @dataclass
 class L1GasEstimators():

@@ -11,4 +11,4 @@ matplotlib
 cadCAD_machine_search
 scikit-learn
 joblib
-pydantic
+
