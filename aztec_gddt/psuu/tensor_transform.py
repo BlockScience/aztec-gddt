@@ -11,7 +11,9 @@ import time
 from typing import List, Tuple, Iterable
 from pathlib import Path
 from multiprocessing import Pool
-
+import logging
+from aztec_gddt import DEFAULT_LOGGER
+logger = logging.getLogger(DEFAULT_LOGGER)
 
 
 TensorPerTrajectory: pd.DataFrame
@@ -81,5 +83,5 @@ if __name__ == "__main__":
 
     execution_time = end_time - start_time
 
-    print(f"Processed {num_files} files.")
-    print(f"Execution time: {execution_time} seconds")
+    logger.info(f"Processed {num_files} files.")
+    logger.info(f"Execution time: {execution_time} seconds")

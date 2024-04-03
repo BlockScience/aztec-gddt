@@ -6,7 +6,9 @@ from tqdm.auto import tqdm # type: ignore
 
 
 from aztec_gddt.types import SelectionPhase
-
+import logging
+from aztec_gddt import DEFAULT_LOGGER
+logger = logging.getLogger(DEFAULT_LOGGER)
 
 
 
@@ -173,11 +175,11 @@ def find_stddev_duration_nonfinalized_blocks(trajectory: pd.DataFrame) -> float 
 ####################################
 
 def find_stddev_payoffs_to_sequencers(trajectory: pd.DataFrame) -> float | np.floating:
-    print("Not yet implemented")
+    logger.warn("Not yet implemented")
     return float('nan') 
 
 def find_stddev_payoffs_to_provers(trajectory: pd.DataFrame) -> float | np.floating:
-    print("Not yet implemented")
+    logger.warn("Not yet implemented")
     return float('nan')  
 
 def find_delta_total_revenue_agents(trajectory: pd.DataFrame) -> float | np.floating:

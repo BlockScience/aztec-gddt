@@ -4,7 +4,17 @@ from aztec_gddt.experiment import standard_run, psuu_exploratory_run
 from aztec_gddt.utils import sim_run
 from datetime import datetime
 import click
+import logging
 
+from aztec_gddt import DEFAULT_LOGGER
+logger = logging.getLogger(DEFAULT_LOGGER)
+log_levels = {
+    "debug": logging.DEBUG,
+    "info": logging.INFO,
+    "warning": logging.WARNING,
+    "error": logging.ERROR,
+    "critical": logging.CRITICAL,
+}
 
 @click.command()
 @click.option('-e', '--experiment-run',
@@ -26,7 +36,18 @@ import click
               '--pickle',
               default=False,
               is_flag=True)
-def main(experiment_run: bool, pickle: bool, n_jobs: int, sweep_samples: int, mc_runs: int, timesteps: int) -> None:
+@click.option(
+    "-l",
+    "--log-level",
+    "log_level",
+    type=click.Choice(list(log_levels.keys()), case_sensitive=False),
+    default="info",
+    help="Set the logging level.",
+)
+def main(experiment_run: bool, pickle: bool, n_jobs: int, sweep_samples: int, mc_runs: int, timesteps: int, log_level: str) -> None:
+
+    logger.setLevel(log_levels[log_level])
+
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
     prefix = 'standard-run'

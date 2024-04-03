@@ -3,7 +3,6 @@ from typing import Dict, List
 
 
 from cadCAD.tools.preparation import sweep_cartesian_product # type: ignore
-
 from aztec_gddt.params import INITIAL_STATE
 from aztec_gddt.params import SINGLE_RUN_PARAMS, TIMESTEPS, BASE_AGENTS_DICT
 from aztec_gddt.params import *
@@ -17,6 +16,9 @@ from random import sample
 from datetime import datetime
 from tqdm.auto import tqdm # type: ignore
 from joblib import Parallel, delayed # type: ignore
+import logging
+from aztec_gddt import DEFAULT_LOGGER
+logger = logging.getLogger(DEFAULT_LOGGER)
 
 def standard_run(N_timesteps=TIMESTEPS) -> DataFrame:
     """Function which runs the cadCAD simulations
@@ -208,7 +210,7 @@ def psuu_exploratory_run(N_sweep_samples=-1,
 
     sweep_params_cartesian_product = sweep_cartesian_product(sweep_params)
 
-    print(f'Performing PSuU run (Trajectory Count: {traj_combinations}, ({N_jobs=})')
+    logger.info(f'Performing PSuU run (Trajectory Count: {traj_combinations}, ({N_jobs=})')
 
     
 
@@ -240,7 +242,7 @@ def psuu_exploratory_run(N_sweep_samples=-1,
         output_path = f"data/simulations/psuu_run_{datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')}"
 
         def run_chunk(i_chunk, sweep_params):
-            print(f"{i_chunk}, {datetime.now()}")
+            logger.debug(f"{i_chunk}, {datetime.now()}")
             sim_args = (initial_state,
                         sweep_params,
                         AZTEC_MODEL_BLOCKS,

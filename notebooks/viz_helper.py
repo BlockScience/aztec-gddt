@@ -7,6 +7,9 @@ from typing import List
 import matplotlib.pyplot as plt
 import plotly.express as px
 import seaborn as sns
+import logging
+from aztec_gddt import DEFAULT_LOGGER
+logger = logging.getLogger(DEFAULT_LOGGER)
 
 def is_column_numeric(df: pd.DataFrame,
                       col_name: str):
@@ -58,7 +61,7 @@ def generate_scatterplots(df: pd.DataFrame,
             plt.ylabel(f'Value of {y_col}')
             plt.show()
         except Exception as e:
-            print("Encountered an issue while generating plots.") 
+            logger.error("Encountered an issue while generating plots.") 
 
 
 
