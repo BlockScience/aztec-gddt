@@ -1,0 +1,5 @@
+{
+    "data_directory": "data/simulations/",
+    "data_prefix":  "psuu_run_2024-04-02T19:35:23Z-13",
+    "output_path": "data/2024-04-02T19:35:23Z-13-trajectory_tensor.csv.gz"
+}
