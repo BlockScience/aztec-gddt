@@ -12,6 +12,7 @@ from typing import List, Tuple, Iterable
 from pathlib import Path
 from multiprocessing import Pool, cpu_count
 import logging
+from datetime import datetime
 from aztec_gddt import DEFAULT_LOGGER
 logger = logging.getLogger(DEFAULT_LOGGER)
 
@@ -59,8 +60,11 @@ def timestep_file_to_trajectory(path: str) -> pd.DataFrame:
 
 def process_timestep_files_to_csv(per_timestep_tensor_paths: list[str],
                                   filename: str) -> pd.DataFrame:
+    logger.info(f"Transforming Timestep Tensors into Trajectory Tensors, {datetime.now()}")
     dfs_to_concat = Pool(cpu_count()).map(timestep_file_to_trajectory, per_timestep_tensor_paths)
+    logger.info(f"Concatenating Trajectory Tensors, {datetime.now()}")
     final_df = pd.concat(dfs_to_concat)
+    logger.info(f"Saving the Full Trajectory Tensor, {datetime.now()}")
     final_df.to_csv(filename)
     return final_df
 
@@ -72,8 +76,9 @@ if __name__ == "__main__":
     config_path = "data/config.json"
     with open(config_path, "r") as file:
         config: dict = json.load(file)
-
+            
     output_path = config['output_path']
+    logger.info(f"Initing Tensor Transform at {datetime.now()}. Output: {output_path}")
     timestep_files = get_timestep_files_from_info(config_path)
     num_files = len(timestep_files)
     trajectory_list = process_timestep_files_to_csv(per_timestep_tensor_paths=timestep_files,
