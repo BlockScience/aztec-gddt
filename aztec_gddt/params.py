@@ -205,28 +205,28 @@ DEFAULT_DETERMINISTIC_GAS_ESTIMATOR = L1GasEstimators(
 SINGLE_RUN_PARAMS = AztecModelParams(label='default',
                                      timestep_in_blocks=1,
 
-                                     uncle_count=0, # TODO
+                                     uncle_count=0, 
                                      reward_per_block=1, # TODO
-                                     fee_subsidy_fraction=1.0, # TODO
+                                     fee_subsidy_fraction=1.0, # unused
 
 
                                      # Placeholder Logic
                                      logic = {},
 
                                      # Phase Durations
-                                     phase_duration_proposal_min_blocks=0, # TODO
-                                     phase_duration_proposal_max_blocks=10, # TODO
-                                     phase_duration_reveal_min_blocks = 0, #TODO
-                                     phase_duration_reveal_max_blocks = 10, # TODO
-                                     phase_duration_commit_bond_min_blocks = 0, # TODO
-                                     phase_duration_commit_bond_max_blocks=10, # TODO
-                                     phase_duration_rollup_min_blocks = 0, # TODO
-                                     phase_duration_rollup_max_blocks=30, # TODO
-                                     phase_duration_race_min_blocks = 0, #TODO
-                                     phase_duration_race_max_blocks=30, # TODO
+                                     phase_duration_proposal_min_blocks=0, 
+                                     phase_duration_proposal_max_blocks=10, 
+                                     phase_duration_reveal_min_blocks = 0, 
+                                     phase_duration_reveal_max_blocks = 10, 
+                                     phase_duration_commit_bond_min_blocks = 0, 
+                                     phase_duration_commit_bond_max_blocks=10, 
+                                     phase_duration_rollup_min_blocks = 0, 
+                                     phase_duration_rollup_max_blocks=30, 
+                                     phase_duration_race_min_blocks = 0, 
+                                     phase_duration_race_max_blocks=30, 
 
-                                     stake_activation_period=40, # TODO
-                                     unstake_cooldown_period=40, # TODO
+                                     stake_activation_period=40, 
+                                     unstake_cooldown_period=40, 
 
 
                                      # Behavioral Parameters

@@ -155,9 +155,9 @@ def psuu_exploratory_run(N_sweep_samples=-1,
     sweep_params: dict[str, list] = dict(label=['default'],
                                         timestep_in_blocks=[1],
 
-                                        uncle_count=[0], # TODO
+                                        uncle_count=[0], 
                                         reward_per_block=[1.0], # HACK: consider alternate values
-                                        fee_subsidy_fraction=[1.0], # TODO
+                                        fee_subsidy_fraction=[1.0], 
 
                                         # Phase Durations
                                         phase_duration_proposal_min_blocks=[0, 3],# HACK: consider alternate values
@@ -171,8 +171,8 @@ def psuu_exploratory_run(N_sweep_samples=-1,
                                         phase_duration_race_min_blocks = [0, 3], # HACK: consider alternate values 
                                         phase_duration_race_max_blocks=[3, 6], 
 
-                                        stake_activation_period=[40], # TODO
-                                        unstake_cooldown_period=[40], # TODO
+                                        stake_activation_period=[40], 
+                                        unstake_cooldown_period=[40], 
 
                                         logic=[{}],
 
