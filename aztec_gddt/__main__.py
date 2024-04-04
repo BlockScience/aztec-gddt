@@ -6,6 +6,8 @@ from pathlib import Path
 from multiprocessing import cpu_count
 from aztec_gddt import DEFAULT_LOGGER
 from aztec_gddt.psuu import tensor_transform as tt
+import boto3 # type: ignore
+import os
 
 logger = logging.getLogger(DEFAULT_LOGGER)
 log_levels = {
@@ -33,6 +35,10 @@ log_levels = {
               '--process',
               default=False,
               is_flag=True)
+@click.option('-c',
+              '--upload_to_cloud',
+              default=False,
+              is_flag=True)
 @click.option(
     "-l",
     "--log-level",
@@ -41,7 +47,19 @@ log_levels = {
     default="info",
     help="Set the logging level.",
 )
-def main(process: bool, n_jobs: int, sweep_samples: int, mc_runs: int, timesteps: int, log_level: str) -> None:
+def main(process: bool,
+         n_jobs: int,
+         sweep_samples: int,
+         mc_runs: int,
+         timesteps: int,
+         log_level: str,
+         upload_to_cloud: bool) -> None:
+    
+    CLOUD_BUCKET_NAME = 'aztec-gddt'
+
+    if upload_to_cloud:
+        session = boto3.Session()
+        s3 = session.client("s3")
 
     logger.setLevel(log_levels[log_level])
 
@@ -50,7 +68,7 @@ def main(process: bool, n_jobs: int, sweep_samples: int, mc_runs: int, timesteps
     folder_path = "data/simulations/"
     folder = f'{prefix}_{timestamp}'
 
-    timestep_tensor_prefix = f"timestep_tensor" 
+    timestep_tensor_prefix = f"timestep_tensor"
     output_path: Path = Path(folder_path) / folder
     output_path.mkdir(parents=True, exist_ok=True)
 
@@ -61,10 +79,25 @@ def main(process: bool, n_jobs: int, sweep_samples: int, mc_runs: int, timesteps
                          supress_cadCAD_print=True,
                          output_path=output_path,
                          timestep_tensor_prefix=timestep_tensor_prefix)
+    
+
+    if upload_to_cloud:
+        files: list[str] = os.listdir(output_path)
+        for f in files:
+            s3.upload_file(str(output_path / f),
+                           CLOUD_BUCKET_NAME,
+                           str(Path(folder) / f))
 
     if process is True:
-        traj_output_path = str(output_path / f"trajectory_tensor.csv.zip")
-        tt.process_folder_files(output_path, timestep_tensor_prefix, traj_output_path)
+        traj_file_name = "trajectory_tensor.csv.zip"
+        traj_output_path = str(output_path / traj_file_name)
+        tt.process_folder_files(
+            output_path, timestep_tensor_prefix, traj_output_path)
+        
+        if upload_to_cloud:
+            s3.upload_file(str(traj_output_path),
+                           CLOUD_BUCKET_NAME,
+                           str(Path(folder) / traj_file_name))
     else:
         pass
 
