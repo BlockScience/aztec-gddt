@@ -21,7 +21,6 @@ def select_processes_by_state(processes: list[Process], phase_to_select: Selecti
 
 
 def has_blown_phase_duration(process) -> bool:
-    # TODO: Determine if a process has blown its phase duration. (Not sure what this means or how to calculate at moment.)
     return False
 
 #######################################

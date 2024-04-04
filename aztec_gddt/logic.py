@@ -295,13 +295,9 @@ def p_select_proposal(params: AztecModelParams,
         if process.phase == SelectionPhase.pending_proposals:
             remaining_time = max_phase_duration - process.duration_in_current_phase
             if remaining_time < 0:
-                # TODO: filter out invalid proposals
-                # J: Which invalid proposals are we expecting here? Anything "spam/invalid" would just be ignored, not sure we need to sim that, unless for blockspace
-                # TODO: Above seems incorrect - if duration of phase exceeds duration, the next phase starts.
                 proposals: dict[TxUUID, Proposal] = proposals_from_tx(
                     state['transactions'])
                 if len(proposals) > 0:
-                    # TODO: check if true
                     number_uncles: int = min(
                         len(proposals) - 1, params['uncle_count'])
 
@@ -328,7 +324,6 @@ def p_select_proposal(params: AztecModelParams,
                         p.who for p in uncle_proposals]
                     updated_process.tx_winning_proposal = winner_proposal.uuid
                 else:
-                    # TODO: check what happens if there are no proposals
                     updated_process = copy(process)
                     updated_process.phase = SelectionPhase.skipped
                     updated_process.duration_in_current_phase = 0
@@ -438,8 +433,6 @@ def p_reveal_content(params: AztecModelParams,
                      state: AztecModelState) -> SignalEvolveProcess:
     """
     Advances state of Processes that have revealed block content.
-    TODO: check if race mode is taken into consideration. We may want to decouple 
-    user actions from the evolving logic.
     """
 
     # Note: Advances state of Process in reveal phase that have revealed block content.
@@ -549,7 +542,7 @@ def p_submit_proof(params: AztecModelParams,
             remaining_time = max_phase_duration - process.duration_in_current_phase
             if remaining_time < 0:
                 updated_process = copy(process)
-                updated_process.phase = SelectionPhase.skipped  # TODO: confirm
+                updated_process.phase = SelectionPhase.skipped  
                 updated_process.duration_in_current_phase = 0
                 
                 # Determine who should be slashed, and how much. 
@@ -887,9 +880,6 @@ def s_total_rewards_provers(params: AztecModelParams,
                      _3,
                      state: AztecModelState,
                      signal: SignalPayout) :
-    """
-    TODO
-    """
 
     p: Process = state['current_process']  # type: ignore
     if p.phase == SelectionPhase.finalized:
@@ -920,9 +910,6 @@ def s_total_rewards_sequencers(params: AztecModelParams,
                      _3,
                      state: AztecModelState,
                      signal: SignalPayout) :
-    """
-    TODO
-    """
     old_total_rewards_sequencers = state['total_rewards_sequencers']
 
     p: Process = state['current_process']  # type: ignore
@@ -956,9 +943,6 @@ def s_total_rewards_relays(params: AztecModelParams,
                      _3,
                      state: AztecModelState,
                      signal: SignalPayout) :
-    """
-    TODO
-    """
     old_total_rewards_relays = state['total_rewards_relays']
 
     p: Process = state['current_process']  # type: ignore
@@ -993,9 +977,6 @@ def s_agents_rewards(params: AztecModelParams,
                      _3,
                      state: AztecModelState,
                      signal: SignalPayout) :
-    """
-    TODO
-    """
 
     p: Process = state['current_process']  # type: ignore
     if p.phase == SelectionPhase.finalized:
