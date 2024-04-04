@@ -120,8 +120,8 @@ def sim_run(state_variables,
                 else:
                     pass
 
-            group_cols = ['simulation', 'subset', 'run']
-            df.set_index(group_cols + ['timestep'], inplace=True)
+            group_cols = ['subset']
+            df.set_index(group_cols + ['simulation', 'run', 'timestep'], inplace=True)
             for i_group, (group, g_df) in enumerate(df.groupby(group_cols)):
                 selected_dict = select_config_M_dict(configs, i_group, selected_params)
                 for (col, val) in selected_dict.items():
