@@ -7,7 +7,7 @@ import numpy as np
 rng = np.random.default_rng()
 
 
-TIMESTEPS = 1000  # HACK
+TIMESTEPS = 1_000  # HACK
 SAMPLES = 1  # HACK
 
 N_INITIAL_AGENTS = 3

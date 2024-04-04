@@ -25,10 +25,10 @@ log_levels = {
               default=-1)
 @click.option('-r',
               '--mc_runs',
-              default=3)
+              default=5)
 @click.option('-t',
               '--timesteps',
-              default=500)
+              default=1_000)
 @click.option('-p',
               '--process',
               default=False,
