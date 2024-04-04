@@ -163,3 +163,5 @@ cython_debug/
 
 data/simulations/*.pkl*
 *pkl*
+data/simulations/*/*.pkl*
+data/simulations/psuu_run_*

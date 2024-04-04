@@ -87,8 +87,8 @@ def sim_run(state_variables,
             # Drop all intermediate substeps
             first_ind = (df.substep == 0) & (df.timestep == 0)
             last_ind = df.substep == max(df.substep)
-            inds_to_drop = (first_ind | last_ind)
-            df = df.loc[inds_to_drop].drop(columns=['substep'])
+            rows_to_keep = (first_ind | last_ind)
+            df = df.loc[rows_to_keep].drop(columns=['substep'])
         else:
             pass
 
@@ -120,11 +120,13 @@ def sim_run(state_variables,
                 else:
                     pass
 
-            for i, (_, n_df) in enumerate(df.groupby(['simulation', 'subset', 'run'])):
-                selected_dict = select_config_M_dict(configs, i, selected_params)
+            group_cols = ['simulation', 'subset', 'run']
+            df.set_index(group_cols + ['timestep'], inplace=True)
+            for i_group, (group, g_df) in enumerate(df.groupby(group_cols)):
+                selected_dict = select_config_M_dict(configs, i_group, selected_params)
                 for (col, val) in selected_dict.items():
                     if hasattr(val, "__iter__") is False and hasattr(val, "__call__") is False:
-                        df.loc[i, col] = val
+                        df.loc[group, col] = val
                     else:
                         pass
 
@@ -136,4 +138,5 @@ def sim_run(state_variables,
             psub_map[0] = 'Initial State'
             df['substep_label'] = df.substep.map(psub_map)
 
+        df = df.reset_index(drop=False)
         return df

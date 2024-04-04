@@ -45,8 +45,6 @@ def main(process: bool, n_jobs: int, sweep_samples: int, mc_runs: int, timesteps
 
     logger.setLevel(log_levels[log_level])
 
-    
-
     timestamp = datetime.now().strftime("%Y-%m-%dT%H%M%SZ%z")
     prefix = 'psuu_run'
     folder_path = "data/simulations/"
