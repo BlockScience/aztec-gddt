@@ -97,7 +97,8 @@ def create_param_impact_dist_plots_by_column(df_to_use: DataFrame,
                                              kpi_col: str,
                                              divider_col: str,
                                              plot_height: float = 4,
-                                             plot_width: float = 4):
+                                             plot_width: float = 4,
+                                             shade_val = True):
     # Define the custom color palette
     custom_palette = ["#000000", "#FF0000"]
     sns.set_palette(custom_palette)
@@ -123,7 +124,8 @@ def create_param_impact_dist_plots_by_column(df_to_use: DataFrame,
                 x=kpi_col,
                 hue=param,
                 ax=axs[row_num, col_num],
-                palette=custom_palette
+                palette=custom_palette,
+                shade = shade_val
             )
             axs[row_num, col_num].set_title(f"KPI measurements for \n {param} and {divider}.",
                                             fontsize=10)
