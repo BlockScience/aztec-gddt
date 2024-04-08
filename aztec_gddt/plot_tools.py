@@ -114,7 +114,7 @@ def create_param_impact_dist_plots_by_column(df_to_use: DataFrame,
                             figsize=(fig_width, fig_height),
                             sharex='row', sharey='row',
                             gridspec_kw={'hspace': 0.5, 'wspace': 0.5})
-    fig.subplots_adjust(top=0.8)
+    fig.subplots_adjust(top=1.0, y= 0.95)
     fig.suptitle(f"Impact of {divider_col}")
 
     for row_num, param in enumerate(param_cols):
