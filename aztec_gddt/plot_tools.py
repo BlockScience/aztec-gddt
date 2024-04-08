@@ -53,18 +53,18 @@ trajectory_id_columns = ['simulation', 'subset', 'run']
 
 
 def extract_df(df_to_use: DataFrame,
-               params_to_use: List[str] = [],
-               trajectory_kpis: Dict[str, Callable] = {},
-               agg_columns: List[str] = [],
-               cols_to_drop: List[str] = []) -> DataFrame:
+               params_to_use: List[str] = None,
+               trajectory_kpis: Dict[str, Callable] = None,
+               agg_columns: List[str] = None,
+               cols_to_drop: List[str] = None) -> DataFrame:
     """
     Given a Timestep Tensor, return a Trajectory Tensor
     """
 
-    if len(params_to_use) == 0:
+    if params_to_use is None:
         params_to_use = governance_surface_params
 
-    if len(agg_columns) == 0:
+    if agg_columns is None:
         agg_columns = trajectory_id_columns
 
     cols_to_group = agg_columns + params_to_use
@@ -97,7 +97,8 @@ def create_param_impact_dist_plots_by_column(df_to_use: DataFrame,
                                              kpi_col: str,
                                              divider_col: str,
                                              plot_height: float = 4,
-                                             plot_width: float = 4):
+                                             plot_width: float = 4,
+                                             shade_val = True):
     # Define the custom color palette
     custom_palette = ["#000000", "#FF0000"]
     sns.set_palette(custom_palette)
@@ -123,7 +124,8 @@ def create_param_impact_dist_plots_by_column(df_to_use: DataFrame,
                 x=kpi_col,
                 hue=param,
                 ax=axs[row_num, col_num],
-                palette=custom_palette
+                palette=custom_palette,
+                shade = shade_val
             )
             axs[row_num, col_num].set_title(f"KPI measurements for \n {param} and {divider}.",
                                             fontsize=10)
@@ -175,18 +177,17 @@ def create_phase_impact_dist_plots_by_kpi(df_to_use: DataFrame,
 
 
 def create_decision_tree_importances_plot(data: DataFrame,
-                                          kpi: str,
+                                          col_name: str,
                                           params_to_use: List = [],
                                           plot_width: float = 36,
                                           plot_height: float = 12):
     if len(params_to_use) == 0:
-        cols_to_use = governance_surface_params + fixed_info_cols
+        features = governance_surface_params + fixed_info_cols
     else:
-        cols_to_use = params_to_use
+        features= params_to_use
 
-    features = cols_to_use
     X = data.loc[:, features]
-    y = data.loc[:, kpi] > data.loc[:, kpi].median()
+    y = data.loc[:, col_name] > data.loc[:, col_name].median()
 
     model = DecisionTreeClassifier(max_depth=3)
     rf = RandomForestClassifier()
@@ -215,7 +216,7 @@ def create_decision_tree_importances_plot(data: DataFrame,
               filled=True,
               ax=ax_dt)
     ax_dt.set_title(
-        f'Decision Tree for the KPI {kpi}, score: {model.score(X, y) :.0%}. N: {len(X) :.2e}')
+        f'Decision Tree for {col_name}, score: {model.score(X, y) :.0%}. N: {len(X) :.2e}')
     sns.barplot(data=rf_df,
                 x=rf_df.features,
                 y=rf_df.importance,

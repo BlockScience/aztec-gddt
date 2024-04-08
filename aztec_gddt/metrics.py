@@ -10,7 +10,20 @@ import logging
 from aztec_gddt import DEFAULT_LOGGER
 logger = logging.getLogger(DEFAULT_LOGGER)
 
+#################################
+## Begin data grouping.        ##
+#################################
 
+G1 = [("proportion_race_mode", "below"),
+    ("proportion_slashed_prover", "below"),
+    ("proportion_slashed_sequencer", "below"),
+    ("proportion_skipped", "below")]
+
+G2 = [("average_duration_finalized_blocks", "below"),
+      ("stddev_duration_finalized_blocks", "below"),
+      ("average_duration_nonfinalized_blocks", "below"),
+      ("stddev_duration_nonfinalized_blocks", "below")
+      ]
 
 #################################
 ## Begin helper functions      ##
@@ -197,76 +210,41 @@ def find_delta_total_revenue_agents(trajectory: pd.DataFrame) -> float | np.floa
 ## Begin PostProcessing/KPIs      ##
 ####################################
 
-def is_above_median_across_trajectories(grouped_data: pd.DataFrame, custom_func: Callable):
-    """
-    TODO: check if the behavior is matching with the workplan
-    """
-    mapped_values = grouped_data.apply(custom_func)
-    median_mapped_values = mapped_values.median()
-    return mapped_values > median_mapped_values
 
-def is_below_median_across_trajectories(grouped_data: pd.DataFrame, custom_func: Callable):
-    # NOTE: Stingy version. 
-    mapped_values = grouped_data.apply(custom_func)
-    median_mapped_values = mapped_values.median()
-    return mapped_values < median_mapped_values
+def check_median_across_trajectories(df: pd.DataFrame, 
+                                     column_name: str,
+                                      direction: str):
+    # Extract the specified column's values
+    column_values = df[column_name]
+    
+    # Calculate the median of the specified column
+    median_column_values = column_values.median()
+    
+    # Determine direction of comparison
+    if direction == 'above':
+        return column_values > median_column_values
+    elif direction == 'below':
+        return column_values < median_column_values
+    else:
+        raise ValueError("The 'direction' parameter must be either 'above' or 'below'.")
 
-def calc_g1_score(grouped_data: pd.DataFrame) -> float:
-    t1_score = is_below_median_across_trajectories(grouped_data, find_proportion_race_mode)
-    t2_score = is_below_median_across_trajectories(grouped_data, find_proportion_slashed_due_to_prover)
-    t3_score = is_below_median_across_trajectories(grouped_data, find_proportion_slashed_due_to_sequencer)
-    t4_score = is_below_median_across_trajectories(grouped_data, find_proportion_skipped)
-    final_score = t1_score + t2_score + t3_score + t4_score
-    return final_score
+def calculate_goal_score(grouped_df: pd.DataFrame, 
+                         group: list[tuple[str, str]],
+                         new_column_name: str) -> pd.DataFrame:
+    
+    scores_df = grouped_df.copy()
+    scores_df[new_column_name] = 0
+    
+    for column_name, direction in group:
+        # For each metric, add a new column to scores_df to store individual column scores
+        scores_df[f'score_{column_name}'] = check_median_across_trajectories(grouped_df,
+                                                    column_name, 
+                                                    direction).astype(int)        
+        scores_df[new_column_name] += scores_df[f'score_{column_name}']
+    
+    return scores_df
 
-def calc_mock_g1_score(grouped_data: pd.DataFrame) -> float:
-    t1_score = is_below_median_across_trajectories(grouped_data, find_proportion_race_mode)
-    t4_score = is_below_median_across_trajectories(grouped_data, find_proportion_skipped)
-    final_score = t1_score +  t4_score
-    return final_score
-
-def calc_g2_score(grouped_data: pd.DataFrame) -> float:
-    t5_score = is_below_median_across_trajectories(grouped_data, find_average_duration_finalized_blocks)
-    t6_score = is_below_median_across_trajectories(grouped_data, find_stddev_duration_finalized_blocks)
-    t7_score = is_below_median_across_trajectories(grouped_data, find_average_duration_nonfinalized_blocks)
-    t8_score = is_below_median_across_trajectories(grouped_data, find_stddev_duration_nonfinalized_blocks)
-    final_score = t5_score + t6_score + t7_score + t8_score
-    return final_score
-
-
-def calc_g3_score(grouped_data: pd.DataFrame) -> float:
-    t9_score = is_below_median_across_trajectories(grouped_data, find_stddev_payoffs_to_sequencers)
-    t10_score = is_below_median_across_trajectories(grouped_data, find_stddev_payoffs_to_provers)
-    final_score = t9_score + t10_score
-    return final_score
 
 ####################################
 ## End PostProcessing/KPIs        ##
-####################################
-
-####################################
-## Begin Mock Metrics             ##
-####################################
-
-def mock_proportion_race_mode(trajectory: pd.DataFrame) -> float:
-    fuzz_val = np.random.uniform()
-    return fuzz_val
-
-def mock_proportion_slashed_due_to_prover(trajectory: pd.DataFrame) -> float:
-    fuzz_val = np.random.uniform()
-    return fuzz_val
-
-def mock_proportion_slashed_due_to_sequencer(trajectory: pd.DataFrame) -> float:
-    fuzz_val = np.random.uniform()
-    return fuzz_val
-
-def mock_proportion_skipped(trajectory: pd.DataFrame) -> float:
-    fuzz_val = np.random.uniform()
-    return fuzz_val
-
-
-
-
-####################################
-## End Mock Metrics               ##
 ####################################
