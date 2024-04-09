@@ -198,35 +198,35 @@ DEFAULT_DETERMINISTIC_GAS_ESTIMATOR = L1GasEstimators(
     commitment_bond=lambda _: 100_000, # type: ignore
     content_reveal=lambda _: 81_000, # type: ignore
     content_reveal_blob=lambda _: 500_000, # type: ignore
-    rollup_proof=lambda _: 450_000 # type: ignore
+    rollup_proof=lambda _: 700_000 # type: ignore
 )
 
 
 SINGLE_RUN_PARAMS = AztecModelParams(label='default',
                                      timestep_in_blocks=1,
 
-                                     uncle_count=0, 
+                                     uncle_count=0, # TODO
                                      reward_per_block=1, # TODO
-                                     fee_subsidy_fraction=1.0, # unused
+                                     fee_subsidy_fraction=1.0, # TODO
 
 
                                      # Placeholder Logic
                                      logic = {},
 
                                      # Phase Durations
-                                     phase_duration_proposal_min_blocks=0, 
-                                     phase_duration_proposal_max_blocks=10, 
-                                     phase_duration_reveal_min_blocks = 0, 
-                                     phase_duration_reveal_max_blocks = 10, 
-                                     phase_duration_commit_bond_min_blocks = 0, 
-                                     phase_duration_commit_bond_max_blocks=10, 
-                                     phase_duration_rollup_min_blocks = 0, 
-                                     phase_duration_rollup_max_blocks=30, 
-                                     phase_duration_race_min_blocks = 0, 
-                                     phase_duration_race_max_blocks=30, 
+                                     phase_duration_proposal_min_blocks=0, # TODO
+                                     phase_duration_proposal_max_blocks=10, # TODO
+                                     phase_duration_reveal_min_blocks = 0, #TODO
+                                     phase_duration_reveal_max_blocks = 10, # TODO
+                                     phase_duration_commit_bond_min_blocks = 0, # TODO
+                                     phase_duration_commit_bond_max_blocks=10, # TODO
+                                     phase_duration_rollup_min_blocks = 0, # TODO
+                                     phase_duration_rollup_max_blocks=30, # TODO
+                                     phase_duration_race_min_blocks = 0, #TODO
+                                     phase_duration_race_max_blocks=30, # TODO
 
-                                     stake_activation_period=40, 
-                                     unstake_cooldown_period=40, 
+                                     stake_activation_period=40, # TODO
+                                     unstake_cooldown_period=40, # TODO
 
 
                                      # Behavioral Parameters

@@ -570,8 +570,8 @@ def p_submit_proof(params: AztecModelParams,
                     updated_process.phase = SelectionPhase.finalized
                     updated_process.duration_in_current_phase = 0
 
-                    who = updated_process.leading_sequencer  # XXX
-                    gas: Gas = params['gas_estimators'].content_reveal(state)
+                    who = updated_process.leading_sequencer  # XXX TODO: prover, not sequencer
+                    gas: Gas = params['gas_estimators'].rollup_proof(state)  # TODO: Check?
                     fee: Gwei = gas * state['gas_fee_l1']
 
                     tx = RollupProof(who=who,
