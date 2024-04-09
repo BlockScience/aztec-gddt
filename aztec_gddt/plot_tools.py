@@ -168,7 +168,7 @@ def create_phase_impact_dist_plots_by_kpi(df_to_use: DataFrame,
                 hue=param,
                 ax=axs[row_num, col_num],
                 palette=custom_palette,
-                common_norm = True
+#                common_norm = True
             )
             axs[row_num, col_num].set_title(f"Impact of \n {param} \n on {kpi}",
                                             fontsize=10)
