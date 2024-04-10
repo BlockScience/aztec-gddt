@@ -6,7 +6,7 @@ import pytest as pt
 
 N_sweep_samples = 2
 N_samples = 2
-N_timesteps = 100
+N_timesteps = 1_000
 
 
 @pt.fixture
@@ -29,3 +29,4 @@ def test_agents_stake_not_negative(sim_df: pd.DataFrame):
     for index, agents in agents_per_timestep.items():
         for agent_name, agent in agents.items():
             assert agent.staked_amount >= 0, f"Assert failed for {agent_name=} at (subset, run, timestep)={index}"
+

@@ -151,8 +151,9 @@ def psuu_exploratory_run(N_sweep_samples=-1,
     initial_state = INITIAL_STATE.copy()
     initial_state['agents'] = Sqn3Prv3
 
+    sweep_params = {k: [v] for k, v in SINGLE_RUN_PARAMS.items()}
 
-    sweep_params: dict[str, list] = dict(label=['default'],
+    sweep_params_upd: dict[str, list] = dict(label=['default'],
                                         timestep_in_blocks=[1],
 
                                         uncle_count=[0], 
@@ -204,7 +205,7 @@ def psuu_exploratory_run(N_sweep_samples=-1,
                                         op_costs=[0.0] # XXX
                                         )  
     
-
+    sweep_params = {**sweep_params, **sweep_params_upd} # type: ignore
 
 
     sweep_combinations: int = 1

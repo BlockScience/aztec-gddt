@@ -256,6 +256,7 @@ SINGLE_RUN_PARAMS = AztecModelParams(
     uncle_count=0,
     reward_per_block=1,  # TODO
     fee_subsidy_fraction=1.0,  # unused
+    minimum_stake=30,
     # Placeholder Logic
     logic={},
     # Phase Durations
