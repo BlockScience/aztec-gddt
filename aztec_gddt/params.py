@@ -10,7 +10,7 @@ rng = np.random.default_rng()
 TIMESTEPS = 1_000  # HACK
 SAMPLES = 1  # HACK
 
-N_INITIAL_AGENTS = 3
+N_INITIAL_AGENTS = 3 # Set before full run
 
 
 
@@ -44,7 +44,7 @@ INITIAL_AGENTS: list[Agent] = [Agent(uuid=uuid4(),
                                      is_sequencer=True,
                                      is_prover=True,
                                      is_relay=False,
-                                     staked_amount=5)
+                                     staked_amount=32)
                                for i
                                in range(N_INITIAL_AGENTS)]
 
@@ -64,7 +64,7 @@ INITIAL_SUPPLY = TokenSupply(
 
 
 SLASH_PARAMS = SlashParameters(
-    failure_to_commit_bond=2,  # XXX # type: Tokens
+    failure_to_commit_bond=1,  # XXX # type: Tokens
     failure_to_reveal_block=1  # XXX # type: Tokens
 )
 
@@ -197,7 +197,7 @@ DEFAULT_DETERMINISTIC_GAS_ESTIMATOR = L1GasEstimators(
     commitment_bond=lambda _: 100_000, # type: ignore
     content_reveal=lambda _: 81_000, # type: ignore
     content_reveal_blob=lambda _: 500_000, # type: ignore
-    rollup_proof=lambda _: 450_000 # type: ignore
+    rollup_proof=lambda _: 750_000 # type: ignore
 )
 
 
@@ -229,11 +229,11 @@ SINGLE_RUN_PARAMS = AztecModelParams(label='default',
 
 
                                      # Behavioral Parameters
-                                     proposal_probability_per_user_per_block=0.2, # XXX
-                                     block_content_reveal_probability=0.2, # XXX
-                                     tx_proof_reveal_probability=0.2, # XXX
-                                     rollup_proof_reveal_probability=0.2, # XXX
-                                     commit_bond_reveal_probability=0.2, # XXX
+                                     proposal_probability_per_user_per_block=0.2, # not used
+                                     block_content_reveal_probability=0.2,  # not used
+                                     tx_proof_reveal_probability=0.2,  # not used
+                                     rollup_proof_reveal_probability=0.2,  # not used
+                                     commit_bond_reveal_probability=0.2,  # not used
                                      gas_threshold_for_tx=70, # HACK
                                      blob_gas_threshold_for_tx=50, # HACK
                                      proving_marketplace_usage_probability=0.3, # XXX
@@ -249,6 +249,6 @@ SINGLE_RUN_PARAMS = AztecModelParams(label='default',
                                      gas_fee_l1_time_series=GAS_FEE_L1_TIME_SERIES_LIST[-1],
                                      gas_fee_blob_time_series=GAS_FEE_BLOB_TIME_SERIES_LIST[-1],
 
-                                     commit_bond_amount=10.0,  # type: Tokens
+                                     commit_bond_amount=16.0,  # type: Tokens
                                      op_costs=0  # XXX # type: Tokens
                                      )  
