@@ -4,7 +4,7 @@ from aztec_gddt.types import Agent
 import pytest as pt
 
 
-N_sweep_samples = 2
+N_sweep_samples = 10
 N_samples = 2
 N_timesteps = 1_000
 
