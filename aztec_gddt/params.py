@@ -16,11 +16,11 @@ N_INITIAL_AGENTS = 3
 
 
 BASE_AGENTS = [Agent(uuid='relay',
-                            balance=0,
+                            balance=0, # type: Tokens
                             is_sequencer=False,
                             is_prover=False,
                             is_relay=True,
-                            staked_amount=0.0),
+                            staked_amount=0.0), # type: Tokens
                             Agent(uuid='l1-builder',
                             balance=0,
                             is_sequencer=False,
@@ -52,9 +52,9 @@ INITIAL_AGENTS_DICT: dict[AgentUUID, Agent] = {a.uuid: a for a in INITIAL_AGENTS
 
 AGENTS_DICT = {**BASE_AGENTS_DICT, **INITIAL_AGENTS_DICT}
 
-INITIAL_CUMM_REWARDS = 200 # XXX
-INITIAL_CUMM_CASHBACK = 50 # XXX
-INITIAL_CUMM_BURN = 50 # XXX
+INITIAL_CUMM_REWARDS = 200  # XXX # type: Tokens
+INITIAL_CUMM_CASHBACK = 50  # XXX # type: Tokens
+INITIAL_CUMM_BURN = 50  # XXX # type: Tokens
 INITIAL_SUPPLY = TokenSupply(
     circulating=sum(a.balance for a in INITIAL_AGENTS),
     staked=sum(a.staked_amount for a in INITIAL_AGENTS),
@@ -64,8 +64,8 @@ INITIAL_SUPPLY = TokenSupply(
 
 
 SLASH_PARAMS = SlashParameters(
-    failure_to_commit_bond=2, # XXX
-    failure_to_reveal_block=1 # XXX
+    failure_to_commit_bond=2,  # XXX # type: Tokens
+    failure_to_reveal_block=1  # XXX # type: Tokens
 )
 
 
@@ -77,16 +77,16 @@ INITIAL_STATE = AztecModelState(timestep=0,
                                 slashes_to_provers=0,
                                 slashes_to_sequencers=0,
                                 
-                                total_rewards_provers=0,
-                                total_rewards_relays=0,
-                                total_rewards_sequencers=0,
+                                total_rewards_provers=0,  # type: Tokens
+                                total_rewards_relays=0,  # type: Tokens
+                                total_rewards_sequencers=0,  # type: Tokens
 
                                 agents=AGENTS_DICT,
                                 current_process=None, # XXX
                                 transactions=dict(),
 
-                                gas_fee_l1=50, # XXX
-                                gas_fee_blob=7, # XXX
+                                gas_fee_l1=50,  # XXX # type: Gwei
+                                gas_fee_blob=7,  # XXX # type: Gwei
 
                                 finalized_blocks_count=0,
                                 cumm_block_rewards=INITIAL_CUMM_REWARDS,
@@ -99,9 +99,9 @@ INITIAL_STATE = AztecModelState(timestep=0,
 ## Begin: Steady state gas estimators defined              ##
 #############################################################
 
-MEAN_STEADY_STATE_L1 = 30
+MEAN_STEADY_STATE_L1 = 30  # type: Gwei
 DEVIATION_STEADY_STATE_L1 = 2
-MEAN_STEADY_STATE_BLOB = 15
+MEAN_STEADY_STATE_BLOB = 15  # type: Gwei
 DEVIATION_STEADY_STATE_BLOB = 2
 
 # XXX: Rounding is needed to address the fact that Gas is an integer type. 
@@ -132,11 +132,10 @@ def steady_state_blob_gas_estimate(state: AztecModelState):
 #############################################################
 
 
-
 # NOTE: ideally, this should be mapped either to relative timesteps or L1 time rather than fixed timesteps
 # so that the scenarios are invariant to number
-L1_SHOCK_AMOUNT = 100
-BLOB_SHOCK_AMOUNT = 100
+L1_SHOCK_AMOUNT = 100  # type: Gwei
+BLOB_SHOCK_AMOUNT = 100  # type: Gwei
 initial_time = floor(0.25 * TIMESTEPS) # XXX: 25% of timesteps
 final_time = floor(0.25 * TIMESTEPS) # XXX: 25% of timesteps
 
@@ -206,7 +205,7 @@ SINGLE_RUN_PARAMS = AztecModelParams(label='default',
                                      timestep_in_blocks=1,
 
                                      uncle_count=0, 
-                                     reward_per_block=1, # TODO
+                                     reward_per_block=1,  # TODO # type: Tokens
                                      fee_subsidy_fraction=1.0, # unused
 
 
@@ -250,6 +249,6 @@ SINGLE_RUN_PARAMS = AztecModelParams(label='default',
                                      gas_fee_l1_time_series=GAS_FEE_L1_TIME_SERIES_LIST[-1],
                                      gas_fee_blob_time_series=GAS_FEE_BLOB_TIME_SERIES_LIST[-1],
 
-                                     commit_bond_amount = 10.0,
-                                     op_costs=0 # XXX
+                                     commit_bond_amount=10.0,  # type: Tokens
+                                     op_costs=0  # XXX # type: Tokens
                                      )  
