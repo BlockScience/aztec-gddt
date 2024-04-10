@@ -764,7 +764,7 @@ def s_transactions_new_proposals(
                 for u in state["agents"].values()
                 if u.uuid not in proposers
                 and u.is_sequencer
-                and u.staked_amount >= params["slash_params"].minimum_stake
+                and u.staked_amount >= params['minimum_stake']
             }
 
             for potential_proposer in potential_proposers:

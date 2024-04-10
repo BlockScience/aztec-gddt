@@ -8,6 +8,8 @@ from pydantic.dataclasses import dataclass, Field
 from typing import Sequence
 # Units
 
+
+ETH = float
 L1Blocks = Annotated[int, "blocks"]  # Number of L1 Blocks (time dimension)
 L2Blocks = Annotated[int, "blocks"]  # Number of L2 Blocks (time dimension)
 ContinuousL1Blocks = Annotated[float, "blocks"]  # (time dimension)
@@ -124,11 +126,11 @@ class Process:
 @dataclass
 class Agent:
     uuid: AgentUUID
-    balance: Tokens
+    balance: ETH
     is_sequencer: bool = False
     is_prover: bool = False
     is_relay: bool = False
-    staked_amount: Tokens = 0.0
+    staked_amount: ETH = 0.0
 
     logic: Optional[Dict[str, Callable[[Dict], Any]]] = (
         None  # placeholder for general agent logic
@@ -262,14 +264,8 @@ class UserTransactionEstimators:
 
 @dataclass
 class SlashParameters:
-    failure_to_commit_bond: Tokens
-    failure_to_reveal_block: Tokens
-
-    @property
-    def minimum_stake(self):
-        # XXX
-        return self.failure_to_commit_bond + self.failure_to_reveal_block
-
+    failure_to_commit_bond: ETH
+    failure_to_reveal_block: ETH
 
 class AztecModelParams(TypedDict):
     # random_seed: int #Random seed for simulation model variation.
@@ -281,6 +277,7 @@ class AztecModelParams(TypedDict):
     uncle_count: int
     reward_per_block: Gwei
     fee_subsidy_fraction: Percentage
+    minimum_stake: ETH
 
     # Phase Durations
     # These have both minimum and maximum numbers of blocks
