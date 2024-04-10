@@ -77,7 +77,7 @@ def main(process: bool,
                          N_sweep_samples=sweep_samples,
                          N_samples=mc_runs,
                          supress_cadCAD_print=True,
-                         output_path=output_path,
+                         output_path=str(output_path),
                          timestep_tensor_prefix=timestep_tensor_prefix)
     
 

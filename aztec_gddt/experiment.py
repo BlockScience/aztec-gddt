@@ -258,7 +258,7 @@ def psuu_exploratory_run(N_sweep_samples=-1,
                         N_samples)
             # Run simulationz
             sim_df = sim_run(*sim_args, exec_mode='single', assign_params=assign_params, supress_cadCAD_print=supress_cadCAD_print)
-            output_filename = output_path / f'{timestep_tensor_prefix}_{i_chunk}.pkl.zip'
+            output_filename = Path(output_path) / f'{timestep_tensor_prefix}_{i_chunk}.pkl.zip'
             sim_df['simulation'] = i_chunk
             logger.debug(f"n_groups: {sim_df.groupby(['simulation', 'run', 'subset']).ngroups}")
             sim_df.to_pickle(output_filename)
