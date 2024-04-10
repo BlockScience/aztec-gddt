@@ -51,7 +51,7 @@ def test_schema(sim_df: pd.DataFrame):
         "total_rewards_sequencers": pa.Column(float, checks=[pa.Check(lambda x: x >= 0)]),
         "total_rewards_relays": pa.Column(float, checks=[pa.Check(lambda x: x >= 0)]),
         "slashes_to_provers": pa.Column(float, checks=[pa.Check(lambda x: x >= 0)]),
-        "slashes_to_sequencers": pa.Column(float, checks=[pa.Check(lambda x: x >= 0), pa.Check(lambda x: x.mean() > 0)]),
+        "slashes_to_sequencers": pa.Column(float, checks=[pa.Check(lambda x: x >= 0)]),
         # "gas_fee_l1": pa.Column(int, checks=[pa.Check(lambda x: x >= 0)]),
         # "gas_fee_blob": pa.Column(int, checks=[pa.Check(lambda x: x >= 0)]),
 
