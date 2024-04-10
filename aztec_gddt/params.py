@@ -254,9 +254,10 @@ SINGLE_RUN_PARAMS = AztecModelParams(
     label="default",
     timestep_in_blocks=1,
     uncle_count=0,
-    reward_per_block=1.0,  # TODO
     fee_subsidy_fraction=1.0,  # unused
     minimum_stake=30,
+    l1_blocks_per_day=int(24 * 60 * 60 / 12.08),
+    daily_block_reward=32,
     # Placeholder Logic
     logic={},
     # Phase Durations

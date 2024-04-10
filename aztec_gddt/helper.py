@@ -37,3 +37,12 @@ def bernoulli_trial(probability: float) -> bool:
     hit = (rand_num <= probability)
 
     return hit 
+
+
+
+
+def max_phase_duration(p: AztecModelParams) -> L1Blocks:
+    return (p['phase_duration_proposal_max_blocks'] + 
+            p['phase_duration_reveal_max_blocks'] + 
+            p['phase_duration_commit_bond_max_blocks'] + 
+            p['phase_duration_rollup_max_blocks'])

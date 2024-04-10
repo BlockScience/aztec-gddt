@@ -393,7 +393,7 @@ def p_commit_bond(
                 #    state["cumm_block_rewards"] - history[-1][0]["cumm_block_rewards"]
                 # )
                 expected_rewards = params["reward_per_block"]
-                expected_costs = params["op_costs"] + fee + SAFETY_BUFFER
+                expected_costs: float = params["op_costs"] + fee + SAFETY_BUFFER
 
                 # Translate to ETH
                 expected_costs = expected_costs * 1e-9
@@ -514,7 +514,7 @@ def p_reveal_content(
                 # )
                 expected_rewards = params["reward_per_block"]
 
-                expected_costs = params["op_costs"] + fee + SAFETY_BUFFER
+                expected_costs: float = params["op_costs"] + fee + SAFETY_BUFFER
                 # Convert to ETH
                 expected_costs = expected_costs * 1e-9
 
@@ -913,7 +913,11 @@ def p_block_reward(
 ) -> SignalPayout:
     p: Process = state["current_process"]  # type: ignore
     if p.phase == SelectionPhase.finalized:
-        reward = params["reward_per_block"]
+
+        # XXX: this assumes that the average L2 block duration
+        # will be the max L2 block duration
+        expected_l2_blocks_per_day = params['l1_blocks_per_day'] / max_phase_duration(params)
+        reward = params['daily_block_reward'] / expected_l2_blocks_per_day
     else:
         reward = 0
     return SignalPayout(block_reward=reward)
