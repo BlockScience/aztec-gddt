@@ -157,7 +157,6 @@ def psuu_exploratory_run(N_sweep_samples=-1,
                                         timestep_in_blocks=[1],
 
                                         uncle_count=[0], 
-                                        reward_per_block=[1.0], # HACK: consider alternate values
                                         fee_subsidy_fraction=[1.0], 
 
                                         # Phase Durations

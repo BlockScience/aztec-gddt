@@ -61,9 +61,9 @@ INITIAL_AGENTS_DICT: dict[AgentUUID, Agent] = {a.uuid: a for a in INITIAL_AGENTS
 
 AGENTS_DICT = {**BASE_AGENTS_DICT, **INITIAL_AGENTS_DICT}
 
-INITIAL_CUMM_REWARDS = 200  # XXX
-INITIAL_CUMM_CASHBACK = 50  # XXX
-INITIAL_CUMM_BURN = 50  # XXX
+INITIAL_CUMM_REWARDS = 200.0  # XXX
+INITIAL_CUMM_CASHBACK = 50.0  # XXX
+INITIAL_CUMM_BURN = 50.0  # XXX
 INITIAL_SUPPLY = TokenSupply(
     circulating=sum(a.balance for a in INITIAL_AGENTS),
     staked=sum(a.staked_amount for a in INITIAL_AGENTS),
@@ -83,11 +83,11 @@ INITIAL_STATE = AztecModelState(
     time_l1=0,
     delta_l1_blocks=0,
     advance_l1_blocks=0,
-    slashes_to_provers=0,
-    slashes_to_sequencers=0,
-    total_rewards_provers=0,
-    total_rewards_relays=0,
-    total_rewards_sequencers=0,
+    slashes_to_provers=0.0,
+    slashes_to_sequencers=0.0,
+    total_rewards_provers=0.0,
+    total_rewards_relays=0.0,
+    total_rewards_sequencers=0.0,
     agents=AGENTS_DICT,
     current_process=None,  # XXX
     transactions=dict(),
@@ -254,9 +254,10 @@ SINGLE_RUN_PARAMS = AztecModelParams(
     label="default",
     timestep_in_blocks=1,
     uncle_count=0,
-    reward_per_block=1,  # TODO
     fee_subsidy_fraction=1.0,  # unused
     minimum_stake=30,
+    l1_blocks_per_day=int(24 * 60 * 60 / 12.08),
+    daily_block_reward=32,
     # Placeholder Logic
     logic={},
     # Phase Durations

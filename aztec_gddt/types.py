@@ -275,7 +275,8 @@ class AztecModelParams(TypedDict):
 
     # Economic Parameters
     uncle_count: int
-    reward_per_block: Gwei
+    daily_block_reward: ETH
+    l1_blocks_per_day: int
     fee_subsidy_fraction: Percentage
     minimum_stake: ETH
 
@@ -300,16 +301,16 @@ class AztecModelParams(TypedDict):
     logic: Dict[str, Callable[[Dict], Any]]  # placeholder for general system logic
 
     # XXX: Refactor to have constantly increasing probability. 
-    proposal_probability_per_user_per_block: Probability = Field(init=False)
+    proposal_probability_per_user_per_block: Probability = Field(init=False)# type: ignore
 
     # XXX In reveal phase, lead might not reveal content
-    block_content_reveal_probability: Probability = Field(init=False)
+    block_content_reveal_probability: Probability = Field(init=False)# type: ignore
     # XXX If lead does not reveal tx proofs, Provers can't do their work
-    tx_proof_reveal_probability: Probability = Field(init=False) 
+    tx_proof_reveal_probability: Probability = Field(init=False) # type: ignore
     # XXX If Provers don't send back rollup proof, lead can't submit
-    rollup_proof_reveal_probability: Probability = Field(init=False)
+    rollup_proof_reveal_probability: Probability = Field(init=False)# type: ignore
     # XXX If noone commits to put up a bond for Proving, sequencer loses their privilege and we enter race mode
-    commit_bond_reveal_probability: Probability = Field(init=False)
+    commit_bond_reveal_probability: Probability = Field(init=False)# type: ignore
 
     gas_threshold_for_tx: Gwei
     blob_gas_threshold_for_tx: Gwei
@@ -329,14 +330,13 @@ class AztecModelParams(TypedDict):
     commit_bond_amount: float
     op_costs: Gwei
 
-    def __post_init__(self):
+
+    def __post_init__(self): # type: ignore
         FINAL_PROBABILITY = 0.99 #XXX: The final cumulative probability
-        self.proposal_probability_per_user_per_block = FINAL_PROBABILITY/self.phase_duration_proposal_max_blocks
-        self.block_content_reveal_probability = FINAL_PROBABILITY/self.phase_duration_reveal_max_blocks
-        self.rollup_proof_reveal_probability = FINAL_PROBABILITY/self.phase_duration_rollup_max_blocks
-        self.commit_bond_reveal_probability = FINAL_PROBABILITY/self.phase_duration_commit_bond_max_blocks
-
-
+        self.proposal_probability_per_user_per_block = FINAL_PROBABILITY/self.phase_duration_proposal_max_blocks# type: ignore
+        self.block_content_reveal_probability = FINAL_PROBABILITY/self.phase_duration_reveal_max_blocks# type: ignore
+        self.rollup_proof_reveal_probability = FINAL_PROBABILITY/self.phase_duration_rollup_max_blocks# type: ignore
+        self.commit_bond_reveal_probability = FINAL_PROBABILITY/self.phase_duration_commit_bond_max_blocks# type: ignore
 
 
 
