@@ -401,6 +401,7 @@ def p_commit_bond(
                 payoff_reveal = expected_rewards - expected_costs
 
                 if payoff_reveal >= 0:
+
                     # If duration is not expired, do  a trial to see if bond is commited
                     agent_decides_to_reveal_commit_bond = bernoulli_trial(
                         probability=params["commit_bond_reveal_probability"]
@@ -451,7 +452,6 @@ def p_commit_bond(
                     pass
         else:
             pass
-
     return {
         "update_process": updated_process,
         "new_transactions": new_transactions,
@@ -483,6 +483,7 @@ def p_reveal_content(
         pass
     else:
         if process.phase == SelectionPhase.pending_reveal:
+
             # If the process has blown the phase duration
             remaining_time = max_phase_duration - process.duration_in_current_phase
             if remaining_time < 0:
@@ -508,10 +509,15 @@ def p_reveal_content(
                 fee = gas * state["gas_fee_l1"]
                 SAFETY_BUFFER = 2 * fee  # HACK:
                 # XXX: Expected Rewards is the rewards over the last timestep.
-                expected_rewards = (
-                    state["cumm_block_rewards"] - history[-1][0]["cumm_block_rewards"]
-                )
+                # expected_rewards = (
+                #    state["cumm_block_rewards"] - history[-1][0]["cumm_block_rewards"]
+                # )
+                expected_rewards = params["reward_per_block"]
+
                 expected_costs = params["op_costs"] + fee + SAFETY_BUFFER
+                # Convert to ETH
+                expected_costs = expected_costs * 1e-9
+
                 payoff_reveal = expected_rewards - expected_costs
 
                 agent_expects_profit = payoff_reveal >= 0
