@@ -1,7 +1,7 @@
 import pandas as pd
 from aztec_gddt.params import TIMESTEPS
 from aztec_gddt.experiment import standard_run
-from aztec_gddt.types import Agent
+from aztec_gddt.types import Agent, Proposal
 import pytest as pt
 import pandera as pa
 
@@ -31,6 +31,12 @@ def test_agents_balance_not_negative(sim_df: pd.DataFrame):
 def test_non_unique_lead_sequencer(sim_df: pd.DataFrame):
     lead_seq_s = sim_df.current_process.map(lambda x: x.leading_sequencer if x is not None else None).dropna()
     assert len(lead_seq_s.unique()) > 1
+
+
+def test_proposal_count_is_distinct_at_least_5_timesteps(sim_df: pd.DataFrame):
+    s = sim_df.transactions.map(lambda tx_dict: len(list(v for v in tx_dict.values() if isinstance(v, Proposal))))
+    assert len(s.unique()) >= 5
+
 
 
 
