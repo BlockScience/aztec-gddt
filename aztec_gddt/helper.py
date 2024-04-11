@@ -6,6 +6,9 @@ import numpy as np
 
 
 def proposals_from_tx(transactions: dict[TxUUID, TransactionL1]) -> dict[TxUUID, Proposal]:
+    """
+    Selects all proposals from the transactions state variable.
+    """
     return {k: v for k, v in transactions.items()
             if type(v) == Proposal}
 

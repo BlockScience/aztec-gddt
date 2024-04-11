@@ -303,9 +303,13 @@ def p_select_proposal(
         if process.phase == SelectionPhase.pending_proposals:
             remaining_time = max_phase_duration - process.duration_in_current_phase
             if remaining_time < 0:
-                proposals: dict[TxUUID, Proposal] = proposals_from_tx(
+                raw_proposals: dict[TxUUID, Proposal] = proposals_from_tx(
                     state["transactions"]
                 )
+
+                proposals = {k: p for k, p in raw_proposals.items()
+                                                 if p.when >= process.current_phase_init_time}
+
                 if len(proposals) > 0:
                     number_uncles: int = min(len(proposals) - 1, params["uncle_count"])
 
