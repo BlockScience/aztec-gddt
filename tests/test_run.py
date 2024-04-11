@@ -6,7 +6,7 @@ import pytest as pt
 import pandera as pa
 
 
-@pt.fixture(scope="module", params=[TIMESTEPS, 20_000])
+@pt.fixture(scope="module", params=[TIMESTEPS, 10_000, 50_000, 2_000, 5_000])
 def sim_df(request) -> pd.DataFrame:
     N_t = request.param
     return standard_run()  # type: ignore
@@ -26,6 +26,12 @@ def test_agents_balance_not_negative(sim_df: pd.DataFrame):
     for index, agents in agents_per_timestep.items():
         for agent_name, agent in agents.items():
             assert agent.balance >= 0, f"Assert failed for {agent_name=} at (subset, run, timestep)={index}"
+
+
+def test_non_unique_lead_sequencer(sim_df: pd.DataFrame):
+    lead_seq_s = sim_df.current_process.map(lambda x: x.leading_sequencer if x is not None else None).dropna()
+    assert len(lead_seq_s.unique()) > 1
+
 
 
 def test_schema(sim_df: pd.DataFrame):

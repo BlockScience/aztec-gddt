@@ -355,7 +355,6 @@ def p_commit_bond(
     new_transactions = list()
     advance_blocks = 0
     transfers: list[Transfer] = []
-
     bond_amount = params["commit_bond_amount"]
     commit_duration = params["phase_duration_commit_bond_max_blocks"]
 
