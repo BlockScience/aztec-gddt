@@ -756,13 +756,13 @@ def s_transactions_new_proposals(
     new_proposals: dict[TxUUID, Proposal] = dict()
     if current_process is not None:
         if current_process.phase == SelectionPhase.pending_proposals:
-            # HACK: all interacting users are potential proposers
-            # XXX: an sequencer can propose only once
-            proposers: set[AgentUUID] = {p.who for p in new_transactions.values()}
+            current_proposers: set[AgentUUID] = {p.who 
+                                                 for p in new_transactions.values()
+                                                 if p.when >= current_process.current_phase_init_time}
             potential_proposers: set[AgentUUID] = {
                 u.uuid
                 for u in state["agents"].values()
-                if u.uuid not in proposers
+                if u.uuid not in current_proposers
                 and u.is_sequencer
                 and u.staked_amount >= params['minimum_stake']
             }
