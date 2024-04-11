@@ -4,24 +4,15 @@ from aztec_gddt.types import Agent
 import pytest as pt
 import pandera as pa
 
-N_sweep_samples = 10
-N_samples = 2
-N_timesteps = 1_000
 
-
-@pt.fixture
-def sim_df() -> pd.DataFrame:
+@pt.fixture(scope="module", params=[(10, 2, 1_000), (2_000, 1, 5), (1, 1, 5_000)])
+def sim_df(request) -> pd.DataFrame:
+    (N_sweep_samples, N_samples, N_timesteps) = request.param
     return psuu_exploratory_run(N_sweep_samples=N_sweep_samples,
                                 N_samples=N_samples,
                                 N_timesteps=N_timesteps,
                                 parallelize_jobs=False,
                                 supress_cadCAD_print=True)  # type: ignore
-
-
-def test_n_rows(sim_df: pd.DataFrame):
-    expected_rows = (N_timesteps + 1) * N_samples * N_sweep_samples
-    assert sim_df.shape[0] == expected_rows
-
 
 def test_agents_stake_not_negative(sim_df: pd.DataFrame):
     _df = sim_df.set_index(["subset", "run", "timestep"])

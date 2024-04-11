@@ -1,15 +1,15 @@
 import pandas as pd
+from aztec_gddt.params import TIMESTEPS
 from aztec_gddt.experiment import standard_run
 from aztec_gddt.types import Agent
 import pytest as pt
 import pandera as pa
-@pt.fixture
-def sim_df() -> pd.DataFrame:
-    return standard_run()  # type: ignore
 
-# def test_n_rows(sim_df: pd.DataFrame):
-#     expected_rows = (N_timesteps + 1) * N_samples * N_sweep_samples
-#     assert sim_df.shape[0] == expected_rows
+
+@pt.fixture(scope="module", params=[TIMESTEPS, 20_000])
+def sim_df(request) -> pd.DataFrame:
+    N_t = request.param
+    return standard_run()  # type: ignore
 
 
 def test_agents_stake_not_negative(sim_df: pd.DataFrame):
