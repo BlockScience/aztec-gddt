@@ -6,7 +6,6 @@ from random import choice
 
 from aztec_gddt.helper import *
 from aztec_gddt.types import *
-
 from scipy.stats import bernoulli, uniform, norm  # type: ignore
 from random import random
 import pickle
@@ -358,13 +357,13 @@ def p_commit_bond(
     transfers: list[Transfer] = []
 
     bond_amount = params["commit_bond_amount"]
-    max_phase_duration = params["phase_duration_commit_bond_max_blocks"]
+    commit_duration = params["phase_duration_commit_bond_max_blocks"]
 
     if process is None:
         pass
     else:
         if process.phase == SelectionPhase.pending_commit_bond:
-            remaining_time = max_phase_duration - process.duration_in_current_phase
+            remaining_time = commit_duration - process.duration_in_current_phase
             if remaining_time < 0:
                 # Move to Proof Race mode if duration is expired
                 updated_process = copy(process)
@@ -392,7 +391,8 @@ def p_commit_bond(
                 # expected_rewards = (
                 #    state["cumm_block_rewards"] - history[-1][0]["cumm_block_rewards"]
                 # )
-                expected_rewards = params["reward_per_block"]
+                expected_l2_blocks_per_day = params['l1_blocks_per_day'] / max_phase_duration(params)
+                expected_rewards = params['daily_block_reward'] / expected_l2_blocks_per_day
                 expected_costs: float = params["op_costs"] + fee + SAFETY_BUFFER
 
                 # Translate to ETH
@@ -477,7 +477,7 @@ def p_reveal_content(
     new_transactions = list()
     transfers: list[Transfer] = []
 
-    max_phase_duration = params["phase_duration_reveal_max_blocks"]
+    max_reveal_duration = params["phase_duration_reveal_max_blocks"]
 
     if process is None:
         pass
@@ -485,7 +485,7 @@ def p_reveal_content(
         if process.phase == SelectionPhase.pending_reveal:
 
             # If the process has blown the phase duration
-            remaining_time = max_phase_duration - process.duration_in_current_phase
+            remaining_time = max_reveal_duration - process.duration_in_current_phase
             if remaining_time < 0:
                 updated_process = copy(process)
                 updated_process.phase = SelectionPhase.proof_race
@@ -512,7 +512,8 @@ def p_reveal_content(
                 # expected_rewards = (
                 #    state["cumm_block_rewards"] - history[-1][0]["cumm_block_rewards"]
                 # )
-                expected_rewards = params["reward_per_block"]
+                expected_l2_blocks_per_day = params['l1_blocks_per_day'] / max_phase_duration(params)
+                expected_rewards = params['daily_block_reward'] / expected_l2_blocks_per_day
 
                 expected_costs: float = params["op_costs"] + fee + SAFETY_BUFFER
                 # Convert to ETH

@@ -52,7 +52,7 @@ INITIAL_AGENTS: list[Agent] = [
         is_sequencer=True,
         is_prover=True,
         is_relay=False,
-        staked_amount=5,
+        staked_amount=50,
     )
     for i in range(N_INITIAL_AGENTS)
 ]
