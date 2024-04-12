@@ -181,14 +181,21 @@ def create_decision_tree_importances_plot(data: DataFrame,
                                           col_name: str,
                                           params_to_use: List = [],
                                           plot_width: float = 36,
-                                          plot_height: float = 12):
+                                          plot_height: float = 12,
+                                          success_criteria: str = ''):
     if len(params_to_use) == 0:
         features = governance_surface_params + fixed_info_cols
     else:
         features= params_to_use
 
     X = data.loc[:, features]
-    y = data.loc[:, col_name] > data.loc[:, col_name].median()
+
+    if success_criteria == 'lower_than_median':
+        y = data.loc[:, col_name] < data.loc[:, col_name].median()
+    elif success_criteria == 'higher_than_median':
+        y = data.loc[:, col_name] > data.loc[:, col_name].median()
+    else:
+        raise Exception('criteria not specified')
 
     model = DecisionTreeClassifier(max_depth=3)
     rf = RandomForestClassifier()
