@@ -124,7 +124,7 @@ def psuu_exploratory_run(N_sweep_samples=-1,
     N_sequencer = 3
     N_prover = 3
 
-    assign_params = {'stake_activation_period', 'phase_duration_commit_bond_min_blocks', 'gas_threshold_for_tx', 'op_costs', 'proving_marketplace_usage_probability', 'gas_fee_l1_time_series', 'phase_duration_reveal_min_blocks', 'gwei_to_tokens', 'slash_params', 'gas_fee_blob_time_series', 'phase_duration_proposal_max_blocks', 'rewards_to_relay', 'phase_duration_rollup_max_blocks', 'phase_duration_rollup_min_blocks', 'phase_duration_reveal_max_blocks', 'fee_subsidy_fraction', 'phase_duration_race_min_blocks', 'timestep_in_blocks', 'rewards_to_provers', 'label', 'reward_per_block', 'blob_gas_threshold_for_tx', 'phase_duration_race_max_blocks', 'unstake_cooldown_period', 'proposal_probability_per_user_per_block', 'block_content_reveal_probability', 'commit_bond_reveal_probability', 'phase_duration_commit_bond_max_blocks', 'commit_bond_amount', 'uncle_count', 'tx_proof_reveal_probability', 'rollup_proof_reveal_probability', 'phase_duration_proposal_min_blocks'}
+    assign_params = {'stake_activation_period', 'phase_duration_commit_bond_min_blocks', 'gas_threshold_for_tx', 'op_costs', 'proving_marketplace_usage_probability', 'gas_fee_l1_time_series', 'phase_duration_reveal_min_blocks', 'gwei_to_tokens', 'slash_params', 'gas_fee_blob_time_series', 'phase_duration_proposal_max_blocks', 'rewards_to_relay', 'phase_duration_rollup_max_blocks', 'phase_duration_rollup_min_blocks', 'phase_duration_reveal_max_blocks', 'fee_subsidy_fraction', 'phase_duration_race_min_blocks', 'timestep_in_blocks', 'rewards_to_provers', 'label', 'daily_block_reward', 'blob_gas_threshold_for_tx', 'phase_duration_race_max_blocks', 'unstake_cooldown_period', 'proposal_probability_per_user_per_block', 'block_content_reveal_probability', 'commit_bond_reveal_probability', 'phase_duration_commit_bond_max_blocks', 'commit_bond_amount', 'uncle_count', 'tx_proof_reveal_probability', 'rollup_proof_reveal_probability', 'phase_duration_proposal_min_blocks'}
 
     for _ in range(N_sequencer):
         a = Agent(uuid=uuid4(),
@@ -151,12 +151,12 @@ def psuu_exploratory_run(N_sweep_samples=-1,
     initial_state = INITIAL_STATE.copy()
     initial_state['agents'] = Sqn3Prv3
 
+    sweep_params = {k: [v] for k, v in SINGLE_RUN_PARAMS.items()}
 
-    sweep_params: dict[str, list] = dict(label=['default'],
+    sweep_params_upd: dict[str, list] = dict(label=['default'],
                                         timestep_in_blocks=[1],
 
                                         uncle_count=[0], 
-                                        reward_per_block=[1.0], # HACK: consider alternate values
                                         fee_subsidy_fraction=[1.0], 
 
                                         # Phase Durations
@@ -204,7 +204,7 @@ def psuu_exploratory_run(N_sweep_samples=-1,
                                         op_costs=[0.0] # XXX
                                         )  
     
-
+    sweep_params = {**sweep_params, **sweep_params_upd} # type: ignore
 
 
     sweep_combinations: int = 1
@@ -258,7 +258,7 @@ def psuu_exploratory_run(N_sweep_samples=-1,
                         N_samples)
             # Run simulationz
             sim_df = sim_run(*sim_args, exec_mode='single', assign_params=assign_params, supress_cadCAD_print=supress_cadCAD_print)
-            output_filename = output_path / f'{timestep_tensor_prefix}_{i_chunk}.pkl.zip'
+            output_filename = Path(output_path) / f'{timestep_tensor_prefix}_{i_chunk}.pkl.zip'
             sim_df['simulation'] = i_chunk
             logger.debug(f"n_groups: {sim_df.groupby(['simulation', 'run', 'subset']).ngroups}")
             sim_df.to_pickle(output_filename)

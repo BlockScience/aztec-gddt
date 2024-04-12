@@ -12,3 +12,5 @@ cadCAD_machine_search
 scikit-learn
 joblib
 boto3
+pytest>=8.1.1
+kaleido>=0.2.1

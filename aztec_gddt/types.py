@@ -4,26 +4,27 @@ from enum import IntEnum, Enum, auto
 from math import floor
 import numpy as np
 from pydantic import FiniteFloat
-from pydantic.dataclasses import dataclass
+from pydantic.dataclasses import dataclass, Field
 from typing import Sequence
-
 # Units
 
-L1Blocks = Annotated[int, 'blocks']  # Number of L1 Blocks (time dimension)
-L2Blocks = Annotated[int, 'blocks']  # Number of L2 Blocks (time dimension)
-ContinuousL1Blocks = Annotated[float, 'blocks']  # (time dimension)
-Seconds = Annotated[int, 's']
-Probability = Annotated[float, 'probability']
-Tokens = Annotated[float, 'tokens']  # Amount of slashable tokens
 
-AgentUUID = Annotated[object, 'uuid']
-TxUUID = Annotated[object, 'uuid']
-ProcessUUID = Annotated[object, 'uuid']
+ETH = float
+L1Blocks = Annotated[int, "blocks"]  # Number of L1 Blocks (time dimension)
+L2Blocks = Annotated[int, "blocks"]  # Number of L2 Blocks (time dimension)
+ContinuousL1Blocks = Annotated[float, "blocks"]  # (time dimension)
+Seconds = Annotated[int, "s"]
+Probability = Annotated[float, "probability"]
+Tokens = Annotated[float, "tokens"]  # Amount of slashable tokens
 
-Bytes = Annotated[int, 'bytes']
-Gas = Annotated[int, 'gas']
-Gwei = Annotated[int, 'gwei']
-BlobGas = Annotated[int, 'blob_gas']
+AgentUUID = Annotated[object, "uuid"]
+TxUUID = Annotated[object, "uuid"]
+ProcessUUID = Annotated[object, "uuid"]
+
+Bytes = Annotated[int, "bytes"]
+Gas = Annotated[int, "gas"]
+Gwei = Annotated[int, "gwei"]
+BlobGas = Annotated[int, "blob_gas"]
 Percentage = Annotated[float, "%"]
 
 
@@ -35,7 +36,7 @@ class L1TransactionType(Enum):
 
 
 @dataclass
-class TransactionL1():
+class TransactionL1:
     who: AgentUUID
     when: L1Blocks
     uuid: TxUUID
@@ -49,6 +50,7 @@ class TransactionL1():
 
 # Types for representing entities
 
+
 class SelectionPhase(IntEnum):
     pending_proposals = 1
     pending_commit_bond = 2
@@ -60,7 +62,7 @@ class SelectionPhase(IntEnum):
 
 
 @dataclass
-class TokenSupply():
+class TokenSupply:
     circulating: Tokens
     staked: Tokens
     burnt: Tokens
@@ -71,12 +73,15 @@ class TokenSupply():
         return self.circulating + self.staked
 
     @staticmethod
-    def from_state(state: 'AztecModelState') -> "TokenSupply":
-        obj = TokenSupply(circulating=sum(a.balance for a in state['agents'].values()),
-                          staked=sum(a.staked_amount for a in state['agents'].values()),
-                          burnt=state['cumm_burn'],
-                          issued=state['cumm_block_rewards'] + state['cumm_fee_cashback'])
+    def from_state(state: "AztecModelState") -> "TokenSupply":
+        obj = TokenSupply(
+            circulating=sum(a.balance for a in state["agents"].values()),
+            staked=sum(a.staked_amount for a in state["agents"].values()),
+            burnt=state["cumm_burn"],
+            issued=state["cumm_block_rewards"] + state["cumm_fee_cashback"],
+        )
         return obj
+
 
 @dataclass
 class Process:
@@ -89,7 +94,7 @@ class Process:
     # Relevant L1 Transactions
     tx_winning_proposal: Optional[TxUUID] = None
     tx_commitment_bond: Optional[TxUUID] = None
-    
+
     tx_content_reveal: Optional[TxUUID] = None
     tx_rollup_proof: Optional[TxUUID] = None
 
@@ -115,20 +120,21 @@ class Process:
         if other is None:
             return self
         else:
-            raise ValueError(
-                'Attempted to add Process to another non-null object')
+            raise ValueError("Attempted to add Process to another non-null object")
 
 
 @dataclass
-class Agent():
+class Agent:
     uuid: AgentUUID
-    balance: Tokens
+    balance: ETH
     is_sequencer: bool = False
     is_prover: bool = False
     is_relay: bool = False
-    staked_amount: Tokens = 0.0
+    staked_amount: ETH = 0.0
 
-    logic: Optional[Dict[str, Callable[[Dict], Any]]] = None #placeholder for general agent logic
+    logic: Optional[Dict[str, Callable[[Dict], Any]]] = (
+        None  # placeholder for general agent logic
+    )
 
     def slots(self, tokens_per_slot: Tokens) -> Tokens:
         return floor(self.staked_amount / tokens_per_slot)
@@ -147,22 +153,22 @@ class TransactionL1Blob(TransactionL1):
 @dataclass
 class Proposal(TransactionL1):
     """
-    NOTE: Instantiation of this class can be understood as a 
+    NOTE: Instantiation of this class can be understood as a
     L1T_proposer_submit_proposal event.
     """
+
     score: FiniteFloat
     size: Bytes
     public_composition: Percentage
 
 
-
-
 @dataclass
 class CommitmentBond(TransactionL1):
     """
-    NOTE: Instantiation of this class can be understood as a 
+    NOTE: Instantiation of this class can be understood as a
     L1T_lead_submit_commit_bond event.
     """
+
     proposal_tx_uuid: TxUUID
     prover_uuid: AgentUUID
     bond_amount: float
@@ -171,12 +177,16 @@ class CommitmentBond(TransactionL1):
 @dataclass
 class ContentReveal(TransactionL1Blob):
     transaction_count: int
-    transaction_avg_size: int
+    transaction_avg_size: float
     transaction_avg_fee_per_size: Tokens
 
     @property
     def total_tx_fee(self) -> Tokens:
-        return self.transaction_count * self.transaction_avg_size * self.transaction_avg_fee_per_size
+        return (
+            self.transaction_count
+            * self.transaction_avg_size
+            * self.transaction_avg_fee_per_size
+        )
 
 
 @dataclass
@@ -184,7 +194,9 @@ class RollupProof(TransactionL1):
     pass
 
 
-AnyL1Transaction = TransactionL1 | Proposal | CommitmentBond | ContentReveal | RollupProof
+AnyL1Transaction = (
+    TransactionL1 | Proposal | CommitmentBond | ContentReveal | RollupProof
+)
 
 SelectionResults = dict[ProcessUUID, tuple[Proposal, list[Proposal]]]
 
@@ -233,8 +245,9 @@ BlobGasEstimator = Callable[Concatenate[AztecModelState, P], BlobGas]
 BaseIntEstimator = Callable[Concatenate[AztecModelState, P], int]
 BaseFloatEstimator = Callable[Concatenate[AztecModelState, P], float]
 
+
 @dataclass
-class L1GasEstimators():
+class L1GasEstimators:
     proposal: GasEstimator
     commitment_bond: GasEstimator
     content_reveal: GasEstimator
@@ -243,23 +256,16 @@ class L1GasEstimators():
 
 
 @dataclass
-class UserTransactionEstimators():
+class UserTransactionEstimators:
     transaction_count: BaseIntEstimator
     proposal_average_size: BaseIntEstimator
     transaction_average_fee_per_size: BaseFloatEstimator
 
 
 @dataclass
-class SlashParameters():
-    failure_to_commit_bond: Tokens
-    failure_to_reveal_block: Tokens
-
-
-    @property
-    def minimum_stake(self):
-        # XXX
-        return self.failure_to_commit_bond + self.failure_to_reveal_block
-
+class SlashParameters:
+    failure_to_commit_bond: ETH
+    failure_to_reveal_block: ETH
 
 class AztecModelParams(TypedDict):
     # random_seed: int #Random seed for simulation model variation.
@@ -269,8 +275,10 @@ class AztecModelParams(TypedDict):
 
     # Economic Parameters
     uncle_count: int
-    reward_per_block: Gwei
+    daily_block_reward: ETH
+    l1_blocks_per_day: int
     fee_subsidy_fraction: Percentage
+    minimum_stake: ETH
 
     # Phase Durations
     # These have both minimum and maximum numbers of blocks
@@ -290,21 +298,19 @@ class AztecModelParams(TypedDict):
 
     # Behavioral Parameters
 
-    logic: Dict[str, Callable[[Dict], Any]] #placeholder for general system logic
+    logic: Dict[str, Callable[[Dict], Any]]  # placeholder for general system logic
 
-    # XXX: assume that each interacting user
-    # has an fixed probability per L1 block
-    # to submit an proposal
-    proposal_probability_per_user_per_block: Probability
+    # XXX: Refactor to have constantly increasing probability. 
+    proposal_probability_per_user_per_block: Probability = Field(init=False)# type: ignore
 
     # XXX In reveal phase, lead might not reveal content
-    block_content_reveal_probability: Probability
+    block_content_reveal_probability: Probability = Field(init=False)# type: ignore
     # XXX If lead does not reveal tx proofs, Provers can't do their work
-    tx_proof_reveal_probability: Probability
+    tx_proof_reveal_probability: Probability = Field(init=False) # type: ignore
     # XXX If Provers don't send back rollup proof, lead can't submit
-    rollup_proof_reveal_probability: Probability
+    rollup_proof_reveal_probability: Probability = Field(init=False)# type: ignore
     # XXX If noone commits to put up a bond for Proving, sequencer loses their privilege and we enter race mode
-    commit_bond_reveal_probability: Probability
+    commit_bond_reveal_probability: Probability = Field(init=False)# type: ignore
 
     gas_threshold_for_tx: Gwei
     blob_gas_threshold_for_tx: Gwei
@@ -321,21 +327,32 @@ class AztecModelParams(TypedDict):
     gas_fee_l1_time_series: np.ndarray
     gas_fee_blob_time_series: np.ndarray
 
-
     commit_bond_amount: float
     op_costs: Gwei
+
+
+    def __post_init__(self): # type: ignore
+        FINAL_PROBABILITY = 0.99 #XXX: The final cumulative probability
+        self.proposal_probability_per_user_per_block = FINAL_PROBABILITY/self.phase_duration_proposal_max_blocks# type: ignore
+        self.block_content_reveal_probability = FINAL_PROBABILITY/self.phase_duration_reveal_max_blocks# type: ignore
+        self.rollup_proof_reveal_probability = FINAL_PROBABILITY/self.phase_duration_rollup_max_blocks# type: ignore
+        self.commit_bond_reveal_probability = FINAL_PROBABILITY/self.phase_duration_commit_bond_max_blocks# type: ignore
+
+
+
+
+
+
 
 
 class SignalTime(TypedDict, total=False):
     delta_blocks: L1Blocks
 
 
-
-
-
 class TransferKind(Enum):
-    conventional=auto()
-    slash=auto()
+    conventional = auto()
+    slash = auto()
+
 
 class Transfer(NamedTuple):
     source: AgentUUID
@@ -344,6 +361,7 @@ class Transfer(NamedTuple):
     kind: TransferKind
     to_prover: bool = False
     to_sequencer: bool = False
+
 
 class SignalEvolveProcess(TypedDict, total=False):
     new_transactions: Sequence[AnyL1Transaction]

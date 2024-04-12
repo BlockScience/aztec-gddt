@@ -39,6 +39,9 @@ log_levels = {
               '--upload_to_cloud',
               default=False,
               is_flag=True)
+@click.option('--no_parallelize',
+              default=False,
+              is_flag=True)
 @click.option(
     "-l",
     "--log-level",
@@ -53,7 +56,8 @@ def main(process: bool,
          mc_runs: int,
          timesteps: int,
          log_level: str,
-         upload_to_cloud: bool) -> None:
+         upload_to_cloud: bool,
+         no_parallelize: bool) -> None:
     
     CLOUD_BUCKET_NAME = 'aztec-gddt'
 
@@ -76,8 +80,9 @@ def main(process: bool,
                          N_timesteps=timesteps,
                          N_sweep_samples=sweep_samples,
                          N_samples=mc_runs,
+                         parallelize_jobs=~no_parallelize,
                          supress_cadCAD_print=True,
-                         output_path=output_path,
+                         output_path=str(output_path),
                          timestep_tensor_prefix=timestep_tensor_prefix)
     
 
