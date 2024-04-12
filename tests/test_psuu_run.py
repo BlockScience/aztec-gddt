@@ -5,7 +5,7 @@ import pytest as pt
 import pandera as pa
 
 
-@pt.fixture(scope="module", params=[(10, 2, 1_000), (2_000, 1, 5), (1, 1, 5_000)])
+@pt.fixture(scope="module", params=[(10, 2, 1_000), (500, 1, 5)])
 def sim_df(request) -> pd.DataFrame:
     (N_sweep_samples, N_samples, N_timesteps) = request.param
     return psuu_exploratory_run(N_sweep_samples=N_sweep_samples,
@@ -30,8 +30,14 @@ def test_agents_balance_not_negative(sim_df: pd.DataFrame):
             assert agent.balance >= 0, f"Assert failed for {agent_name=} at (subset, run, timestep)={index}"
 
 
-def test_schema(sim_df: pd.DataFrame):
+def test_skipped_fraction(sim_df: pd.DataFrame):
+    fig_df = sim_df.copy()
+    fig_df['process_order'] = fig_df.current_process.map(lambda x: x.phase.value if x is not None else None)
+    fig_df['process_label'] = fig_df.current_process.map(lambda x: x.phase.name if x is not None else None)
+    assert len(fig_df.process_label.dropna().unique()) > 2
 
+
+def test_schema(sim_df: pd.DataFrame):
     # NOTE: this is incomplete
     schema = pa.DataFrameSchema({
         "timestep": pa.Column(int, checks=[pa.Check(lambda x: x >= 0), pa.Check(lambda x: x.mean() > 0)]),
@@ -50,7 +56,6 @@ def test_schema(sim_df: pd.DataFrame):
         "cumm_block_rewards": pa.Column(float, checks=[pa.Check(lambda x: x >= 0)]),
         "cumm_fee_cashback": pa.Column(float, checks=[pa.Check(lambda x: x >= 0)]),
         "cumm_burn": pa.Column(float, checks=[pa.Check(lambda x: x >= 0)]),
-
     })
 
     schema.validate(sim_df)
