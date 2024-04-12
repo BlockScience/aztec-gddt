@@ -244,11 +244,11 @@ DEFAULT_DETERMINISTIC_TX_ESTIMATOR = UserTransactionEstimators(
 
 
 DEFAULT_DETERMINISTIC_GAS_ESTIMATOR = L1GasEstimators(
-    proposal=lambda _: 100_000,  # type: ignore
-    commitment_bond=lambda _: 100_000,  # type: ignore
-    content_reveal=lambda _: 81_000,  # type: ignore
-    content_reveal_blob=lambda _: 500_000,  # type: ignore
-    rollup_proof=lambda _: 450_000,  # type: ignore
+    proposal=lambda _: 100_000, # type: ignore
+    commitment_bond=lambda _: 100_000, # type: ignore
+    content_reveal=lambda _: 81_000, # type: ignore
+    content_reveal_blob=lambda _: 500_000, # type: ignore
+    rollup_proof=lambda _: 700_000 # type: ignore
 )
 
 SINGLE_RUN_PARAMS = AztecModelParams(
@@ -261,19 +261,20 @@ SINGLE_RUN_PARAMS = AztecModelParams(
     daily_block_reward=32,
     # Placeholder Logic
     logic={},
-    # Phase Durations
-    phase_duration_proposal_min_blocks=0,
-    phase_duration_proposal_max_blocks=10,
-    phase_duration_reveal_min_blocks=0,
-    phase_duration_reveal_max_blocks=10,
-    phase_duration_commit_bond_min_blocks=0,
-    phase_duration_commit_bond_max_blocks=10,
-    phase_duration_rollup_min_blocks=0,
-    phase_duration_rollup_max_blocks=30,
-    phase_duration_race_min_blocks=0,
-    phase_duration_race_max_blocks=30,
-    stake_activation_period=40,
-    unstake_cooldown_period=40,
+     # Phase Durations
+     phase_duration_proposal_min_blocks=0, # TODO
+     phase_duration_proposal_max_blocks=10, # TODO
+     phase_duration_reveal_min_blocks = 0, #TODO
+     phase_duration_reveal_max_blocks = 10, # TODO
+     phase_duration_commit_bond_min_blocks = 0, # TODO
+     phase_duration_commit_bond_max_blocks=10, # TODO
+     phase_duration_rollup_min_blocks = 0, # TODO
+     phase_duration_rollup_max_blocks=30, # TODO
+     phase_duration_race_min_blocks = 0, #TODO
+     phase_duration_race_max_blocks=30, # TODO
+  
+                                       stake_activation_period=40, # TODO
+                                     unstake_cooldown_period=40, # TODO
     # Behavioral Parameters
     proposal_probability_per_user_per_block=0.2,  # XXX
     block_content_reveal_probability=0.2,  # XXX

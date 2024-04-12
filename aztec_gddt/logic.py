@@ -639,10 +639,10 @@ def p_submit_proof(
                     advance_blocks = remaining_time
                     updated_process.phase = SelectionPhase.finalized
                     updated_process.duration_in_current_phase = 0
+                    who = updated_process.leading_sequencer  # XXX TODO: prover, not sequencer
+                    gas: Gas = params['gas_estimators'].rollup_proof(state)  # TODO: Check?
+                    fee: Gwei = gas * state['gas_fee_l1']
 
-                    who = updated_process.leading_sequencer  # XXX
-                    gas: Gas = params["gas_estimators"].content_reveal(state)
-                    fee: Gwei = gas * state["gas_fee_l1"]
 
                     tx = RollupProof(
                         who=who, when=state["time_l1"], uuid=uuid4(), gas=gas, fee=fee
