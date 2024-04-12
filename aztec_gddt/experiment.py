@@ -176,15 +176,6 @@ def psuu_exploratory_run(N_sweep_samples=-1,
 
                                         logic=[{}],
 
-
-                                        # Behavioral Parameters
-                                        proposal_probability_per_user_per_block=[0.1],
-                                        block_content_reveal_probability=[0.01, 0.5], 
-                                        tx_proof_reveal_probability=[0.01, 0.5], 
-                                        rollup_proof_reveal_probability=[0.01, 0.5],
-                                        commit_bond_reveal_probability=[0.01, 0.5], 
-
-
                                         gas_threshold_for_tx=[50], 
                                         blob_gas_threshold_for_tx=[50], 
                                         proving_marketplace_usage_probability=[0.0],
