@@ -132,7 +132,7 @@ def psuu_exploratory_run(N_sweep_samples=-1,
                                      is_sequencer=True,
                                      is_prover=False,
                                      is_relay=False,
-                                     staked_amount=5)
+                                     staked_amount=32)
         Sqn3Prv3_agents.append(a)
     for _ in range(N_prover):
         a = Agent(uuid=uuid4(),
@@ -140,7 +140,7 @@ def psuu_exploratory_run(N_sweep_samples=-1,
                                      is_sequencer=False,
                                      is_prover=True,
                                      is_relay=False,
-                                     staked_amount=5)
+                                     staked_amount=32)
         Sqn3Prv3_agents.append(a)
 
     
