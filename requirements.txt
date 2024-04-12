@@ -14,3 +14,5 @@ joblib
 boto3
 pytest>=8.1.1
 kaleido>=0.2.1
+fsspec
+s3fs
