@@ -231,7 +231,7 @@ def psuu_exploratory_run(N_sweep_samples=-1,
         # Run simulation
         sim_df = sim_run(*sim_args, exec_mode='single', assign_params=assign_params, supress_cadCAD_print=supress_cadCAD_print)
     else:
-        sweeps_per_process = 100
+        sweeps_per_process = 50
         processes = N_jobs
 
         chunk_size = sweeps_per_process
