@@ -15,28 +15,28 @@ N_INITIAL_AGENTS = 3
 BASE_AGENTS = [
     Agent(
         uuid="relay",
-        balance=0, # type: Tokens
+        balance=0,  # type: Tokens
         is_sequencer=False,
         is_prover=False,
         is_relay=True,
-        staked_amount=0.0, # type: Tokens
+        staked_amount=0.0,  # type: Tokens
     ),
     Agent(
         uuid="l1-builder",
-        balance=0, # type: Tokens
+        balance=0,  # type: Tokens
         is_sequencer=False,
         is_prover=False,
         is_relay=False,
-        staked_amount=0.0, # type: Tokens
+        staked_amount=0.0,  # type: Tokens
     ),
     Agent(
         uuid="burnt",
-        balance=0, # type: Tokens
+        balance=0,  # type: Tokens
         is_sequencer=False,
         is_prover=False,
         is_relay=False,
-        staked_amount=0.0, # type: Tokens
-    ),
+        staked_amount=0.0,  # type: Tokens
+    )
 ]
 
 
@@ -56,7 +56,8 @@ INITIAL_AGENTS: list[Agent] = [
     for i in range(N_INITIAL_AGENTS)
 ]
 
-INITIAL_AGENTS_DICT: dict[AgentUUID, Agent] = {a.uuid: a for a in INITIAL_AGENTS}
+INITIAL_AGENTS_DICT: dict[AgentUUID, Agent] = {
+    a.uuid: a for a in INITIAL_AGENTS}
 
 AGENTS_DICT = {**BASE_AGENTS_DICT, **INITIAL_AGENTS_DICT}
 
@@ -154,9 +155,8 @@ def steady_state_blob_gas_estimate(state: AztecModelState):
 # so that the scenarios are invariant to number
 L1_SHOCK_AMOUNT = 100  # type: Gwei
 BLOB_SHOCK_AMOUNT = 100  # type: Gwei
-initial_time = floor(0.25 * TIMESTEPS) # XXX: 25% of timesteps
-final_time = floor(0.25 * TIMESTEPS) # XXX: 25% of timesteps
-
+initial_time = floor(0.25 * TIMESTEPS)  # XXX: 25% of timesteps
+final_time = floor(0.25 * TIMESTEPS)  # XXX: 25% of timesteps
 
 
 single_shock_gas_fee_l1_time_series = np.zeros(TIMESTEPS)
@@ -168,8 +168,8 @@ single_shock_gas_fee_l1_time_series[0:initial_time] = steady_gas_fee_l1_time_ser
 single_shock_gas_fee_l1_time_series[-final_time:] = steady_gas_fee_l1_time_series[
     -final_time:
 ].copy()
-single_shock_gas_fee_l1_time_series[initial_time : TIMESTEPS - final_time] = (
-    steady_gas_fee_l1_time_series[initial_time : TIMESTEPS - final_time].copy()
+single_shock_gas_fee_l1_time_series[initial_time: TIMESTEPS - final_time] = (
+    steady_gas_fee_l1_time_series[initial_time: TIMESTEPS - final_time].copy()
     + L1_SHOCK_AMOUNT
 )
 
@@ -179,8 +179,9 @@ single_shock_gas_fee_blob_time_series[0:initial_time] = steady_gas_fee_blob_time
 single_shock_gas_fee_blob_time_series[-final_time:] = steady_gas_fee_blob_time_series[
     -final_time:
 ].copy()
-single_shock_gas_fee_blob_time_series[initial_time : TIMESTEPS - final_time] = (
-    steady_gas_fee_blob_time_series[initial_time : TIMESTEPS - final_time].copy()
+single_shock_gas_fee_blob_time_series[initial_time: TIMESTEPS - final_time] = (
+    steady_gas_fee_blob_time_series[initial_time: TIMESTEPS -
+                                    final_time].copy()
     + L1_SHOCK_AMOUNT
 )
 
@@ -213,8 +214,8 @@ intermit_shock_gas_fee_l1_time_series[0:initial_time] = steady_gas_fee_l1_time_s
 intermit_shock_gas_fee_l1_time_series[-final_time:] = steady_gas_fee_l1_time_series[
     -final_time:
 ].copy()
-intermit_shock_gas_fee_l1_time_series[initial_time : TIMESTEPS - final_time] = (
-    steady_gas_fee_l1_time_series[initial_time : TIMESTEPS - final_time].copy()
+intermit_shock_gas_fee_l1_time_series[initial_time: TIMESTEPS - final_time] = (
+    steady_gas_fee_l1_time_series[initial_time: TIMESTEPS - final_time].copy()
     + L1_INTER_SHOCK_SIGNAL
 )
 
@@ -244,12 +245,13 @@ DEFAULT_DETERMINISTIC_TX_ESTIMATOR = UserTransactionEstimators(
 
 
 DEFAULT_DETERMINISTIC_GAS_ESTIMATOR = L1GasEstimators(
-    proposal=lambda _: 100_000, # type: ignore
-    commitment_bond=lambda _: 100_000, # type: ignore
-    content_reveal=lambda _: 81_000, # type: ignore
-    content_reveal_blob=lambda _: 500_000, # type: ignore
-    rollup_proof=lambda _: 700_000 # type: ignore
+    proposal=lambda _: 100_000,  # type: ignore
+    commitment_bond=lambda _: 100_000,  # type: ignore
+    content_reveal=lambda _: 81_000,  # type: ignore
+    content_reveal_blob=lambda _: 500_000,  # type: ignore
+    rollup_proof=lambda _: 700_000  # type: ignore
 )
+
 
 SINGLE_RUN_PARAMS = AztecModelParams(
     label="default",
@@ -261,26 +263,22 @@ SINGLE_RUN_PARAMS = AztecModelParams(
     daily_block_reward=32,
     # Placeholder Logic
     logic={},
-     # Phase Durations
-     phase_duration_proposal_min_blocks=0, # TODO
-     phase_duration_proposal_max_blocks=10, # TODO
-     phase_duration_reveal_min_blocks = 0, #TODO
-     phase_duration_reveal_max_blocks = 10, # TODO
-     phase_duration_commit_bond_min_blocks = 0, # TODO
-     phase_duration_commit_bond_max_blocks=10, # TODO
-     phase_duration_rollup_min_blocks = 0, # TODO
-     phase_duration_rollup_max_blocks=30, # TODO
-     phase_duration_race_min_blocks = 0, #TODO
-     phase_duration_race_max_blocks=30, # TODO
-  
-                                       stake_activation_period=40, # TODO
-                                     unstake_cooldown_period=40, # TODO
+    # Phase Durations
+    phase_duration_proposal_min_blocks=0,  # TODO
+    phase_duration_proposal_max_blocks=10,  # TODO
+    phase_duration_reveal_min_blocks=0,  # TODO
+    phase_duration_reveal_max_blocks=10,  # TODO
+    phase_duration_commit_bond_min_blocks=0,  # TODO
+    phase_duration_commit_bond_max_blocks=10,  # TODO
+    phase_duration_rollup_min_blocks=0,  # TODO
+    phase_duration_rollup_max_blocks=30,  # TODO
+    phase_duration_race_min_blocks=0,  # TODO
+    phase_duration_race_max_blocks=30,  # TODO
+
+    stake_activation_period=40,  # TODO
+    unstake_cooldown_period=40,  # TODO
     # Behavioral Parameters
-    proposal_probability_per_user_per_block=0.2,  # XXX
-    block_content_reveal_probability=0.2,  # XXX
-    tx_proof_reveal_probability=0.2,  # XXX
-    rollup_proof_reveal_probability=0.2,  # XXX
-    commit_bond_reveal_probability=0.2,  # XXX
+    final_probability=0.99,
     gas_threshold_for_tx=70,  # HACK
     blob_gas_threshold_for_tx=50,  # HACK
     proving_marketplace_usage_probability=0.3,  # XXX

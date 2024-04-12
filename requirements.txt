@@ -4,7 +4,7 @@ pandas>=2.2.1
 pydantic>=1.10.8
 scipy>=1.12.0
 tqdm>=4.66
-cadCAD @ git+https://github.com/cadCAD-org/cadCAD
+cadCAD @ git+https://github.com/danlessa/cadCAD/fix_sticky_initial_state
 plotly
 seaborn
 matplotlib

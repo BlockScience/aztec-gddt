@@ -4,7 +4,7 @@ from enum import IntEnum, Enum, auto
 from math import floor
 import numpy as np
 from pydantic import FiniteFloat
-from pydantic.dataclasses import dataclass, Field
+from pydantic.dataclasses import dataclass
 from typing import Sequence
 # Units
 
@@ -297,24 +297,11 @@ class AztecModelParams(TypedDict):
     unstake_cooldown_period: L1Blocks  # XXX
 
     # Behavioral Parameters
-
     logic: Dict[str, Callable[[Dict], Any]]  # placeholder for general system logic
-
-    # XXX: Refactor to have constantly increasing probability. 
-    proposal_probability_per_user_per_block: Probability = Field(init=False)# type: ignore
-
-    # XXX In reveal phase, lead might not reveal content
-    block_content_reveal_probability: Probability = Field(init=False)# type: ignore
-    # XXX If lead does not reveal tx proofs, Provers can't do their work
-    tx_proof_reveal_probability: Probability = Field(init=False) # type: ignore
-    # XXX If Provers don't send back rollup proof, lead can't submit
-    rollup_proof_reveal_probability: Probability = Field(init=False)# type: ignore
-    # XXX If noone commits to put up a bond for Proving, sequencer loses their privilege and we enter race mode
-    commit_bond_reveal_probability: Probability = Field(init=False)# type: ignore
-
     gas_threshold_for_tx: Gwei
     blob_gas_threshold_for_tx: Gwei
     proving_marketplace_usage_probability: Probability
+    final_probability: Probability
 
     gwei_to_tokens: Tokens
 
@@ -329,18 +316,6 @@ class AztecModelParams(TypedDict):
 
     commit_bond_amount: float
     op_costs: Gwei
-
-
-    def __post_init__(self): # type: ignore
-        FINAL_PROBABILITY = 0.99 #XXX: The final cumulative probability
-        self.proposal_probability_per_user_per_block = FINAL_PROBABILITY/self.phase_duration_proposal_max_blocks# type: ignore
-        self.block_content_reveal_probability = FINAL_PROBABILITY/self.phase_duration_reveal_max_blocks# type: ignore
-        self.rollup_proof_reveal_probability = FINAL_PROBABILITY/self.phase_duration_rollup_max_blocks# type: ignore
-        self.commit_bond_reveal_probability = FINAL_PROBABILITY/self.phase_duration_commit_bond_max_blocks# type: ignore
-
-
-
-
 
 
 

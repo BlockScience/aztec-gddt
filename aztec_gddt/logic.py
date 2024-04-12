@@ -407,7 +407,7 @@ def p_commit_bond(
 
                     # If duration is not expired, do  a trial to see if bond is commited
                     agent_decides_to_reveal_commit_bond = bernoulli_trial(
-                        probability=params["commit_bond_reveal_probability"]
+                        probability=params['final_probability']/params['phase_duration_commit_bond_max_blocks']
                     )
                     gas_fee_l1_acceptable = (
                         state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
@@ -526,7 +526,7 @@ def p_reveal_content(
 
                 agent_expects_profit = payoff_reveal >= 0
                 agent_decides_to_reveal_block_content = bernoulli_trial(
-                    probability=params["block_content_reveal_probability"]
+                    probability=params['final_probability']/params['phase_duration_reveal_max_blocks']
                 )
                 gas_fee_blob_acceptable = (
                     state["gas_fee_blob"] <= params["blob_gas_threshold_for_tx"]
@@ -629,7 +629,7 @@ def p_submit_proof(
 
             else:
                 agent_decides_to_reveal_rollup_proof = bernoulli_trial(
-                    probability=params["rollup_proof_reveal_probability"]
+                    probability=params['final_probability']/params['phase_duration_reveal_max_blocks']
                 )
                 gas_fee_l1_acceptable = (
                     state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
@@ -772,7 +772,7 @@ def s_transactions_new_proposals(
             }
 
             for potential_proposer in potential_proposers:
-                if bernoulli.rvs(params["proposal_probability_per_user_per_block"]):
+                if bernoulli_trial(params['final_probability']/params['phase_duration_proposal_max_blocks']):
 
                     tx_uuid = uuid4()
                     gas: Gas = params["gas_estimators"].proposal(state)
