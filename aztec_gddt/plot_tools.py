@@ -115,7 +115,7 @@ def create_param_impact_dist_plots_by_column(df_to_use: DataFrame,
                             sharex='row', sharey='row',
                             gridspec_kw={'hspace': 0.5, 'wspace': 0.5})
     fig.subplots_adjust(top=0.8)
-    fig.suptitle(f"Impact of {divider_col}")
+    fig.suptitle(f"Impact of {divider_col}", y = 0.95)
 
     for row_num, param in enumerate(param_cols):
         for col_num, divider in enumerate(dividers):
@@ -156,9 +156,9 @@ def create_phase_impact_dist_plots_by_kpi(df_to_use: DataFrame,
     fig, axs = plt.subplots(len(phase_cols), len(kpi_cols),
                             figsize=(fig_width, fig_height),
                             sharex='row', sharey='row',
-                            gridspec_kw={'hspace': 0.5, 'wspace': 0.5})
-    fig.subplots_adjust(top=0.95)
-    fig.suptitle("Phase Impact Plot")
+                            gridspec_kw={'hspace': 0.65, 'wspace': 0.65})
+    fig.subplots_adjust(top=0.89)
+    fig.suptitle("Phase Impact Plot", y = 1.0)
 
     for row_num, param in enumerate(phase_cols):
         for col_num, kpi in enumerate(kpi_cols):
@@ -167,7 +167,8 @@ def create_phase_impact_dist_plots_by_kpi(df_to_use: DataFrame,
                 x=kpi,
                 hue=param,
                 ax=axs[row_num, col_num],
-                palette=custom_palette
+                palette=custom_palette,
+#                common_norm = True
             )
             axs[row_num, col_num].set_title(f"Impact of \n {param} \n on {kpi}",
                                             fontsize=10)
