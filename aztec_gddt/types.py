@@ -69,15 +69,20 @@ class TokenSupply:
     issued: Tokens
 
     @property
-    def user(self):
+    def user(self) -> FiniteFloat:
         return self.circulating + self.staked
+    
+
+    @property
+    def invariant(self) -> FiniteFloat:
+        return (self.staked + self.burnt) + (self.circulating - self.issued)
 
     @staticmethod
     def from_state(state: "AztecModelState") -> "TokenSupply":
         obj = TokenSupply(
-            circulating=sum(a.balance for a in state["agents"].values()),
-            staked=sum(a.staked_amount for a in state["agents"].values()),
-            burnt=state["cumm_burn"],
+            circulating=sum(a.balance for a in state["agents"].values() if a.uuid != "burnt"),
+            staked=sum(a.staked_amount for a in state["agents"].values() if a.uuid != "burnt"),
+            burnt=sum(a.balance for a in state["agents"].values() if a.uuid == "burnt"),
             issued=state["cumm_block_rewards"] + state["cumm_fee_cashback"],
         )
         return obj

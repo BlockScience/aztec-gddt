@@ -804,7 +804,6 @@ def s_transactions_new_proposals(
         new_proposals = dict()
 
     new_transactions = {**new_transactions, **new_proposals}
-
     return ("transactions", new_transactions)
 
 
