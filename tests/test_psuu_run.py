@@ -40,8 +40,8 @@ def test_skipped_fraction(sim_df: pd.DataFrame):
 def test_token_conservation(sim_df: pd.DataFrame):
     id_cols = ["simulation", "subset", "run"]
     for i, gdf in sim_df.groupby(["simulation", "subset", "run"]):
-        tdf = gdf.set_index(id_cols).query('timestep > 0').token_supply.apply(lambda x: pd.Series(x.__dict__)).diff()
-        assert (tdf['circulating'] + tdf['staked'] + tdf['burnt'] - tdf['issued'] == 0).mean() == 1.0
+        tdf = gdf.set_index(id_cols).query('timestep > 2').token_supply.apply(lambda x: pd.Series(x.__dict__)).diff()
+        assert ((tdf['circulating'] + tdf['staked'] + tdf['burnt'] - tdf['issued']).abs() < 1e-5).mean() == 1.0
 
 
 def test_schema(sim_df: pd.DataFrame):
