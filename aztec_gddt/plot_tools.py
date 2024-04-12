@@ -26,7 +26,7 @@ governance_surface_params = [
     'phase_duration_rollup_max_blocks',
     'phase_duration_race_min_blocks',
     'phase_duration_race_max_blocks',
-    'reward_per_block'
+    'daily_block_reward'
 ]
 
 phases = ["proposal", "reveal", "commit_bond", "rollup", "race"]
