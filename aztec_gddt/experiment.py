@@ -176,8 +176,8 @@ def psuu_exploratory_run(N_sweep_samples=-1,
 
                                         logic=[{}],
 
-                                        gas_threshold_for_tx=[50], 
-                                        blob_gas_threshold_for_tx=[50], 
+                                        gas_threshold_for_tx=[50, 175], 
+                                        blob_gas_threshold_for_tx=[50, 175], 
                                         proving_marketplace_usage_probability=[0.0],
                                         
                                         rewards_to_provers=[0.5],
