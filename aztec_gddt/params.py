@@ -61,9 +61,9 @@ INITIAL_AGENTS_DICT: dict[AgentUUID, Agent] = {a.uuid: a for a in INITIAL_AGENTS
 AGENTS_DICT = {**BASE_AGENTS_DICT, **INITIAL_AGENTS_DICT}
 
 
-INITIAL_CUMM_REWARDS = 200  # XXX # type: Tokens
-INITIAL_CUMM_CASHBACK = 50  # XXX # type: Tokens
-INITIAL_CUMM_BURN = 50  # XXX # type: Tokens
+INITIAL_CUMM_REWARDS = 200.0  # XXX # type: Tokens
+INITIAL_CUMM_CASHBACK = 50.0  # XXX # type: Tokens
+INITIAL_CUMM_BURN = 50.0  # XXX # type: Tokens
 
 INITIAL_SUPPLY = TokenSupply(
     circulating=sum(a.balance for a in INITIAL_AGENTS),
