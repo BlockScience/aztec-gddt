@@ -63,7 +63,7 @@ AGENTS_DICT = {**BASE_AGENTS_DICT, **INITIAL_AGENTS_DICT}
 
 
 INITIAL_CUMM_REWARDS = 200.0  # XXX # type: Tokens
-INITIAL_CUMM_CASHBACK = 50.0  # XXX # type: Tokens
+INITIAL_CUMM_CASHBACK = 00.0  # XXX # type: Tokens
 INITIAL_CUMM_BURN = 50.0  # XXX # type: Tokens
 
 INITIAL_SUPPLY = TokenSupply(
@@ -94,7 +94,7 @@ INITIAL_STATE = AztecModelState(
     current_process=None,  # XXX
     transactions=dict(),
     gas_fee_l1=50,  # XXX # type: Gwei
-    gas_fee_blob=7,  # XXX # type: Gwei
+    gas_fee_blob=30,  # XXX # type: Gwei
     finalized_blocks_count=0,
     cumm_block_rewards=INITIAL_CUMM_REWARDS,
     cumm_fee_cashback=INITIAL_CUMM_CASHBACK,
@@ -106,24 +106,24 @@ INITIAL_STATE = AztecModelState(
 ## Begin: Steady state gas estimators defined              ##
 #############################################################
 
-MEAN_STEADY_STATE_L1 = 30  # type: Gwei
-DEVIATION_STEADY_STATE_L1 = 2
-MEAN_STEADY_STATE_BLOB = 15  # type: Gwei
-DEVIATION_STEADY_STATE_BLOB = 2
+MEAN_STEADY_STATE_L1 = 50  # type: Gwei
+DEVIATION_STEADY_STATE_L1 = 5
+MEAN_STEADY_STATE_BLOB = 50  # type: Gwei
+DEVIATION_STEADY_STATE_BLOB = 5
 
 # XXX: Rounding is needed to address the fact that Gas is an integer type.
 steady_gas_fee_l1_time_series = np.array(
     [
-        max(floor(el), 1)
-        for el in rng.standard_normal(TIMESTEPS) * MEAN_STEADY_STATE_L1
-        + DEVIATION_STEADY_STATE_L1
+        max(floor(el), 10)
+        for el in rng.standard_normal(TIMESTEPS) * DEVIATION_STEADY_STATE_L1
+        + MEAN_STEADY_STATE_L1  # DEVIATION_STEADY_STATE_L1
     ]
 )
 steady_gas_fee_blob_time_series = np.array(
     [
-        max(floor(el), 1)
-        for el in rng.standard_normal(TIMESTEPS) * MEAN_STEADY_STATE_BLOB
-        + DEVIATION_STEADY_STATE_BLOB
+        max(floor(el), 50)
+        for el in rng.standard_normal(TIMESTEPS) * DEVIATION_STEADY_STATE_BLOB
+        + MEAN_STEADY_STATE_BLOB
     ]
 )
 
