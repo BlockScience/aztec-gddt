@@ -654,6 +654,7 @@ def p_submit_proof(
                     advance_blocks = remaining_time
                     updated_process.phase = SelectionPhase.finalized
                     updated_process.duration_in_current_phase = 0
+                    transactions = state["transactions"]
                     commit_bond_id = updated_process.tx_commitment_bond
                     commit_bond: CommitmentBond = transactions.get(
                     commit_bond_id, None)  # type: ignore
