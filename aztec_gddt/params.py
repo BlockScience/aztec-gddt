@@ -107,9 +107,9 @@ INITIAL_STATE = AztecModelState(
 #############################################################
 
 MEAN_STEADY_STATE_L1 = 50  # type: Gwei
-DEVIATION_STEADY_STATE_L1 = 15
+DEVIATION_STEADY_STATE_L1 = 5
 MEAN_STEADY_STATE_BLOB = 30  # type: Gwei
-DEVIATION_STEADY_STATE_BLOB = 15
+DEVIATION_STEADY_STATE_BLOB = 5
 
 # XXX: Rounding is needed to address the fact that Gas is an integer type.
 steady_gas_fee_l1_time_series = np.array(
