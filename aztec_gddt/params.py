@@ -107,9 +107,9 @@ INITIAL_STATE = AztecModelState(
 #############################################################
 
 MEAN_STEADY_STATE_L1 = 50  # type: Gwei
-DEVIATION_STEADY_STATE_L1 = 5
-MEAN_STEADY_STATE_BLOB = 50  # type: Gwei
-DEVIATION_STEADY_STATE_BLOB = 5
+DEVIATION_STEADY_STATE_L1 = 15
+MEAN_STEADY_STATE_BLOB = 30  # type: Gwei
+DEVIATION_STEADY_STATE_BLOB = 15
 
 # XXX: Rounding is needed to address the fact that Gas is an integer type.
 steady_gas_fee_l1_time_series = np.array(
@@ -121,7 +121,7 @@ steady_gas_fee_l1_time_series = np.array(
 )
 steady_gas_fee_blob_time_series = np.array(
     [
-        max(floor(el), 50)
+        max(floor(el), 10)
         for el in rng.standard_normal(TIMESTEPS) * DEVIATION_STEADY_STATE_BLOB
         + MEAN_STEADY_STATE_BLOB
     ]
@@ -153,8 +153,8 @@ def steady_state_blob_gas_estimate(state: AztecModelState):
 
 # NOTE: ideally, this should be mapped either to relative timesteps or L1 time rather than fixed timesteps
 # so that the scenarios are invariant to number
-L1_SHOCK_AMOUNT = 100  # type: Gwei
-BLOB_SHOCK_AMOUNT = 100  # type: Gwei
+L1_SHOCK_AMOUNT = 150  # type: Gwei
+BLOB_SHOCK_AMOUNT = 150  # type: Gwei
 initial_time = floor(0.25 * TIMESTEPS)  # XXX: 25% of timesteps
 final_time = floor(0.25 * TIMESTEPS)  # XXX: 25% of timesteps
 
@@ -279,9 +279,9 @@ SINGLE_RUN_PARAMS = AztecModelParams(
     unstake_cooldown_period=40,  # TODO
     # Behavioral Parameters
     final_probability=0.99,
-    gas_threshold_for_tx=70,  # HACK
-    blob_gas_threshold_for_tx=50,  # HACK
-    proving_marketplace_usage_probability=0.3,  # XXX
+    gas_threshold_for_tx=220,  # HACK
+    blob_gas_threshold_for_tx=220,  # HACK
+    proving_marketplace_usage_probability=0.7,  # XXX
     rewards_to_provers=0.3,  # XXX
     rewards_to_relay=0.01,  # XXX
     gwei_to_tokens=1e-9,
@@ -290,6 +290,7 @@ SINGLE_RUN_PARAMS = AztecModelParams(
     slash_params=SLASH_PARAMS,
     gas_fee_l1_time_series=GAS_FEE_L1_TIME_SERIES_LIST[-1],
     gas_fee_blob_time_series=GAS_FEE_BLOB_TIME_SERIES_LIST[-1],
-    commit_bond_amount=10.0,  # type: Tokens
+    commit_bond_amount=16.0,  # type: Tokens
     op_costs=0,  # XXX  # type: Tokens
+    MEAN_STEADY_STATE_L1 = MEAN_STEADY_STATE_L1,
 )
