@@ -102,6 +102,8 @@ INITIAL_STATE = AztecModelState(
     token_supply=INITIAL_SUPPLY,
 )
 
+INITIAL_STATE['token_supply'] = TokenSupply.from_state(INITIAL_STATE)
+
 #############################################################
 ## Begin: Steady state gas estimators defined              ##
 #############################################################

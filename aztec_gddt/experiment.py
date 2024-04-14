@@ -150,6 +150,7 @@ def psuu_exploratory_run(N_sweep_samples=-1,
 
     initial_state = INITIAL_STATE.copy()
     initial_state['agents'] = Sqn3Prv3
+    initial_state['token_supply'] = TokenSupply.from_state(initial_state)
 
     sweep_params = {k: [v] for k, v in SINGLE_RUN_PARAMS.items()}
 
