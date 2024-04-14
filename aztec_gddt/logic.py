@@ -10,6 +10,8 @@ from scipy.stats import bernoulli, uniform, norm  # type: ignore
 from random import random
 import pickle
 
+from aztec_gddt.types import Agent
+
 
 def generic_policy(_1, _2, _3, _4) -> dict:
     """
@@ -384,7 +386,7 @@ def p_commit_bond(
                         source=updated_process.leading_sequencer,
                         destination="burnt",
                         amount=slashed_amount,
-                        kind=TransferKind.slash,
+                        kind=TransferKind.slash_sequencer,
                         to_sequencer=True,
                     )
                 )
@@ -423,13 +425,8 @@ def p_commit_bond(
                     )
                     if agent_decides_to_reveal_commit_bond and gas_fee_l1_acceptable:
                         updated_process = copy(process)
-                        # TODO: double-check this.
-                        advance_blocks = remaining_time
-                        updated_process.phase = SelectionPhase.pending_reveal
-                        updated_process.duration_in_current_phase = 0
-
-                        proposal_uuid = updated_process.tx_winning_proposal
-
+                        lead_seq: Agent = state['agents'][process.leading_sequencer]
+                        proposal_uuid = process.tx_winning_proposal
                         proving_market_is_used = bernoulli_trial(
                             params["proving_marketplace_usage_probability"]
                         )
@@ -440,23 +437,39 @@ def p_commit_bond(
                                 if a.is_prover and a.balance >= bond_amount
                             ]
                             # XXX: relays are going to be uniformly sampled
-                            prover: AgentUUID = choice(provers)
 
+                            if len(provers) > 0:
+                                prover: AgentUUID = choice(provers)
+                            else: 
+                                if (lead_seq.balance >= bond_amount):
+                                    prover = updated_process.leading_sequencer
+                                else:
+                                    prover = None
                         else:
-                            prover = updated_process.leading_sequencer
+                            if (lead_seq.balance >= bond_amount):
+                                prover = updated_process.leading_sequencer
+                            else:
+                                prover = None
 
-                        tx = CommitmentBond(
-                            who=prover,
-                            when=state["time_l1"],
-                            uuid=uuid4(),
-                            gas=gas,
-                            fee=fee,
-                            proposal_tx_uuid=proposal_uuid,
-                            prover_uuid=prover,
-                            bond_amount=bond_amount,
-                        )
-                        new_transactions.append(tx)
-                        updated_process.tx_commitment_bond = tx.uuid
+                        if prover is not None:
+                            # TODO: double-check this.
+                            advance_blocks = remaining_time
+                            updated_process.phase = SelectionPhase.pending_reveal
+                            updated_process.duration_in_current_phase = 0
+                            tx = CommitmentBond(
+                                who=prover,
+                                when=state["time_l1"],
+                                uuid=uuid4(),
+                                gas=gas,
+                                fee=fee,
+                                proposal_tx_uuid=proposal_uuid,
+                                prover_uuid=prover,
+                                bond_amount=bond_amount,
+                            )
+                            new_transactions.append(tx)
+                            updated_process.tx_commitment_bond = tx.uuid
+                        else:
+                            pass
                     else:
                         # Force Race Mode by doing nothing
                         pass
@@ -512,7 +525,7 @@ def p_reveal_content(
                         source=updated_process.leading_sequencer,
                         destination="burnt",
                         amount=slashed_amount,
-                        kind=TransferKind.slash,
+                        kind=TransferKind.slash_sequencer,
                         to_sequencer=True,
                     )
                 )
@@ -640,7 +653,7 @@ def p_submit_proof(
                     source=who_to_slash,
                     destination="burnt",
                     amount=how_much_to_slash,
-                    kind=TransferKind.slash,
+                    kind=TransferKind.slash_prover,
                     to_prover=True,
                 )
                 transfers.append(slash_transfer)
@@ -897,7 +910,7 @@ def s_slashes_to_prover(
         [
             transfer
             for transfer in transfers
-            if (transfer.kind == TransferKind.slash) and (transfer.to_prover == True)
+            if (transfer.kind == TransferKind.slash_prover) and (transfer.to_prover == True)
         ]
     )
 
@@ -924,7 +937,7 @@ def s_slashes_to_sequencer(
         [
             transfer
             for transfer in transfers
-            if transfer.kind == TransferKind.slash and transfer.to_sequencer
+            if transfer.kind == TransferKind.slash_sequencer and transfer.to_sequencer
         ]
     )
 
@@ -950,9 +963,14 @@ def s_agent_transfer(
         if transfer.kind == TransferKind.conventional:
             updated_agents[transfer.source].balance -= transfer.amount
             updated_agents[transfer.destination].balance += transfer.amount
-        elif transfer.kind == TransferKind.slash:
+        elif transfer.kind == TransferKind.slash_sequencer:
             updated_agents[transfer.source].staked_amount -= transfer.amount
             updated_agents[transfer.destination].balance += transfer.amount
+        elif transfer.kind == TransferKind.slash_prover:
+            updated_agents[transfer.source].balance -= transfer.amount
+            updated_agents[transfer.destination].balance += transfer.amount
+        else:
+            raise Exception(f'Transfer logic is undefined for {transfer.kind}')
 
     return ("agents", updated_agents)
 
