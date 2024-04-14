@@ -153,46 +153,27 @@ def psuu_exploratory_run(N_sweep_samples=-1,
 
     sweep_params = {k: [v] for k, v in SINGLE_RUN_PARAMS.items()}
 
-    sweep_params_upd: dict[str, list] = dict(label=['default'],
-                                        timestep_in_blocks=[1],
-
-                                        uncle_count=[0], 
-                                        fee_subsidy_fraction=[1.0], 
-
-                                        # Phase Durations
-                                        phase_duration_proposal_min_blocks=[0, 3],# HACK: consider alternate values
+    sweep_params_upd: dict[str, list] = dict( 
+                                    # Phase Durations
+                                        phase_duration_proposal_min_blocks=[0, 3],
                                         phase_duration_proposal_max_blocks=[3, 12], 
-                                        phase_duration_reveal_min_blocks = [0, 3],# HACK: consider alternate values
+                                        phase_duration_reveal_min_blocks = [0, 3],
                                         phase_duration_reveal_max_blocks = [3, 24], 
-                                        phase_duration_commit_bond_min_blocks = [0, 3], # HACK: consider alternate values
+                                        phase_duration_commit_bond_min_blocks = [0, 3],
                                         phase_duration_commit_bond_max_blocks=[3, 12], 
-                                        phase_duration_rollup_min_blocks = [0, 3], # HACK: consider alternate values
+                                        phase_duration_rollup_min_blocks = [0, 3],
                                         phase_duration_rollup_max_blocks=[15, 80],
-                                        phase_duration_race_min_blocks = [0, 3], # HACK: consider alternate values 
+                                        phase_duration_race_min_blocks = [0, 3],
                                         phase_duration_race_max_blocks=[3, 6], 
-
-                                        stake_activation_period=[40], 
-                                        unstake_cooldown_period=[40], 
-
-                                        logic=[{}],
-
-                                        gas_threshold_for_tx=[50, 175], 
-                                        blob_gas_threshold_for_tx=[50, 175], 
-                                        proving_marketplace_usage_probability=[0.0],
-                                        
-                                        rewards_to_provers=[0.5],
-                                        rewards_to_relay=[0.0],
-
-                                        gwei_to_tokens=[1e-9], 
+                                    
+                                        rewards_to_provers=[0.3, 0.5],
+                                        rewards_to_relay=[0.0, 0.01],
 
                                         gas_estimators=[DEFAULT_DETERMINISTIC_GAS_ESTIMATOR],
                                         tx_estimators=[DEFAULT_DETERMINISTIC_TX_ESTIMATOR],
                                         slash_params=[SLASH_PARAMS],
                                         gas_fee_l1_time_series=GAS_FEE_L1_TIME_SERIES_LIST,
                                         gas_fee_blob_time_series=GAS_FEE_BLOB_TIME_SERIES_LIST,
-
-                                        commit_bond_amount = [10.0], # HACK: consider alternate values
-                                        op_cost_sequencer=[0.0] # XXX
                                         )  
     
     sweep_params = {**sweep_params, **sweep_params_upd} # type: ignore

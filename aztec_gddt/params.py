@@ -279,11 +279,13 @@ SINGLE_RUN_PARAMS = AztecModelParams(
     unstake_cooldown_period=40,  # TODO
     # Behavioral Parameters
     final_probability=0.99,
-    gas_threshold_for_tx=220,  # HACK
-    blob_gas_threshold_for_tx=220,  # HACK
+    gas_threshold_for_tx=250,  # HACK
+    blob_gas_threshold_for_tx=250,  # HACK
     proving_marketplace_usage_probability=0.7,  # XXX
+    
     rewards_to_provers=0.3,  # XXX
     rewards_to_relay=0.01,  # XXX
+
     gwei_to_tokens=1e-9,
     gas_estimators=DEFAULT_DETERMINISTIC_GAS_ESTIMATOR,
     tx_estimators=DEFAULT_DETERMINISTIC_TX_ESTIMATOR,
@@ -293,4 +295,7 @@ SINGLE_RUN_PARAMS = AztecModelParams(
     commit_bond_amount=16.0,  # type: Tokens
     op_cost_sequencer=0,  # XXX  # type: Tokens
     op_cost_prover=0, # XXX
+    safety_factor_commit_bond = 0.0,
+    safety_factor_reveal_content = 0.0,
+    safety_factor_rollup_proof = 0.0
 )

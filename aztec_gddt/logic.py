@@ -392,7 +392,7 @@ def p_commit_bond(
                 # NOTE: Costs now include gas fees and safety buffer.
                 gas: Gas = params["gas_estimators"].commitment_bond(state)
                 fee = gas * state["gas_fee_l1"]
-                SAFETY_BUFFER = 2 * fee  # XXX
+                SAFETY_BUFFER = params['safety_factor_commit_bond'] * fee  # XXX
 
                 # expected_rewards = (
                 #    state["cumm_block_rewards"] - history[-1][0]["cumm_block_rewards"]
@@ -407,9 +407,7 @@ def p_commit_bond(
                 expected_costs: float = params["op_cost_sequencer"] 
                 expected_costs += fee 
                 expected_costs += SAFETY_BUFFER
-
-                # Translate to ETH
-                expected_costs = expected_costs * 1e-9
+                expected_costs *= params['gwei_to_tokens']
 
                 payoff_reveal = expected_rewards - expected_costs
 
@@ -522,7 +520,7 @@ def p_reveal_content(
                 # NOTE: Costs now include gas fees and safety buffer.
                 gas: Gas = params["gas_estimators"].content_reveal(state)
                 fee = gas * state["gas_fee_l1"]
-                SAFETY_BUFFER = 2 * fee  # HACK:
+                SAFETY_BUFFER = params['safety_factor_reveal_content'] * fee  # HACK:
                 # XXX: Expected Rewards is the rewards over the last timestep.
                 # expected_rewards = (
                 #    state["cumm_block_rewards"] - history[-1][0]["cumm_block_rewards"]
@@ -537,7 +535,7 @@ def p_reveal_content(
                 expected_costs: float = params["op_cost_sequencer"] 
                 expected_costs += fee 
                 expected_costs += SAFETY_BUFFER
-
+                expected_costs *= params['gwei_to_tokens']
 
                 payoff_reveal = expected_rewards - expected_costs
 
@@ -650,7 +648,7 @@ def p_submit_proof(
             else:
                 gas: Gas = params["gas_estimators"].content_reveal(state)
                 fee = gas * state["gas_fee_l1"]
-                SAFETY_BUFFER = 2 * fee  # XXX
+                SAFETY_BUFFER = params['safety_factor_rollup_proof'] * fee  # XXX
                 expected_l2_blocks_per_day = params['l1_blocks_per_day'] / max_phase_duration(params)
 
 
@@ -661,6 +659,7 @@ def p_submit_proof(
                 expected_costs: float = params["op_cost_prover"] 
                 expected_costs += fee 
                 expected_costs += SAFETY_BUFFER
+                expected_costs *= params['gwei_to_tokens']
 
 
                 payoff_reveal = expected_rewards - expected_costs

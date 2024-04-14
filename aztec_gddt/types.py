@@ -324,6 +324,11 @@ class AztecModelParams(TypedDict):
     op_cost_prover: Gwei
 
 
+    safety_factor_commit_bond: float
+    safety_factor_reveal_content: float
+    safety_factor_rollup_proof: float
+
+
 
 
 class SignalTime(TypedDict, total=False):
