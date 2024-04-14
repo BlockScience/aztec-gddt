@@ -320,7 +320,8 @@ class AztecModelParams(TypedDict):
     gas_fee_blob_time_series: np.ndarray
 
     commit_bond_amount: float
-    op_costs: Gwei
+    op_cost_sequencer: Gwei
+    op_cost_prover: Gwei
 
 
 
