@@ -291,5 +291,6 @@ SINGLE_RUN_PARAMS = AztecModelParams(
     gas_fee_l1_time_series=GAS_FEE_L1_TIME_SERIES_LIST[-1],
     gas_fee_blob_time_series=GAS_FEE_BLOB_TIME_SERIES_LIST[-1],
     commit_bond_amount=10.0,  # type: Tokens
-    op_costs=0,  # XXX  # type: Tokens
+    op_cost_sequencer=0,  # XXX  # type: Tokens
+    op_cost_prover=0, # XXX
 )

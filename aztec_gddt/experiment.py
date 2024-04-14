@@ -124,7 +124,7 @@ def psuu_exploratory_run(N_sweep_samples=-1,
     # Relay Agent
     Sqn3Prv3_agents = []
 
-    assign_params = {'stake_activation_period', 'phase_duration_commit_bond_min_blocks', 'gas_threshold_for_tx', 'op_costs', 'proving_marketplace_usage_probability', 'gas_fee_l1_time_series', 'phase_duration_reveal_min_blocks', 'gwei_to_tokens', 'slash_params', 'gas_fee_blob_time_series', 'phase_duration_proposal_max_blocks', 'rewards_to_relay', 'phase_duration_rollup_max_blocks', 'phase_duration_rollup_min_blocks', 'phase_duration_reveal_max_blocks', 'fee_subsidy_fraction', 'phase_duration_race_min_blocks', 'timestep_in_blocks', 'rewards_to_provers', 'label', 'daily_block_reward', 'blob_gas_threshold_for_tx', 'phase_duration_race_max_blocks', 'unstake_cooldown_period', 'phase_duration_commit_bond_max_blocks', 'commit_bond_amount', 'uncle_count', 'phase_duration_proposal_min_blocks', 'final_probability'}
+    assign_params = {'stake_activation_period', 'phase_duration_commit_bond_min_blocks', 'gas_threshold_for_tx', 'proving_marketplace_usage_probability', 'gas_fee_l1_time_series', 'phase_duration_reveal_min_blocks', 'gwei_to_tokens', 'slash_params', 'gas_fee_blob_time_series', 'phase_duration_proposal_max_blocks', 'rewards_to_relay', 'phase_duration_rollup_max_blocks', 'phase_duration_rollup_min_blocks', 'phase_duration_reveal_max_blocks', 'fee_subsidy_fraction', 'phase_duration_race_min_blocks', 'timestep_in_blocks', 'rewards_to_provers', 'label', 'daily_block_reward', 'blob_gas_threshold_for_tx', 'phase_duration_race_max_blocks', 'unstake_cooldown_period', 'phase_duration_commit_bond_max_blocks', 'commit_bond_amount', 'uncle_count', 'phase_duration_proposal_min_blocks', 'final_probability', 'op_cost_sequencer', 'op_cost_prover'}
 
     for _ in range(N_sequencer):
         a = Agent(uuid=uuid4(),
@@ -192,7 +192,7 @@ def psuu_exploratory_run(N_sweep_samples=-1,
                                         gas_fee_blob_time_series=GAS_FEE_BLOB_TIME_SERIES_LIST,
 
                                         commit_bond_amount = [10.0], # HACK: consider alternate values
-                                        op_costs=[0.0] # XXX
+                                        op_cost_sequencer=[0.0] # XXX
                                         )  
     
     sweep_params = {**sweep_params, **sweep_params_upd} # type: ignore

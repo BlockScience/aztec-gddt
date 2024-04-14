@@ -392,17 +392,21 @@ def p_commit_bond(
                 # NOTE: Costs now include gas fees and safety buffer.
                 gas: Gas = params["gas_estimators"].commitment_bond(state)
                 fee = gas * state["gas_fee_l1"]
-                SAFETY_BUFFER = 2 * fee  # HACK:
+                SAFETY_BUFFER = 2 * fee  # XXX
 
                 # expected_rewards = (
                 #    state["cumm_block_rewards"] - history[-1][0]["cumm_block_rewards"]
                 # )
                 expected_l2_blocks_per_day = params['l1_blocks_per_day'] / \
                     max_phase_duration(params)
-                expected_rewards = params['daily_block_reward'] / \
-                    expected_l2_blocks_per_day
-                expected_costs: float = params["op_costs"] + \
-                    fee + SAFETY_BUFFER
+                
+                expected_rewards = params['daily_block_reward']
+                expected_rewards *= rewards_to_sequencer(params)
+                expected_rewards /= expected_l2_blocks_per_day
+
+                expected_costs: float = params["op_cost_sequencer"] 
+                expected_costs += fee 
+                expected_costs += SAFETY_BUFFER
 
                 # Translate to ETH
                 expected_costs = expected_costs * 1e-9
@@ -525,13 +529,15 @@ def p_reveal_content(
                 # )
                 expected_l2_blocks_per_day = params['l1_blocks_per_day'] / \
                     max_phase_duration(params)
-                expected_rewards = params['daily_block_reward'] / \
-                    expected_l2_blocks_per_day
+                
+                expected_rewards = params['daily_block_reward']
+                expected_rewards *= rewards_to_sequencer(params)
+                expected_rewards /= expected_l2_blocks_per_day
 
-                expected_costs: float = params["op_costs"] + \
-                    fee + SAFETY_BUFFER
-                # Convert to ETH
-                expected_costs = expected_costs * 1e-9
+                expected_costs: float = params["op_cost_sequencer"] 
+                expected_costs += fee 
+                expected_costs += SAFETY_BUFFER
+
 
                 payoff_reveal = expected_rewards - expected_costs
 
@@ -611,13 +617,13 @@ def p_submit_proof(
     advance_blocks = 0
     transfers: list[Transfer] = []
 
-    max_phase_duration = params["phase_duration_rollup_max_blocks"]
+    phase_max_duration = params["phase_duration_rollup_max_blocks"]
 
     if process is None:
         pass
     else:
         if process.phase == SelectionPhase.pending_rollup_proof:
-            remaining_time = max_phase_duration - process.duration_in_current_phase
+            remaining_time = phase_max_duration - process.duration_in_current_phase
             if remaining_time < 0:
                 updated_process = copy(process)
                 updated_process.phase = SelectionPhase.skipped
@@ -642,6 +648,25 @@ def p_submit_proof(
                 transfers.append(slash_transfer)
 
             else:
+                gas: Gas = params["gas_estimators"].content_reveal(state)
+                fee = gas * state["gas_fee_l1"]
+                SAFETY_BUFFER = 2 * fee  # XXX
+                expected_l2_blocks_per_day = params['l1_blocks_per_day'] / max_phase_duration(params)
+
+
+                expected_rewards = params['daily_block_reward']
+                expected_rewards *= params['rewards_to_provers']
+                expected_rewards /= expected_l2_blocks_per_day
+
+                expected_costs: float = params["op_cost_prover"] 
+                expected_costs += fee 
+                expected_costs += SAFETY_BUFFER
+
+
+                payoff_reveal = expected_rewards - expected_costs
+
+                agent_expects_profit = payoff_reveal >= 0
+
                 agent_decides_to_reveal_rollup_proof = bernoulli_trial(
                     probability=params['final_probability'] /
                     params['phase_duration_reveal_max_blocks']
@@ -649,7 +674,7 @@ def p_submit_proof(
                 gas_fee_l1_acceptable = (
                     state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
                 )
-                if agent_decides_to_reveal_rollup_proof and gas_fee_l1_acceptable:
+                if agent_decides_to_reveal_rollup_proof and gas_fee_l1_acceptable and agent_expects_profit:
                     updated_process = copy(process)
                     advance_blocks = remaining_time
                     updated_process.phase = SelectionPhase.finalized

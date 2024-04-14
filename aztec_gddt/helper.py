@@ -49,3 +49,9 @@ def max_phase_duration(p: AztecModelParams) -> L1Blocks:
             p['phase_duration_reveal_max_blocks'] + 
             p['phase_duration_commit_bond_max_blocks'] + 
             p['phase_duration_rollup_max_blocks'])
+
+
+
+
+def rewards_to_sequencer(p: AztecModelParams) -> Percentage:
+    return (1 - p['rewards_to_provers'] - p['rewards_to_relay'])
