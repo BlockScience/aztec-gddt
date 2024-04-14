@@ -112,8 +112,8 @@ def psuu_exploratory_run(N_sweep_samples=-1,
                          supress_cadCAD_print=False,
                          output_path = '',
                          timestep_tensor_prefix='',
-                         N_sequencer=3,
-                         N_prover=3) -> Optional[DataFrame]:
+                         N_sequencer=10,
+                         N_prover=10) -> Optional[DataFrame]:
     """Function which runs the cadCAD simulations
 
     Returns:
@@ -136,11 +136,11 @@ def psuu_exploratory_run(N_sweep_samples=-1,
         Sqn3Prv3_agents.append(a)
     for _ in range(N_prover):
         a = Agent(uuid=uuid4(),
-                                     balance=max(norm.rvs(50, 20), 1),
+                                     balance=max(norm.rvs(160, 10), 16),
                                      is_sequencer=False,
                                      is_prover=True,
                                      is_relay=False,
-                                     staked_amount=32)
+                                     staked_amount=0.0)
         Sqn3Prv3_agents.append(a)
 
     

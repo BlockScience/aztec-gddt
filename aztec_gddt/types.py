@@ -339,7 +339,8 @@ class SignalTime(TypedDict, total=False):
 
 class TransferKind(Enum):
     conventional = auto()
-    slash = auto()
+    slash_sequencer = auto()
+    slash_prover = auto()
 
 
 class Transfer(NamedTuple):
