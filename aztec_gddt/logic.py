@@ -10,7 +10,6 @@ from scipy.stats import bernoulli, uniform, norm  # type: ignore
 from random import random
 import pickle
 
-
 def generic_policy(_1, _2, _3, _4) -> dict:
     """
     Function to generate pass through policy
@@ -201,18 +200,23 @@ def value_from_param_timeseries_suf(
         value = time_series[state["timestep"]]
     else:
         value = time_series[-1]
-
-    return (var_value, value)
-
-
-def s_gas_fee_l1(p, _2, _3, s, _5): return value_from_param_timeseries_suf(
-    p, s, "gas_fee_l1_time_series", "gas_fee_l1"
-)
+    return value
 
 
-def s_gas_fee_blob(p, _2, _3, s, _5): return value_from_param_timeseries_suf(
-    p, s, "gas_fee_blob_time_series", "gas_fee_blob"
-)
+def s_gas_fee_l1(p: AztecModelParams, _2, _3, s, _5): 
+    key = "gas_fee_l1"
+    random_value =  value_from_param_timeseries_suf(p, s, "gas_fee_blob_time_series", key)
+    past_value = s[key]
+    value = round(p['past_gas_weight_fraction'] * past_value + (1 - p['past_gas_weight_fraction']) * random_value)
+    return (key, value)
+
+
+def s_gas_fee_blob(p: AztecModelParams, _2, _3, s, _5): 
+    key = "gas_fee_blob"
+    random_value =  value_from_param_timeseries_suf(p, s, "gas_fee_blob_time_series", key)
+    past_value = s[key]
+    value = round(p['past_gas_weight_fraction'] * past_value + (1 - p['past_gas_weight_fraction']) * random_value)
+    return (key, value)
 
 
 def p_init_process(

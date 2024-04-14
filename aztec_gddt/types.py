@@ -328,6 +328,8 @@ class AztecModelParams(TypedDict):
     safety_factor_reveal_content: float
     safety_factor_rollup_proof: float
 
+    past_gas_weight_fraction: Percentage
+
 
 
 

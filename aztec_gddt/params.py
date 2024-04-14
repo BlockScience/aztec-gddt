@@ -297,5 +297,6 @@ SINGLE_RUN_PARAMS = AztecModelParams(
     op_cost_prover=0, # XXX
     safety_factor_commit_bond = 0.0,
     safety_factor_reveal_content = 0.0,
-    safety_factor_rollup_proof = 0.0
+    safety_factor_rollup_proof = 0.0,
+    past_gas_weight_fraction = 0.9
 )
