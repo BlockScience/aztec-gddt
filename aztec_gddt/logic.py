@@ -10,6 +10,8 @@ from scipy.stats import bernoulli, uniform, norm  # type: ignore
 from random import random
 import pickle
 
+from aztec_gddt.types import Agent
+
 
 def generic_policy(_1, _2, _3, _4) -> dict:
     """
@@ -384,7 +386,7 @@ def p_commit_bond(
                         source=updated_process.leading_sequencer,
                         destination="burnt",
                         amount=slashed_amount,
-                        kind=TransferKind.slash,
+                        kind=TransferKind.slash_sequencer,
                         to_sequencer=True,
                     )
                 )
@@ -392,20 +394,21 @@ def p_commit_bond(
                 # NOTE: Costs now include gas fees and safety buffer.
                 gas: Gas = params["gas_estimators"].commitment_bond(state)
                 fee = gas * state["gas_fee_l1"]
-                SAFETY_BUFFER = params['safety_factor_commit_bond'] * fee  # XXX
+                # XXX
+                SAFETY_BUFFER = params['safety_factor_commit_bond'] * fee
 
                 # expected_rewards = (
                 #    state["cumm_block_rewards"] - history[-1][0]["cumm_block_rewards"]
                 # )
                 expected_l2_blocks_per_day = params['l1_blocks_per_day'] / \
                     max_phase_duration(params)
-                
+
                 expected_rewards = params['daily_block_reward']
                 expected_rewards *= rewards_to_sequencer(params)
                 expected_rewards /= expected_l2_blocks_per_day
 
-                expected_costs: float = params["op_cost_sequencer"] 
-                expected_costs += fee 
+                expected_costs: float = params["op_cost_sequencer"]
+                expected_costs += fee
                 expected_costs += SAFETY_BUFFER
                 expected_costs *= params['gwei_to_tokens']
 
@@ -415,21 +418,16 @@ def p_commit_bond(
 
                     # If duration is not expired, do  a trial to see if bond is commited
                     agent_decides_to_reveal_commit_bond = bernoulli_trial(
-                        probability=params['final_probability'] /
-                        params['phase_duration_commit_bond_max_blocks']
+                        probability=trial_probability(params['phase_duration_commit_bond_max_blocks'],
+                                                      params['final_probability'])
                     )
                     gas_fee_l1_acceptable = (
                         state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
                     )
                     if agent_decides_to_reveal_commit_bond and gas_fee_l1_acceptable:
                         updated_process = copy(process)
-                        # TODO: double-check this.
-                        advance_blocks = remaining_time
-                        updated_process.phase = SelectionPhase.pending_reveal
-                        updated_process.duration_in_current_phase = 0
-
-                        proposal_uuid = updated_process.tx_winning_proposal
-
+                        lead_seq: Agent = state['agents'][process.leading_sequencer]
+                        proposal_uuid = process.tx_winning_proposal
                         proving_market_is_used = bernoulli_trial(
                             params["proving_marketplace_usage_probability"]
                         )
@@ -440,23 +438,39 @@ def p_commit_bond(
                                 if a.is_prover and a.balance >= bond_amount
                             ]
                             # XXX: relays are going to be uniformly sampled
-                            prover: AgentUUID = choice(provers)
 
+                            if len(provers) > 0:
+                                prover: AgentUUID = choice(provers)
+                            else:
+                                if (lead_seq.balance >= bond_amount):
+                                    prover = updated_process.leading_sequencer
+                                else:
+                                    prover = None
                         else:
-                            prover = updated_process.leading_sequencer
+                            if (lead_seq.balance >= bond_amount):
+                                prover = updated_process.leading_sequencer
+                            else:
+                                prover = None
 
-                        tx = CommitmentBond(
-                            who=prover,
-                            when=state["time_l1"],
-                            uuid=uuid4(),
-                            gas=gas,
-                            fee=fee,
-                            proposal_tx_uuid=proposal_uuid,
-                            prover_uuid=prover,
-                            bond_amount=bond_amount,
-                        )
-                        new_transactions.append(tx)
-                        updated_process.tx_commitment_bond = tx.uuid
+                        if prover is not None:
+                            # TODO: double-check this.
+                            advance_blocks = remaining_time
+                            updated_process.phase = SelectionPhase.pending_reveal
+                            updated_process.duration_in_current_phase = 0
+                            tx = CommitmentBond(
+                                who=prover,
+                                when=state["time_l1"],
+                                uuid=uuid4(),
+                                gas=gas,
+                                fee=fee,
+                                proposal_tx_uuid=proposal_uuid,
+                                prover_uuid=prover,
+                                bond_amount=bond_amount,
+                            )
+                            new_transactions.append(tx)
+                            updated_process.tx_commitment_bond = tx.uuid
+                        else:
+                            pass
                     else:
                         # Force Race Mode by doing nothing
                         pass
@@ -512,7 +526,7 @@ def p_reveal_content(
                         source=updated_process.leading_sequencer,
                         destination="burnt",
                         amount=slashed_amount,
-                        kind=TransferKind.slash,
+                        kind=TransferKind.slash_sequencer,
                         to_sequencer=True,
                     )
                 )
@@ -520,20 +534,21 @@ def p_reveal_content(
                 # NOTE: Costs now include gas fees and safety buffer.
                 gas: Gas = params["gas_estimators"].content_reveal(state)
                 fee = gas * state["gas_fee_l1"]
-                SAFETY_BUFFER = params['safety_factor_reveal_content'] * fee  # HACK:
+                # HACK:
+                SAFETY_BUFFER = params['safety_factor_reveal_content'] * fee
                 # XXX: Expected Rewards is the rewards over the last timestep.
                 # expected_rewards = (
                 #    state["cumm_block_rewards"] - history[-1][0]["cumm_block_rewards"]
                 # )
                 expected_l2_blocks_per_day = params['l1_blocks_per_day'] / \
                     max_phase_duration(params)
-                
+
                 expected_rewards = params['daily_block_reward']
                 expected_rewards *= rewards_to_sequencer(params)
                 expected_rewards /= expected_l2_blocks_per_day
 
-                expected_costs: float = params["op_cost_sequencer"] 
-                expected_costs += fee 
+                expected_costs: float = params["op_cost_sequencer"]
+                expected_costs += fee
                 expected_costs += SAFETY_BUFFER
                 expected_costs *= params['gwei_to_tokens']
 
@@ -541,8 +556,8 @@ def p_reveal_content(
 
                 agent_expects_profit = payoff_reveal >= 0
                 agent_decides_to_reveal_block_content = bernoulli_trial(
-                    probability=params['final_probability'] /
-                    params['phase_duration_reveal_max_blocks']
+                    probability=trial_probability(params['phase_duration_reveal_max_blocks'],
+                                                  params['final_probability'])
                 )
                 gas_fee_blob_acceptable = (
                     state["gas_fee_blob"] <= params["blob_gas_threshold_for_tx"]
@@ -640,7 +655,7 @@ def p_submit_proof(
                     source=who_to_slash,
                     destination="burnt",
                     amount=how_much_to_slash,
-                    kind=TransferKind.slash,
+                    kind=TransferKind.slash_prover,
                     to_prover=True,
                 )
                 transfers.append(slash_transfer)
@@ -648,27 +663,27 @@ def p_submit_proof(
             else:
                 gas: Gas = params["gas_estimators"].content_reveal(state)
                 fee = gas * state["gas_fee_l1"]
-                SAFETY_BUFFER = params['safety_factor_rollup_proof'] * fee  # XXX
-                expected_l2_blocks_per_day = params['l1_blocks_per_day'] / max_phase_duration(params)
-
+                # XXX
+                SAFETY_BUFFER = params['safety_factor_rollup_proof'] * fee
+                expected_l2_blocks_per_day = params['l1_blocks_per_day'] / \
+                    max_phase_duration(params)
 
                 expected_rewards = params['daily_block_reward']
                 expected_rewards *= params['rewards_to_provers']
                 expected_rewards /= expected_l2_blocks_per_day
 
-                expected_costs: float = params["op_cost_prover"] 
-                expected_costs += fee 
+                expected_costs: float = params["op_cost_prover"]
+                expected_costs += fee
                 expected_costs += SAFETY_BUFFER
                 expected_costs *= params['gwei_to_tokens']
-
 
                 payoff_reveal = expected_rewards - expected_costs
 
                 agent_expects_profit = payoff_reveal >= 0
 
                 agent_decides_to_reveal_rollup_proof = bernoulli_trial(
-                    probability=params['final_probability'] /
-                    params['phase_duration_reveal_max_blocks']
+                    probability=trial_probability(params['phase_duration_rollup_max_blocks'],
+                                                  params['final_probability'])
                 )
                 gas_fee_l1_acceptable = (
                     state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
@@ -681,8 +696,8 @@ def p_submit_proof(
                     transactions = state["transactions"]
                     commit_bond_id = updated_process.tx_commitment_bond
                     commit_bond: CommitmentBond = transactions.get(
-                    commit_bond_id, None)  # type: ignore
-                    who = commit_bond.prover_uuid  
+                        commit_bond_id, None)  # type: ignore
+                    who = commit_bond.prover_uuid
                     gas: Gas = params['gas_estimators'].rollup_proof(
                         state)  # TODO: Check?
                     fee: Gwei = gas * state['gas_fee_l1']
@@ -817,7 +832,8 @@ def s_transactions_new_proposals(
             }
 
             for potential_proposer in potential_proposers:
-                if bernoulli_trial(params['final_probability']/params['phase_duration_proposal_max_blocks']):
+                if bernoulli_trial(trial_probability(params['phase_duration_proposal_max_blocks'],
+                                                     params['final_probability'])):
 
                     tx_uuid = uuid4()
                     gas: Gas = params["gas_estimators"].proposal(state)
@@ -897,7 +913,7 @@ def s_slashes_to_prover(
         [
             transfer
             for transfer in transfers
-            if (transfer.kind == TransferKind.slash) and (transfer.to_prover == True)
+            if (transfer.kind == TransferKind.slash_prover) and (transfer.to_prover == True)
         ]
     )
 
@@ -924,7 +940,7 @@ def s_slashes_to_sequencer(
         [
             transfer
             for transfer in transfers
-            if transfer.kind == TransferKind.slash and transfer.to_sequencer
+            if transfer.kind == TransferKind.slash_sequencer and transfer.to_sequencer
         ]
     )
 
@@ -950,9 +966,14 @@ def s_agent_transfer(
         if transfer.kind == TransferKind.conventional:
             updated_agents[transfer.source].balance -= transfer.amount
             updated_agents[transfer.destination].balance += transfer.amount
-        elif transfer.kind == TransferKind.slash:
+        elif transfer.kind == TransferKind.slash_sequencer:
             updated_agents[transfer.source].staked_amount -= transfer.amount
             updated_agents[transfer.destination].balance += transfer.amount
+        elif transfer.kind == TransferKind.slash_prover:
+            updated_agents[transfer.source].balance -= transfer.amount
+            updated_agents[transfer.destination].balance += transfer.amount
+        else:
+            raise Exception(f'Transfer logic is undefined for {transfer.kind}')
 
     return ("agents", updated_agents)
 
@@ -1197,7 +1218,9 @@ def s_agent_restake(
     sequencers = {k: v for k, v in new_agents.items() if v.is_sequencer}
     for k, v in sequencers.items():
         if v.staked_amount < params['minimum_stake']:
-            max_amount_to_stake = (params['minimum_stake'] - v.staked_amount + 2.0) # HACK assume constant safety factor
+            # HACK assume constant safety factor
+            max_amount_to_stake = (
+                params['minimum_stake'] - v.staked_amount + 2.0)
             amount_to_stake = min(max_amount_to_stake, v.balance)
             v.balance -= amount_to_stake
             v.staked_amount += amount_to_stake
