@@ -28,7 +28,7 @@ Taken together, we would expect the simulation to take about `181` minutes.
 
 ## Step 4. Analysis & Interpretation
 
-Files are at 
+Files are at https://us-east-2.console.aws.amazon.com/s3/buckets/aztec-gddt
 
 1. `python -m aztec_gddt -e -s N_SWEEP_SAMPLES -r N_RUNS -t N_TIMESTEPS -z N_PROCESSES` will run the `psuu_exploratory_run` experiment.
 2. `python aztec_gddt/psuu/tensor_transform.py` will generate the relevant per-trajectory file, as per the configuration set in `data/config.json`
