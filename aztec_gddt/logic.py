@@ -247,7 +247,7 @@ def p_init_process(
     #######################################
 
     if state["current_process"] is None:
-        # XXX: Lack of active process implies on a new one being initiated
+        # Assumption: Lack of active process implies a new one being initiated
         do_init_process = True
     else:
         # Else, check if the current one is finalized
@@ -399,12 +399,9 @@ def p_commit_bond(
                 # NOTE: Costs now include gas fees and safety buffer.
                 gas: Gas = params["gas_estimators"].commitment_bond(state)
                 fee = gas * state["gas_fee_l1"]
-                # XXX
+                # Assumption: Agents have extra costs / profit considerations and need a safety buffer
                 SAFETY_BUFFER = params['safety_factor_commit_bond'] * fee
 
-                # expected_rewards = (
-                #    state["cumm_block_rewards"] - history[-1][0]["cumm_block_rewards"]
-                # )
                 expected_l2_blocks_per_day = params['l1_blocks_per_day'] / \
                     max_phase_duration(params)
 
@@ -442,7 +439,6 @@ def p_commit_bond(
                                 for (a_id, a) in state["agents"].items()
                                 if a.is_prover and a.balance >= bond_amount
                             ]
-                            # XXX: relays are going to be uniformly sampled
 
                             if len(provers) > 0:
                                 prover: AgentUUID = choice(provers)
@@ -539,12 +535,8 @@ def p_reveal_content(
                 # NOTE: Costs now include gas fees and safety buffer.
                 gas: Gas = params["gas_estimators"].content_reveal(state)
                 fee = gas * state["gas_fee_l1"]
-                # HACK:
-                SAFETY_BUFFER = params['safety_factor_reveal_content'] * fee
-                # XXX: Expected Rewards is the rewards over the last timestep.
-                # expected_rewards = (
-                #    state["cumm_block_rewards"] - history[-1][0]["cumm_block_rewards"]
-                # )
+                # Assumption: Agents have extra costs / profit considerations and need a safety buffer
+                SAFETY_BUFFER = params['safety_factor_reveal_content'] * fee 
                 expected_l2_blocks_per_day = params['l1_blocks_per_day'] / \
                     max_phase_duration(params)
 
@@ -582,7 +574,7 @@ def p_reveal_content(
                     updated_process.phase = SelectionPhase.pending_rollup_proof
                     updated_process.duration_in_current_phase = 0
 
-                    who = updated_process.leading_sequencer  # XXX
+                    who = updated_process.leading_sequencer  
                     blob_gas: BlobGas = params["gas_estimators"].content_reveal_blob(
                         state
                     )
@@ -668,7 +660,7 @@ def p_submit_proof(
             else:
                 gas: Gas = params["gas_estimators"].content_reveal(state)
                 fee = gas * state["gas_fee_l1"]
-                # XXX
+                # Assumption: Agents have extra costs / profit considerations and need a safety buffer
                 SAFETY_BUFFER = params['safety_factor_rollup_proof'] * fee
                 expected_l2_blocks_per_day = params['l1_blocks_per_day'] / \
                     max_phase_duration(params)
@@ -749,7 +741,7 @@ def p_race_mode(
                 updated_process.phase = SelectionPhase.skipped
                 updated_process.duration_in_current_phase = 0
             else:
-                # XXX there is a hard-coded L1 Builder agent
+                # Assumption: there is a hard-coded L1 Builder agent
                 # who immediately ends the race mode.
                 who = "l1-builder"
                 gas: Gas = params["gas_estimators"].content_reveal(state)
@@ -843,9 +835,9 @@ def s_transactions_new_proposals(
                     tx_uuid = uuid4()
                     gas: Gas = params["gas_estimators"].proposal(state)
                     fee: Gwei = gas * state["gas_fee_l1"]
-                    score = uniform.rvs()  # XXX: score is always uniform
+                    score = uniform.rvs()  # Assumption: score is always uniform
                     size = params["tx_estimators"].proposal_average_size(state)
-                    public_share = 0.5  # HACK
+                    public_share = 0.5  # Assumption: Share of public function calls 
 
                     if state["gas_fee_l1"] <= params["gas_threshold_for_tx"]:
                         new_proposal = Proposal(
@@ -989,7 +981,7 @@ def p_block_reward(
     p: Process = state["current_process"]  # type: ignore
     if p.phase == SelectionPhase.finalized:
 
-        # XXX: this assumes that the average L2 block duration
+        # Assumption: this assumes that the average L2 block duration
         # will be the max L2 block duration
         expected_l2_blocks_per_day = params['l1_blocks_per_day'] / \
             max_phase_duration(params)
@@ -1223,7 +1215,7 @@ def s_agent_restake(
     sequencers = {k: v for k, v in new_agents.items() if v.is_sequencer}
     for k, v in sequencers.items():
         if v.staked_amount < params['minimum_stake']:
-            # HACK assume constant safety factor
+            # Assumption: Sequencers top-up from balance with 2 more ETH than necessary
             max_amount_to_stake = (
                 params['minimum_stake'] - v.staked_amount + 2.0)
             amount_to_stake = min(max_amount_to_stake, v.balance)

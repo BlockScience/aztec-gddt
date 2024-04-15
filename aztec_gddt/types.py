@@ -15,7 +15,7 @@ L2Blocks = Annotated[int, "blocks"]  # Number of L2 Blocks (time dimension)
 ContinuousL1Blocks = Annotated[float, "blocks"]  # (time dimension)
 Seconds = Annotated[int, "s"]
 Probability = Annotated[float, "probability"]
-Tokens = Annotated[float, "tokens"]  # Amount of slashable tokens
+Tokens = Annotated[float, "tokens"]  # Tokens are currently set to ETH via gwei_to_tokens conversion 
 
 AgentUUID = Annotated[object, "uuid"]
 TxUUID = Annotated[object, "uuid"]
@@ -110,7 +110,6 @@ class Process:
     # Process State
     proofs_are_public: bool = False
     block_content_is_revealed: bool = False
-    # Commitment bond is put down / rename from proof
     commit_bond_is_put_down: bool = False
     rollup_proof_is_commited: bool = False
     entered_race_mode: bool = False
@@ -275,8 +274,8 @@ class SlashParameters:
 class AztecModelParams(TypedDict):
     # random_seed: int #Random seed for simulation model variation.
 
-    label: str  # XXX
-    timestep_in_blocks: L1Blocks  # XXX
+    label: str  # Defines Labels as strings
+    timestep_in_blocks: L1Blocks  # Defines timesteps in L1Blocks
 
     # Economic Parameters
     uncle_count: int
@@ -298,8 +297,8 @@ class AztecModelParams(TypedDict):
     phase_duration_race_min_blocks: L1Blocks
     phase_duration_race_max_blocks: L1Blocks
 
-    stake_activation_period: L1Blocks  # XXX
-    unstake_cooldown_period: L1Blocks  # XXX
+    stake_activation_period: L1Blocks  # Defines stake_activation in L1 blocks
+    unstake_cooldown_period: L1Blocks  # Defines stake_deactivation in L1 blocks
 
     # Behavioral Parameters
     logic: Dict[str, Callable[[Dict], Any]]  # placeholder for general system logic
