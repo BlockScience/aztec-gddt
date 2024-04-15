@@ -7,8 +7,8 @@ import numpy as np
 rng = np.random.default_rng()
 
 
-TIMESTEPS = 1_000  # HACK
-SAMPLES = 1  # HACK
+TIMESTEPS = 1_000  # Used mostly for single runs
+SAMPLES = 1  # Used mostly for single runs
 
 N_INITIAL_AGENTS = 3
 
@@ -42,7 +42,7 @@ BASE_AGENTS = [
 
 BASE_AGENTS_DICT = {a.uuid: a for a in BASE_AGENTS}
 
-# XXX
+# Note: Used mostly for single runs
 INITIAL_AGENTS: list[Agent] = [
     Agent(
         uuid=uuid4(),
@@ -62,9 +62,9 @@ INITIAL_AGENTS_DICT: dict[AgentUUID, Agent] = {
 AGENTS_DICT = {**BASE_AGENTS_DICT, **INITIAL_AGENTS_DICT}
 
 
-INITIAL_CUMM_REWARDS = 200.0  # XXX # type: Tokens
-INITIAL_CUMM_CASHBACK = 00.0  # XXX # type: Tokens
-INITIAL_CUMM_BURN = 50.0  # XXX # type: Tokens
+INITIAL_CUMM_REWARDS = 200.0  # Assumption # type: Tokens
+INITIAL_CUMM_CASHBACK = 00.0  # Assumption # type: Tokens
+INITIAL_CUMM_BURN = 50.0  # Assumption # type: Tokens
 
 INITIAL_SUPPLY = TokenSupply(
     circulating=sum(a.balance for a in INITIAL_AGENTS),
@@ -75,7 +75,7 @@ INITIAL_SUPPLY = TokenSupply(
 
 
 SLASH_PARAMS = SlashParameters(
-    failure_to_commit_bond=2, failure_to_reveal_block=1  # XXX # type: Tokens
+    failure_to_commit_bond=2, failure_to_reveal_block=1  # Assumption # type: Tokens
 )
 
 
@@ -91,10 +91,10 @@ INITIAL_STATE = AztecModelState(
     total_rewards_relays=0.0,  # type: Tokens
     total_rewards_sequencers=0.0,  # type: Tokens
     agents=AGENTS_DICT,
-    current_process=None,  # XXX
+    current_process=None,  # Note: Used to start without an ongoing L2 block process
     transactions=dict(),
-    gas_fee_l1=50,  # XXX # type: Gwei
-    gas_fee_blob=30,  # XXX # type: Gwei
+    gas_fee_l1=50,  # type: Gwei # Assumption
+    gas_fee_blob=30,  # type: Gwei # Assumption: In reality likely much lower, but must be tuned. Goes per MB, not per blob currently
     finalized_blocks_count=0,
     cumm_block_rewards=INITIAL_CUMM_REWARDS,
     cumm_fee_cashback=INITIAL_CUMM_CASHBACK,
@@ -113,7 +113,7 @@ DEVIATION_STEADY_STATE_L1 = 5
 MEAN_STEADY_STATE_BLOB = 30  # type: Gwei
 DEVIATION_STEADY_STATE_BLOB = 5
 
-# XXX: Rounding is needed to address the fact that Gas is an integer type.
+# Note: Rounding is needed to address the fact that Gas is an integer type.
 steady_gas_fee_l1_time_series = np.array(
     [
         max(floor(el), 10)
@@ -157,8 +157,8 @@ def steady_state_blob_gas_estimate(state: AztecModelState):
 # so that the scenarios are invariant to number
 L1_SHOCK_AMOUNT = 150  # type: Gwei
 BLOB_SHOCK_AMOUNT = 150  # type: Gwei
-initial_time = floor(0.25 * TIMESTEPS)  # XXX: 25% of timesteps
-final_time = floor(0.25 * TIMESTEPS)  # XXX: 25% of timesteps
+initial_time = floor(0.25 * TIMESTEPS)  # Assumption: 25% of timesteps
+final_time = floor(0.25 * TIMESTEPS)  # Assumption: 25% of timesteps
 
 
 single_shock_gas_fee_l1_time_series = np.zeros(TIMESTEPS)
@@ -260,33 +260,33 @@ SINGLE_RUN_PARAMS = AztecModelParams(
     timestep_in_blocks=1,
     uncle_count=0,
     fee_subsidy_fraction=1.0,  # unused
-    minimum_stake=30,
+    minimum_stake=30,  # Assumption: Min Stake, where Sequencers try to top-up if they fall below after slashing
     l1_blocks_per_day=int(24 * 60 * 60 / 12.08),
     daily_block_reward=32,
     # Placeholder Logic
     logic={},
     # Phase Durations
-    phase_duration_proposal_min_blocks=0,  # TODO
-    phase_duration_proposal_max_blocks=10,  # TODO
-    phase_duration_reveal_min_blocks=0,  # TODO
-    phase_duration_reveal_max_blocks=10,  # TODO
-    phase_duration_commit_bond_min_blocks=0,  # TODO
-    phase_duration_commit_bond_max_blocks=10,  # TODO
-    phase_duration_rollup_min_blocks=0,  # TODO
-    phase_duration_rollup_max_blocks=30,  # TODO
-    phase_duration_race_min_blocks=0,  # TODO
-    phase_duration_race_max_blocks=30,  # TODO
+    phase_duration_proposal_min_blocks=0,  # Assumption: Sweeping sets upper bound and lower bound per upper bound for fixed / dynamic
+    phase_duration_proposal_max_blocks=10,  # Assumption
+    phase_duration_reveal_min_blocks=0,  # Assumption
+    phase_duration_reveal_max_blocks=10,  # Assumption
+    phase_duration_commit_bond_min_blocks=0,  # Assumption
+    phase_duration_commit_bond_max_blocks=10,  # Assumption
+    phase_duration_rollup_min_blocks=0,  # Assumption
+    phase_duration_rollup_max_blocks=30,  # Assumption
+    phase_duration_race_min_blocks=0,  # Assumption
+    phase_duration_race_max_blocks=30,  # Assumption
 
-    stake_activation_period=40,  # TODO
-    unstake_cooldown_period=40,  # TODO
+    stake_activation_period=40,  # Assumption: Currently not impactful
+    unstake_cooldown_period=40,  # Assumption: Currently not impactful
     # Behavioral Parameters
     final_probability=0.99,
-    gas_threshold_for_tx=250,  # HACK
-    blob_gas_threshold_for_tx=250,  # HACK
-    proving_marketplace_usage_probability=0.7,  # XXX
+    gas_threshold_for_tx=250,  # Assumption: We want to set a censorship level for gas prices (which we could create a timeseries with too)
+    blob_gas_threshold_for_tx=250,  # Assumption: We want to set a censorship level for blob gas prices (which we could create a timeseries with too)
+    proving_marketplace_usage_probability=0.7,  # Assumption: Global Probability, could instantiate agents with [0, 1]
     
-    rewards_to_provers=0.3,  # XXX
-    rewards_to_relay=0.01,  # XXX
+    rewards_to_provers=0.3,  # Assumption: Reward Share
+    rewards_to_relay=0.01,  # Assumption: Reward Share
 
     gwei_to_tokens=1e-9,
     gas_estimators=DEFAULT_DETERMINISTIC_GAS_ESTIMATOR,
@@ -295,8 +295,8 @@ SINGLE_RUN_PARAMS = AztecModelParams(
     gas_fee_l1_time_series=GAS_FEE_L1_TIME_SERIES_LIST[-1],
     gas_fee_blob_time_series=GAS_FEE_BLOB_TIME_SERIES_LIST[-1],
     commit_bond_amount=16.0,  # type: Tokens
-    op_cost_sequencer=0,  # XXX  # type: Tokens
-    op_cost_prover=0, # XXX
+    op_cost_sequencer=0,  # Assumption: Currently all Sequencers have one op_cost constant to evaluate against
+    op_cost_prover=0, # Assumption: Currently all Provers have one op_cost constant to evaluate against
     safety_factor_commit_bond = 0.0,
     safety_factor_reveal_content = 0.0,
     safety_factor_rollup_proof = 0.0,

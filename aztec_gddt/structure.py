@@ -31,13 +31,13 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
         'label': 'Agent Actions',
         'ignore' : False, 
         'policies': {
-            # TODO Possibly add policies for the users triggering the relevant events
+            # Potential Change: Possibly add policies for the users triggering the relevant events
             # eg. making the proofs public
         },
         'variables': {
             'transactions': s_transactions_new_proposals,
             'agents': s_agent_restake
-            # TODO Possibly add a SUF for updating toggling the event
+            # Potential Change: Possibly add a SUF for updating toggling the event
             # bools in the current process
         }
     },
