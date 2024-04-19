@@ -36,7 +36,7 @@ BASE_AGENTS = [
         is_prover=False,
         is_relay=False,
         staked_amount=0.0,  # type: Tokens
-    )
+    ),
 ]
 
 
@@ -56,8 +56,7 @@ INITIAL_AGENTS: list[Agent] = [
     for i in range(N_INITIAL_AGENTS)
 ]
 
-INITIAL_AGENTS_DICT: dict[AgentUUID, Agent] = {
-    a.uuid: a for a in INITIAL_AGENTS}
+INITIAL_AGENTS_DICT: dict[AgentUUID, Agent] = {a.uuid: a for a in INITIAL_AGENTS}
 
 AGENTS_DICT = {**BASE_AGENTS_DICT, **INITIAL_AGENTS_DICT}
 
@@ -102,7 +101,7 @@ INITIAL_STATE = AztecModelState(
     token_supply=INITIAL_SUPPLY,
 )
 
-INITIAL_STATE['token_supply'] = TokenSupply.from_state(INITIAL_STATE)
+INITIAL_STATE["token_supply"] = TokenSupply.from_state(INITIAL_STATE)
 
 #############################################################
 ## Begin: Steady state gas estimators defined              ##
@@ -170,8 +169,8 @@ single_shock_gas_fee_l1_time_series[0:initial_time] = steady_gas_fee_l1_time_ser
 single_shock_gas_fee_l1_time_series[-final_time:] = steady_gas_fee_l1_time_series[
     -final_time:
 ].copy()
-single_shock_gas_fee_l1_time_series[initial_time: TIMESTEPS - final_time] = (
-    steady_gas_fee_l1_time_series[initial_time: TIMESTEPS - final_time].copy()
+single_shock_gas_fee_l1_time_series[initial_time : TIMESTEPS - final_time] = (
+    steady_gas_fee_l1_time_series[initial_time : TIMESTEPS - final_time].copy()
     + L1_SHOCK_AMOUNT
 )
 
@@ -181,9 +180,8 @@ single_shock_gas_fee_blob_time_series[0:initial_time] = steady_gas_fee_blob_time
 single_shock_gas_fee_blob_time_series[-final_time:] = steady_gas_fee_blob_time_series[
     -final_time:
 ].copy()
-single_shock_gas_fee_blob_time_series[initial_time: TIMESTEPS - final_time] = (
-    steady_gas_fee_blob_time_series[initial_time: TIMESTEPS -
-                                    final_time].copy()
+single_shock_gas_fee_blob_time_series[initial_time : TIMESTEPS - final_time] = (
+    steady_gas_fee_blob_time_series[initial_time : TIMESTEPS - final_time].copy()
     + L1_SHOCK_AMOUNT
 )
 
@@ -216,8 +214,8 @@ intermit_shock_gas_fee_l1_time_series[0:initial_time] = steady_gas_fee_l1_time_s
 intermit_shock_gas_fee_l1_time_series[-final_time:] = steady_gas_fee_l1_time_series[
     -final_time:
 ].copy()
-intermit_shock_gas_fee_l1_time_series[initial_time: TIMESTEPS - final_time] = (
-    steady_gas_fee_l1_time_series[initial_time: TIMESTEPS - final_time].copy()
+intermit_shock_gas_fee_l1_time_series[initial_time : TIMESTEPS - final_time] = (
+    steady_gas_fee_l1_time_series[initial_time : TIMESTEPS - final_time].copy()
     + L1_INTER_SHOCK_SIGNAL
 )
 
@@ -251,7 +249,7 @@ DEFAULT_DETERMINISTIC_GAS_ESTIMATOR = L1GasEstimators(
     commitment_bond=lambda _: 100_000,  # type: ignore
     content_reveal=lambda _: 81_000,  # type: ignore
     content_reveal_blob=lambda _: 500_000,  # type: ignore
-    rollup_proof=lambda _: 700_000  # type: ignore
+    rollup_proof=lambda _: 700_000,  # type: ignore
 )
 
 
@@ -276,7 +274,6 @@ SINGLE_RUN_PARAMS = AztecModelParams(
     phase_duration_rollup_max_blocks=30,  # Assumption
     phase_duration_race_min_blocks=0,  # Assumption
     phase_duration_race_max_blocks=30,  # Assumption
-
     stake_activation_period=40,  # Assumption: Currently not impactful
     unstake_cooldown_period=40,  # Assumption: Currently not impactful
     # Behavioral Parameters
@@ -284,10 +281,8 @@ SINGLE_RUN_PARAMS = AztecModelParams(
     gas_threshold_for_tx=250,  # Assumption: We want to set a censorship level for gas prices (which we could create a timeseries with too)
     blob_gas_threshold_for_tx=250,  # Assumption: We want to set a censorship level for blob gas prices (which we could create a timeseries with too)
     proving_marketplace_usage_probability=0.7,  # Assumption: Global Probability, could instantiate agents with [0, 1]
-    
     rewards_to_provers=0.3,  # Assumption: Reward Share
     rewards_to_relay=0.01,  # Assumption: Reward Share
-
     gwei_to_tokens=1e-9,
     gas_estimators=DEFAULT_DETERMINISTIC_GAS_ESTIMATOR,
     tx_estimators=DEFAULT_DETERMINISTIC_TX_ESTIMATOR,
@@ -296,9 +291,10 @@ SINGLE_RUN_PARAMS = AztecModelParams(
     gas_fee_blob_time_series=GAS_FEE_BLOB_TIME_SERIES_LIST[-1],
     commit_bond_amount=16.0,  # type: Tokens
     op_cost_sequencer=0,  # Assumption: Currently all Sequencers have one op_cost constant to evaluate against
-    op_cost_prover=0, # Assumption: Currently all Provers have one op_cost constant to evaluate against
-    safety_factor_commit_bond = 0.0,
-    safety_factor_reveal_content = 0.0,
-    safety_factor_rollup_proof = 0.0,
-    past_gas_weight_fraction = 0.9
+    op_cost_prover=0,  # Assumption: Currently all Provers have one op_cost constant to evaluate against
+    safety_factor_commit_bond=0.0,
+    safety_factor_reveal_content=0.0,
+    safety_factor_rollup_proof=0.0,
+    past_gas_weight_fraction=0.9,
+    fp_commit_bond_reveal="Bernoulli",  # Functional parameterizations
 )
