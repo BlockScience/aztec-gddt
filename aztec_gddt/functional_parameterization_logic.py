@@ -11,3 +11,10 @@ def commit_bond_reveal_behavior(state, params):
         )
     else:
         assert False, "Not implemented"
+
+
+def proving_market_is_used_behavior(state, params):
+    if params["fp_proving_market_used"] == "Bernoulli":
+        return bernoulli_trial(params["proving_marketplace_usage_probability"])
+    else:
+        assert False, "Not implemented"

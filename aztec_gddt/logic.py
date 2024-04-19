@@ -11,7 +11,10 @@ from random import random
 import pickle
 
 from aztec_gddt.types import Agent
-from .functional_parameterization_logic import commit_bond_reveal_behavior
+from .functional_parameterization_logic import (
+    commit_bond_reveal_behavior,
+    proving_market_is_used_behavior,
+)
 
 
 def generic_policy(_1, _2, _3, _4) -> dict:
@@ -439,8 +442,8 @@ def p_commit_bond(
                         updated_process = copy(process)
                         lead_seq: Agent = state["agents"][process.leading_sequencer]
                         proposal_uuid = process.tx_winning_proposal
-                        proving_market_is_used = bernoulli_trial(
-                            params["proving_marketplace_usage_probability"]
+                        proving_market_is_used = proving_market_is_used_behavior(
+                            state, params
                         )
                         if proving_market_is_used:
                             provers: list[AgentUUID] = [
