@@ -14,6 +14,9 @@ from aztec_gddt.types import Agent
 from .functional_parameterization_logic import (
     commit_bond_reveal_behavior,
     proving_market_is_used_behavior,
+    potential_proposer_behavior,
+    reveal_block_content_behavior,
+    reveal_rollup_proof_behavior,
 )
 
 
@@ -565,11 +568,8 @@ def p_reveal_content(
                 payoff_reveal = expected_rewards - expected_costs
 
                 agent_expects_profit = payoff_reveal >= 0
-                agent_decides_to_reveal_block_content = bernoulli_trial(
-                    probability=trial_probability(
-                        params["phase_duration_reveal_max_blocks"],
-                        params["final_probability"],
-                    )
+                agent_decides_to_reveal_block_content = reveal_block_content_behavior(
+                    state, params
                 )
                 gas_fee_blob_acceptable = (
                     state["gas_fee_blob"] <= params["blob_gas_threshold_for_tx"]
@@ -697,11 +697,8 @@ def p_submit_proof(
 
                 agent_expects_profit = payoff_reveal >= 0
 
-                agent_decides_to_reveal_rollup_proof = bernoulli_trial(
-                    probability=trial_probability(
-                        params["phase_duration_rollup_max_blocks"],
-                        params["final_probability"],
-                    )
+                agent_decides_to_reveal_rollup_proof = reveal_rollup_proof_behavior(
+                    state, params
                 )
                 gas_fee_l1_acceptable = (
                     state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
@@ -858,12 +855,7 @@ def s_transactions_new_proposals(
             }
 
             for potential_proposer in potential_proposers:
-                if bernoulli_trial(
-                    trial_probability(
-                        params["phase_duration_proposal_max_blocks"],
-                        params["final_probability"],
-                    )
-                ):
+                if potential_proposer_behavior(state, params):
 
                     tx_uuid = uuid4()
                     gas: Gas = params["gas_estimators"].proposal(state)

@@ -298,4 +298,7 @@ SINGLE_RUN_PARAMS = AztecModelParams(
     past_gas_weight_fraction=0.9,
     fp_commit_bond_reveal="Bernoulli",  # Functional parameterizations
     fp_proving_market_used="Bernoulli",
+    fp_potential_proposer="Bernoulli",
+    fp_reveal_block_content="Bernoulli",
+    fp_reveal_rollup_proof="Bernoulli",
 )
