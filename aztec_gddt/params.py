@@ -255,6 +255,19 @@ DEFAULT_DETERMINISTIC_GAS_ESTIMATOR = L1GasEstimators(
 )
 
 
+#################################################
+## Begin censorship time series information    ## 
+################################################
+
+ALWAYS_TRUE_SERIES = [True] * TIMESTEPS
+ALWAYS_FALSE_SERIES = [False] * TIMESTEPS
+
+#################################################
+## End censorship time series information     ## 
+################################################
+
+
+
 SINGLE_RUN_PARAMS = AztecModelParams(
     label="default",
     timestep_in_blocks=1,
@@ -287,6 +300,9 @@ SINGLE_RUN_PARAMS = AztecModelParams(
     
     rewards_to_provers=0.3,  # Assumption: Reward Share
     rewards_to_relay=0.01,  # Assumption: Reward Share
+
+    censorship_series_builder = ALWAYS_FALSE_SERIES,  # Iniital Assumptions: No Censorship
+    censorship_series_validator = ALWAYS_FALSE_SERIES, # Iniital Assumption: No Censorship
 
     gwei_to_tokens=1e-9,
     gas_estimators=DEFAULT_DETERMINISTIC_GAS_ESTIMATOR,
