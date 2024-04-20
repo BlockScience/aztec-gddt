@@ -312,6 +312,9 @@ class AztecModelParams(TypedDict):
     rewards_to_provers: Percentage
     rewards_to_relay: Percentage
 
+    censorship_series_builder: Sequence[bool]
+    censorship_series_validator: Sequence[bool]
+
     gas_estimators: L1GasEstimators
     tx_estimators: UserTransactionEstimators
     slash_params: SlashParameters
