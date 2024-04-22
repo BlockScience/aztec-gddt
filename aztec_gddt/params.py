@@ -262,6 +262,33 @@ DEFAULT_DETERMINISTIC_GAS_ESTIMATOR = L1GasEstimators(
 ALWAYS_TRUE_SERIES = [True] * TIMESTEPS
 ALWAYS_FALSE_SERIES = [False] * TIMESTEPS
 
+def build_censor_series_from_role(data: pd.DataFrame,
+                        censor_list: List[str] = None, 
+                        start_point: int = None,
+                        num_timesteps: int = 1000, 
+                        role: str = None):
+    # HACK: Currently we have hard-coded timestep limits. 
+    if num_timesteps > 1000:
+        Exception("Currently all simulation runs must be 1000 timesteps or less.")
+
+    if start_point is None:
+        start_point = random.randint(0, length - number_of_timesteps)
+
+    if censor_list is None:
+        censor_list = []
+
+    index_range_to_use = [x for x in range(start_point, start_point + num_timesteps)]
+    
+    final_censor_list = build_censor_series_from_data(data: pd.DataFrame, 
+                                     index_range = index_range_to_use, 
+                                     column_name = role, 
+                                     censor_list = censor_list)
+
+    return final_censor_list
+
+
+
+
 #################################################
 ## End censorship time series information     ## 
 ################################################
@@ -318,3 +345,24 @@ SINGLE_RUN_PARAMS = AztecModelParams(
     safety_factor_rollup_proof = 0.0,
     past_gas_weight_fraction = 0.9
 )
+
+def build_censor_params(data: pd.DataFrame, 
+                        censoring_builders: List[str],
+                        censoring_validators: List[str],
+                        start_time: int,
+                        num_timesteps:int):
+    censorship_builder_data = build_censor_series_from_role(data = data,
+                                                           censor_list = censoring_builders,
+                                                           start_time = start_time,
+                                                           num_timesteps = num_timesteps,
+                                                           role = 'builder')
+    censorship_validator_data = build_censor_series_from_role(data = data,
+                                                           censor_list = censoring_validators,
+                                                           start_time = start_time,
+                                                           num_timesteps = num_timesteps,
+                                                           role = 'validator')
+
+    censorship_info_dict = {"censorship_series_builder": censorship_builder_data,
+                   "censorship_series_validator": censorship_validator_data}
+
+    return censorship_info_dict
