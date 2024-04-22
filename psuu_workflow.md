@@ -15,6 +15,7 @@ Before the first run, some items should be prepared:
 2. On the local machine, push the model's current state to the CodeCommit repository.
    1. If it is your first time you have to add in security credentials for codecommit under HTTPS Git credentials for AWS CodeCommit and use these as the username and password when pushing
 3. Start the instance. Typically, it takes about ~5min to start. Open JupyeterLab when done.
+   1. If you are creating the SageMaker notebook from scratch, you will need to add repository and it will allow you to pick to add the codecommit repository which then has it copied into the enviroment
 4. Pull the CodeCommit repository, e.g., `git pull` You may need to `stash` or `clean` before.
 5. Install requirements, e.g. `pip install -r requirements.txt.`
 6. Do a small test run before doing all trajectories, eg. `python -m aztec-gddt -p -c -s 100 -r 5 -t 10`. If there are errors or warnings, try to fix them before doing the extensive run. 
