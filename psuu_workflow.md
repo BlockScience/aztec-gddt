@@ -13,6 +13,7 @@ Before the first run, some items should be prepared:
    2. Make sure that there's a created S3 Bucket for storing and reading the simulation results
    3. Ensure the simulation code is configured for using the S3 bucket. Precisely, the `s3.upload_file` calls in `__main__.py` should reflect the setup.
 2. On the local machine, push the model's current state to the CodeCommit repository.
+   1. If it is your first time you have to add in security credentials for codecommit under HTTPS Git credentials for AWS CodeCommit and use these as the username and password when pushing
 3. Start the instance. Typically, it takes about ~5min to start. Open JupyeterLab when done.
 4. Pull the CodeCommit repository, e.g., `git pull` You may need to `stash` or `clean` before.
 5. Install requirements, e.g. `pip install -r requirements.txt.`
