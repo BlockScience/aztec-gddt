@@ -30,7 +30,7 @@ def has_blown_phase_duration(process) -> bool:
 ##  Censorship functions             ##
 #######################################
 
-def build_censorship_series_from_data(data: pd.DataFrame, 
+def build_censor_series_from_data(data: pd.DataFrame, 
                                      index_range, 
                                      column_name: str, 
                                      censoring_list: List[str]):
