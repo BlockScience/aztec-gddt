@@ -267,6 +267,9 @@ def build_censor_series_from_role(data: pd.DataFrame,
                         start_point: int = None,
                         num_timesteps: int = 1000, 
                         role: str = None):
+
+    sorted_data = data.sort_values(by='date')
+
     # HACK: Currently we have hard-coded timestep limits. 
     if num_timesteps > 1000:
         Exception("Currently all simulation runs must be 1000 timesteps or less.")
@@ -278,13 +281,9 @@ def build_censor_series_from_role(data: pd.DataFrame,
         censor_list = []
 
     index_range_to_use = [x for x in range(start_point, start_point + num_timesteps)]
-    
-    final_censor_list = build_censor_series_from_data(data: pd.DataFrame, 
-                                     index_range = index_range_to_use, 
-                                     column_name = role, 
-                                     censor_list = censor_list)
-
-    return final_censor_list
+    indexed_data = data.iloc[index_range]
+    censored_series = indexed_data[column_name].apply(lambda x: x in censoring_list)
+    return censored_series
 
 
 
