@@ -285,7 +285,7 @@ def build_censor_series_from_role(data: pd.DataFrame,
 
     index_range_to_use = [x for x in range(start_time, start_time + num_timesteps)]
     indexed_data = data.iloc[index_range_to_use]
-    censored_series = indexed_data[role].apply(lambda x: x in censor_list)
+    censored_series = indexed_data[role].apply(lambda x: x in censor_list).to_list()
 
     return censored_series
 
