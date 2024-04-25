@@ -1,11 +1,10 @@
 from typing import Annotated, Dict, TypedDict, NamedTuple, Optional
-from typing import Any, Callable, Concatenate, ParamSpec
+from typing import Any, Callable, Concatenate, ParamSpec, Sequence
 from enum import IntEnum, Enum, auto
 from math import floor
 import numpy as np
 from pydantic import FiniteFloat
 from pydantic.dataclasses import dataclass
-from typing import Sequence
 # Units
 
 
@@ -311,6 +310,9 @@ class AztecModelParams(TypedDict):
 
     rewards_to_provers: Percentage
     rewards_to_relay: Percentage
+
+    censorship_series_builder: Optional[Sequence] 
+    censorship_series_validator: Optional[Sequence]
 
     gas_estimators: L1GasEstimators
     tx_estimators: UserTransactionEstimators
