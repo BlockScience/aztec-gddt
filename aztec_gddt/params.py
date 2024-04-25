@@ -9,7 +9,7 @@ from typing import List
 # Note: For numpy 1.26 and above, random calls go through a generator.
 rng = np.random.default_rng()
 
-
+L1_BUFFER = 10 # To check timesteps -> L1_timesteps issue
 TIMESTEPS = 1_000  # Used mostly for single runs
 SAMPLES = 1  # Used mostly for single runs
 
@@ -262,8 +262,8 @@ DEFAULT_DETERMINISTIC_GAS_ESTIMATOR = L1GasEstimators(
 ## Begin censorship time series information    ## 
 ################################################
 
-ALWAYS_TRUE_SERIES = [True] * TIMESTEPS
-ALWAYS_FALSE_SERIES = [False] * TIMESTEPS
+ALWAYS_TRUE_SERIES = [True] * (L1_BUFFER * TIMESTEPS)
+ALWAYS_FALSE_SERIES = [False] * (L1_BUFFER * TIMESTEPS)
 
 def build_censor_series_from_role(data: pd.DataFrame,
                         censor_list: List[str] = None, 
@@ -355,8 +355,7 @@ def build_censor_params(data: pd.DataFrame,
                         start_time: int = None,
                         num_timesteps:int = 1000):
 
-    BUFFER = 10 #XXX: To relate L1 blocks to model time steps
-    practical_num_timesteps = BUFFER * num_timesteps
+    practical_num_timesteps = L1_BUFFER * num_timesteps
 
     if start_time is None:
         data_length = len(data)
