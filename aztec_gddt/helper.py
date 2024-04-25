@@ -1,6 +1,8 @@
-from aztec_gddt.types import *
 import numpy as np
+import pandas as pd
+from typing import List
 
+from aztec_gddt.types import *
 
 def proposals_from_tx(transactions: dict[TxUUID, TransactionL1]) -> dict[TxUUID, Proposal]:
     """
@@ -23,6 +25,26 @@ def select_processes_by_state(processes: list[Process], phase_to_select: Selecti
 
 def has_blown_phase_duration(process) -> bool:
     return False
+
+#######################################
+##  Censorship functions             ##
+#######################################
+
+def build_censor_series_from_data(data: pd.DataFrame, 
+                                     index_range, 
+                                     column_name: str, 
+                                     censoring_list: List[str]):
+    """
+    Given DataFrame and input range and list of censoring builders, return a time series 
+    describing censoring behavior. 
+    """
+    indexed_data = data.iloc[index_range]
+    censored_series = indexed_data[column_name].apply(lambda x: x in censoring_list)
+
+    return censored_series
+
+
+
 
 #######################################
 ## Helper functions for decisions    ##

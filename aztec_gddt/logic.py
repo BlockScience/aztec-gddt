@@ -426,13 +426,23 @@ def p_commit_bond(
                     gas_fee_l1_acceptable = (
                         state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
                     )
-                    if agent_decides_to_reveal_commit_bond and gas_fee_l1_acceptable:
+                    
+                    time_l1 = state["time_l1"]
+                    block_is_uncensored = not(
+                                              params["censorship_series_builder"][time_l1]
+                                              or params["censorship_series_validator"][time_l1]
+                                              )
+                    
+                    if (agent_decides_to_reveal_commit_bond 
+                        and gas_fee_l1_acceptable
+                        and block_is_uncensored):
                         updated_process = copy(process)
                         lead_seq: Agent = state['agents'][process.leading_sequencer]
                         proposal_uuid = process.tx_winning_proposal
                         proving_market_is_used = bernoulli_trial(
                             params["proving_marketplace_usage_probability"]
                         )
+
                         if proving_market_is_used:
                             provers: list[AgentUUID] = [
                                 a_id
@@ -563,11 +573,18 @@ def p_reveal_content(
                     state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
                 )
 
+                time_l1 = state["time_l1"]
+                block_is_uncensored = not(
+                                          params["censorship_series_builder"][time_l1]
+                                          or params["censorship_series_validator"][time_l1]
+                                          )
+
                 if (
                     agent_expects_profit
                     and agent_decides_to_reveal_block_content
                     and gas_fee_blob_acceptable
                     and gas_fee_l1_acceptable
+                    and block_is_uncensored
                 ):
                     updated_process = copy(process)
                     advance_blocks = remaining_time
@@ -685,7 +702,19 @@ def p_submit_proof(
                 gas_fee_l1_acceptable = (
                     state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
                 )
-                if agent_decides_to_reveal_rollup_proof and gas_fee_l1_acceptable and agent_expects_profit:
+
+                time_l1 = state["time_l1"]
+                block_is_uncensored = not(
+                                          params["censorship_series_builder"][time_l1]
+                                          or params["censorship_series_validator"][time_l1]
+                                          )
+
+                if (
+                    agent_decides_to_reveal_rollup_proof 
+                    and gas_fee_l1_acceptable 
+                    and agent_expects_profit
+                    and block_is_uncensored
+                ):
                     updated_process = copy(process)
                     advance_blocks = remaining_time
                     updated_process.phase = SelectionPhase.finalized
@@ -839,7 +868,21 @@ def s_transactions_new_proposals(
                     size = params["tx_estimators"].proposal_average_size(state)
                     public_share = 0.5  # Assumption: Share of public function calls 
 
-                    if state["gas_fee_l1"] <= params["gas_threshold_for_tx"]:
+                    gas_fee_l1_acceptable = (
+                    state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
+                    )
+
+                    time_l1 = state["time_l1"]
+                    block_is_uncensored = not(
+                            params["censorship_series_builder"][time_l1]
+                            or params["censorship_series_validator"][time_l1]
+                            )
+
+
+
+                    if (gas_fee_l1_acceptable
+                        and block_is_uncensored
+                        ):
                         new_proposal = Proposal(
                             who=potential_proposer,
                             when=state["time_l1"],

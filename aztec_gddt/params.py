@@ -2,6 +2,9 @@ from aztec_gddt.types import *
 from uuid import uuid4
 from scipy.stats import norm  # type: ignore
 import numpy as np
+import pandas as pd
+
+from typing import List
 
 # Note: For numpy 1.26 and above, random calls go through a generator.
 rng = np.random.default_rng()
@@ -255,6 +258,46 @@ DEFAULT_DETERMINISTIC_GAS_ESTIMATOR = L1GasEstimators(
 )
 
 
+#################################################
+## Begin censorship time series information    ## 
+################################################
+
+ALWAYS_TRUE_SERIES = [True] * TIMESTEPS
+ALWAYS_FALSE_SERIES = [False] * TIMESTEPS
+
+def build_censor_series_from_role(data: pd.DataFrame,
+                        censor_list: List[str] = None, 
+                        start_time: int = None,
+                        num_timesteps: int = 1000, 
+                        role: str = None):
+
+    sorted_data = data.sort_values(by='date')
+
+    # HACK: Currently we have hard-coded timestep limits. 
+    if num_timesteps > 1000:
+        Exception("Currently all simulation runs must be 1000 timesteps or less.")
+
+    if start_time is None:
+        start_time = random.randint(0, length - number_of_timesteps)
+
+    if censor_list is None:
+        censor_list = []
+
+    index_range_to_use = [x for x in range(start_time, start_time + num_timesteps)]
+    indexed_data = data.iloc[index_range_to_use]
+    censored_series = indexed_data[role].apply(lambda x: x in censor_list).to_list()
+
+    return censored_series
+
+
+
+
+#################################################
+## End censorship time series information     ## 
+################################################
+
+
+
 SINGLE_RUN_PARAMS = AztecModelParams(
     label="default",
     timestep_in_blocks=1,
@@ -288,6 +331,9 @@ SINGLE_RUN_PARAMS = AztecModelParams(
     rewards_to_provers=0.3,  # Assumption: Reward Share
     rewards_to_relay=0.01,  # Assumption: Reward Share
 
+    censorship_series_builder = ALWAYS_FALSE_SERIES,  # Iniital Assumptions: No Censorship
+    censorship_series_validator = ALWAYS_FALSE_SERIES, # Iniital Assumption: No Censorship
+
     gwei_to_tokens=1e-9,
     gas_estimators=DEFAULT_DETERMINISTIC_GAS_ESTIMATOR,
     tx_estimators=DEFAULT_DETERMINISTIC_TX_ESTIMATOR,
@@ -302,3 +348,34 @@ SINGLE_RUN_PARAMS = AztecModelParams(
     safety_factor_rollup_proof = 0.0,
     past_gas_weight_fraction = 0.9
 )
+
+def build_censor_params(data: pd.DataFrame, 
+                        censoring_builders: List[str],
+                        censoring_validators: List[str],
+                        start_time: int = None,
+                        num_timesteps:int = 1000):
+
+    BUFFER = 10 #XXX: To relate L1 blocks to model time steps
+    practical_num_timesteps = BUFFER * num_timesteps
+
+    if start_time is None:
+        data_length = len(data)
+        start_time = random.randint(0, data_length - (practical_num_timesteps + 1))
+    
+    # XXX: Currently doubling number of timesteps due to weird out-of-range errors on long runs. 
+
+    censorship_builder_data = build_censor_series_from_role(data = data,
+                                                           censor_list = censoring_builders,
+                                                           start_time = start_time,
+                                                           num_timesteps = practical_num_timesteps,
+                                                           role = 'builder')
+    censorship_validator_data = build_censor_series_from_role(data = data,
+                                                           censor_list = censoring_validators,
+                                                           start_time = start_time,
+                                                           num_timesteps = practical_num_timesteps,
+                                                           role = 'validator')
+
+    censorship_info_dict = {"censorship_series_builder": [censorship_builder_data],
+                   "censorship_series_validator": [censorship_validator_data]}
+
+    return censorship_info_dict

@@ -7,6 +7,7 @@ import pandas as pd
 import sys
 import os
 from functools import partialmethod
+from inspect import signature, getfile
 
 
 class HiddenPrints:
@@ -103,6 +104,54 @@ def sim_run(
             pass
         else:
             df = add_parameter_labels(configs, df)
+            for indx in df.index:
+                f = df.loc[indx, "gas_estimators"].proposal
+                if type(f) != str:
+                    df.loc[indx, "gas_estimators"].proposal = (
+                        f"{f.__name__}[{signature(f)}]|{getfile(f)}"
+                    )
+
+                f = df.loc[indx, "gas_estimators"].commitment_bond
+                if type(f) != str:
+                    df.loc[indx, "gas_estimators"].commitment_bond = (
+                        f"{f.__name__}[{signature(f)}]|{getfile(f)}"
+                    )
+
+                f = df.loc[indx, "gas_estimators"].content_reveal
+                if type(f) != str:
+                    df.loc[indx, "gas_estimators"].content_reveal = (
+                        f"{f.__name__}[{signature(f)}]|{getfile(f)}"
+                    )
+
+                f = df.loc[indx, "gas_estimators"].content_reveal_blob
+                if type(f) != str:
+                    df.loc[indx, "gas_estimators"].content_reveal_blob = (
+                        f"{f.__name__}[{signature(f)}]|{getfile(f)}"
+                    )
+
+                f = df.loc[indx, "gas_estimators"].rollup_proof
+                if type(f) != str:
+                    df.loc[indx, "gas_estimators"].rollup_proof = (
+                        f"{f.__name__}[{signature(f)}]|{getfile(f)}"
+                    )
+
+                f = df.loc[indx, "tx_estimators"].transaction_count
+                if type(f) != str:
+                    df.loc[indx, "tx_estimators"].transaction_count = (
+                        f"{f.__name__}[{signature(f)}]|{getfile(f)}"
+                    )
+
+                f = df.loc[indx, "tx_estimators"].proposal_average_size
+                if type(f) != str:
+                    df.loc[indx, "tx_estimators"].proposal_average_size = (
+                        f"{f.__name__}[{signature(f)}]|{getfile(f)}"
+                    )
+
+                f = df.loc[indx, "tx_estimators"].transaction_average_fee_per_size
+                if type(f) != str:
+                    df.loc[indx, "tx_estimators"].transaction_average_fee_per_size = (
+                        f"{f.__name__}[{signature(f)}]|{getfile(f)}"
+                    )
 
         # Based on Vitor Marthendal (@marthendalnunes) snippet
         if use_label == True:
