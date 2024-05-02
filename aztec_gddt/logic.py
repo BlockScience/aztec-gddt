@@ -403,7 +403,7 @@ def p_commit_bond(
                 SAFETY_BUFFER = params['safety_factor_commit_bond'] * fee
 
                 expected_l2_blocks_per_day = params['l1_blocks_per_day'] / \
-                    max_phase_duration(params)
+                    total_phase_duration(params)
 
                 expected_rewards = params['daily_block_reward']
                 expected_rewards *= rewards_to_sequencer(params)
@@ -551,7 +551,7 @@ def p_reveal_content(
                 # Assumption: Agents have extra costs / profit considerations and need a safety buffer
                 SAFETY_BUFFER = params['safety_factor_reveal_content'] * fee 
                 expected_l2_blocks_per_day = params['l1_blocks_per_day'] / \
-                    max_phase_duration(params)
+                    total_phase_duration(params)
 
                 expected_rewards = params['daily_block_reward']
                 expected_rewards *= rewards_to_sequencer(params)
@@ -689,7 +689,7 @@ def p_submit_proof(
                 # Assumption: Agents have extra costs / profit considerations and need a safety buffer
                 SAFETY_BUFFER = params['safety_factor_rollup_proof'] * fee
                 expected_l2_blocks_per_day = params['l1_blocks_per_day'] / \
-                    max_phase_duration(params)
+                    total_phase_duration(params)
 
                 expected_rewards = params['daily_block_reward']
                 expected_rewards *= params['rewards_to_provers']
@@ -771,6 +771,9 @@ def p_race_mode(
     new_transactions: list[TransactionL1] = list()
 
     max_phase_duration = params["phase_duration_race_max_blocks"]
+    
+    # NOTE: Logic of race mode is different.
+    # No check here for L1 censorship.
 
     if process is None:
         pass
@@ -1039,7 +1042,7 @@ def p_block_reward(
         # Assumption: this assumes that the average L2 block duration
         # will be the max L2 block duration
         expected_l2_blocks_per_day = params['l1_blocks_per_day'] / \
-            max_phase_duration(params)
+            total_phase_duration(params)
         reward = params['daily_block_reward'] / expected_l2_blocks_per_day
     else:
         reward = 0
