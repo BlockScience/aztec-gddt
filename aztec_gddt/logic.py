@@ -426,9 +426,11 @@ def p_commit_bond(
                         probability=trial_probability(params['phase_duration_commit_bond_max_blocks'],
                                                       params['final_probability'])
                     )
-                    gas_fee_l1_acceptable = (
-                        state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
-                    )
+                    # gas_fee_l1_acceptable = (
+                    #     state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
+                    # )
+
+                    gas_fee_l1_acceptable = True #XXX: Temporary economic assumption
                     
                     time_l1 = state["time_l1"]
                     block_is_uncensored = not(
@@ -578,9 +580,12 @@ def p_reveal_content(
                 gas_fee_blob_acceptable = (
                     state["gas_fee_blob"] <= params["blob_gas_threshold_for_tx"]
                 )
-                gas_fee_l1_acceptable = (
-                    state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
-                )
+
+                # gas_fee_l1_acceptable = (
+                #     state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
+                # )
+                
+                gas_fee_l1_acceptable = True
 
                 time_l1 = state["time_l1"]
                 block_is_uncensored = not(
@@ -711,9 +716,11 @@ def p_submit_proof(
                     probability=trial_probability(params['phase_duration_rollup_max_blocks'],
                                                   params['final_probability'])
                 )
-                gas_fee_l1_acceptable = (
-                    state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
-                )
+
+                # gas_fee_l1_acceptable = (
+                #     state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
+                # )
+                gas_fee_l1_acceptable = True #XXX: Assume gas fee is acceptable. 
 
                 time_l1 = state["time_l1"]
                 block_is_uncensored = not(
@@ -883,17 +890,17 @@ def s_transactions_new_proposals(
                     size = params["tx_estimators"].proposal_average_size(state)
                     public_share = 0.5  # Assumption: Share of public function calls 
 
-                    gas_fee_l1_acceptable = (
-                    state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
-                    )
+                    # gas_fee_l1_acceptable = (
+                    # state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
+                    # )
+
+                    gas_fee_l1_acceptable = True #XXX: Temporary economic assumption
 
                     time_l1 = state["time_l1"]
                     block_is_uncensored = not(
                             params["censorship_series_builder"][time_l1]
                             or params["censorship_series_validator"][time_l1]
                             )
-
-
 
                     if (gas_fee_l1_acceptable
                         and block_is_uncensored
