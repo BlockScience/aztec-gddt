@@ -81,3 +81,16 @@ def trial_probability(n_trials: int,
     Calculates the probability for an individual trial. 
     """
     return 1 - (1 - sample_probability) ** (1 / n_trials)
+
+
+
+def check_for_censorship(params: AztecModelParams, state: AztecModelState) -> bool:
+    time_l1 = state["time_l1"]
+
+    # XXX: If there's no data, then assume that is uncensored.
+    block_is_uncensored = not(
+                                params["censorship_series_builder"].get(time_l1, True)
+                                or params["censorship_series_validator"].get(time_l1, True)
+                                )
+    
+    return block_is_uncensored

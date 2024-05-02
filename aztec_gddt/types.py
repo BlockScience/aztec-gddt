@@ -311,8 +311,8 @@ class AztecModelParams(TypedDict):
     rewards_to_provers: Percentage
     rewards_to_relay: Percentage
 
-    censorship_series_builder: Optional[Sequence] 
-    censorship_series_validator: Optional[Sequence]
+    censorship_series_builder: dict[L1Blocks, bool]
+    censorship_series_validator: dict[L1Blocks, bool]
 
     gas_estimators: L1GasEstimators
     tx_estimators: UserTransactionEstimators
