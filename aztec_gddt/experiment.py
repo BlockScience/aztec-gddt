@@ -127,15 +127,15 @@ def psuu_exploratory_run(N_sweep_samples=-1,
 
     for _ in range(N_sequencer):
         a = Agent(uuid=uuid4(),
-                  balance=max(norm.rvs(50, 20), 1),
+                  balance=100_000,
                   is_sequencer=True,
                   is_prover=False,
                   is_relay=False,
-                  staked_amount=32)
+                  staked_amount=32 * 100)
         Sqn3Prv3_agents.append(a)
     for _ in range(N_prover):
         a = Agent(uuid=uuid4(),
-                  balance=max(norm.rvs(160, 10), 16),
+                  balance=100_000,
                   is_sequencer=False,
                   is_prover=True,
                   is_relay=False,
@@ -169,9 +169,6 @@ def psuu_exploratory_run(N_sweep_samples=-1,
 
         phase_duration_race_min_blocks=[0],
         phase_duration_race_max_blocks=[6],
-
-        #                                        rewards_to_provers=[0.3, 0.5],
-        #                                        rewards_to_relay=[0.0, 0.01],
 
         gas_estimators=[DEFAULT_DETERMINISTIC_GAS_ESTIMATOR],
         tx_estimators=[DEFAULT_DETERMINISTIC_TX_ESTIMATOR],
