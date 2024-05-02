@@ -18,7 +18,7 @@ N_INITIAL_AGENTS = 3
 BASE_AGENTS = [
     Agent(
         uuid="relay",
-        balance=0, 
+        balance=0,
         is_sequencer=False,
         is_prover=False,
         is_relay=True,
@@ -274,30 +274,36 @@ def build_censor_series_from_role(data: pd.DataFrame,
                                   role: str,
                                   censor_list: list[str],
                                   start_time: int,
-                                  num_timesteps: int = 1000) -> dict[L1Blocks, bool]:
+                                  num_timesteps: int = 1000,
+                                  start_time_is_block_no: bool = False) -> dict[L1Blocks, bool]:
 
     # XXX: this assumes that the DataFrame has a unique, non-missing measurement
     # for each L1 time.
     # L1 Time.
     sorted_data = data.sort_values(by='date')
 
-    # HACK: Currently we have hard-coded timestep limits.
-    if num_timesteps > 1000:
-        Exception("Currently all simulation runs must be 1000 timesteps or less.")
-
     if censor_list is None:
         censor_list = []
 
-    index_range_to_use: List[int] = [x for x in range(
-        start_time, start_time + num_timesteps)]
-    
-    indexed_data: pd.DataFrame = sorted_data.iloc[index_range_to_use]
+    if start_time_is_block_no:
+        relevant_df = sorted_data.query(f"(block_number >= {start_time}) & (block_number < {start_time + num_timesteps})")
+        censored_list = relevant_df[role].apply(
+            lambda x: x in censor_list).to_list()
+        
+        index_range_to_use: List[int] = [x for x in range(
+            0, 0 + num_timesteps)]
+        
+        censored_dict = dict(zip(index_range_to_use, censored_list))
+    else:
+        index_range_to_use: List[int] = [x for x in range(
+            start_time, start_time + num_timesteps)]
 
-    censored_list: list[bool] = indexed_data[role].apply(
-        lambda x: x in censor_list).to_list()
+        indexed_data: pd.DataFrame = sorted_data.iloc[index_range_to_use]
 
-    censored_dict = dict(zip(index_range_to_use, censored_list))
+        censored_list: list[bool] = indexed_data[role].apply(
+            lambda x: x in censor_list).to_list()
 
+        censored_dict = dict(zip(index_range_to_use, censored_list))
     return censored_dict
 
 
@@ -317,15 +323,15 @@ def build_censor_params(data: pd.DataFrame,
     # XXX: Currently doubling number of timesteps due to weird out-of-range errors on long runs.
 
     censorship_builder_data: dict[L1Blocks, bool] = build_censor_series_from_role(data=data,
-                                                            censor_list=censoring_builders,
-                                                            start_time=start_time,
-                                                            num_timesteps=practical_num_timesteps,
-                                                            role='builder')
+                                                                                  censor_list=censoring_builders,
+                                                                                  start_time=start_time,
+                                                                                  num_timesteps=practical_num_timesteps,
+                                                                                  role='builder')
     censorship_validator_data: dict[L1Blocks, bool] = build_censor_series_from_role(data=data,
-                                                              censor_list=censoring_validators,
-                                                              start_time=start_time,
-                                                              num_timesteps=practical_num_timesteps,
-                                                              role='validator')
+                                                                                    censor_list=censoring_validators,
+                                                                                    start_time=start_time,
+                                                                                    num_timesteps=practical_num_timesteps,
+                                                                                    role='validator')
 
     censorship_info_dict = {"censorship_series_builder": [censorship_builder_data],
                             "censorship_series_validator": [censorship_validator_data]}

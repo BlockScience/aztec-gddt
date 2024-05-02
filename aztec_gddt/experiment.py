@@ -151,6 +151,56 @@ def psuu_exploratory_run(N_sweep_samples=-1,
 
     sweep_params = {k: [v] for k, v in SINGLE_RUN_PARAMS.items()}
 
+    N_SAMPLES_CENSORSHIP_TS = 50
+
+    CENSORING_BUILDERS = ['beaverbuild.org', 'rsync-builder.xyz', 'Flashbots',
+                          'BuildAI (https://buildai.net)', 'Gambit Labs', 'boba-builder.com',
+                          'Builder + www.btcs.com', 'builder0x69',  '0x83bee517',
+                          'BloXroute', 'I can haz block', 'EigenPhi',
+                          'Edennetwork', 'blockbeelder']
+
+    CHERRY_PICKED_BLOCK_NUMBERS = [
+        19427023,
+        19497229,
+        19564017,
+        19598924,
+        19642990,
+        19430116,
+        19457879,
+        19614134,
+        19602101,
+        19475312,
+        19543729,
+        19640128
+        ]
+
+    N_RANDOM_SAMPLES_CENSORSHIP_TS = max(
+        N_SAMPLES_CENSORSHIP_TS - len(CHERRY_PICKED_BLOCK_NUMBERS), 0)
+
+    # XXX: only take into consideration points after DENCUN
+    censorship_data = pd.read_parquet(
+        'data/auxiliary/eth_builder_validator_data.parquet.gz').query(f"slot > 8626718")
+
+    SAFETY_MARGIN = 7
+    SAMPLED_BLOCK_NUMBERS = (censorship_data
+                             .block_number
+                             .iloc[:-(N_timesteps * SAFETY_MARGIN)]
+                             .sample(N_RANDOM_SAMPLES_CENSORSHIP_TS)
+                             .astype(int)
+                             .tolist())
+
+    ALL_BLOCK_NUMBERS = CHERRY_PICKED_BLOCK_NUMBERS + SAMPLED_BLOCK_NUMBERS
+
+    CENSORSHIP_SERIES_LIST = []
+    for block_no in ALL_BLOCK_NUMBERS:
+        ts = build_censor_series_from_role(data=censorship_data,
+                                        censor_list=CENSORING_BUILDERS,
+                                        start_time=block_no,
+                                        num_timesteps=N_timesteps * SAFETY_MARGIN,
+                                        role='builder',
+                                        start_time_is_block_no=True)
+        CENSORSHIP_SERIES_LIST.append(ts)
+
     # HACK: if min duration is `inf`, it will be dynamically set to the max duration
     # after doing the `sweep_cartesian_product`
     sweep_params_upd: dict[str, list] = dict(
@@ -175,6 +225,8 @@ def psuu_exploratory_run(N_sweep_samples=-1,
         slash_params=[SLASH_PARAMS],
         gas_fee_l1_time_series=[zero_timeseries],
         gas_fee_blob_time_series=[zero_timeseries],
+        censorship_series_builder=CENSORSHIP_SERIES_LIST,
+        censorship_series_validator=[ALWAYS_FALSE_SERIES]
     )
 
     sweep_params = {**sweep_params, **sweep_params_upd}  # type: ignore
@@ -220,7 +272,8 @@ def psuu_exploratory_run(N_sweep_samples=-1,
 
     param_df = pd.DataFrame(sweep_params_cartesian_product)
     for kwargs in inf_to_max_duration_cols:
-        param_df.loc[:, kwargs['min_col']] = param_df.apply(inf_to_max_duration, axis='columns', **kwargs).astype(int)
+        param_df.loc[:, kwargs['min_col']] = param_df.apply( # type: ignore
+            inf_to_max_duration, axis='columns', **kwargs).astype(int) # type: ignore
 
     sweep_params_cartesian_product = param_df.to_dict(orient='list')
 
