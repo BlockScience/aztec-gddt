@@ -4,6 +4,7 @@ from pathlib import Path
 
 from cadCAD.tools.preparation import sweep_cartesian_product  # type: ignore
 from aztec_gddt.params import INITIAL_STATE
+from aztec_gddt.psuu.tensor_transform import timestep_tensor_to_trajectory_tensor
 from aztec_gddt.params import SINGLE_RUN_PARAMS, TIMESTEPS, BASE_AGENTS_DICT
 from aztec_gddt.params import *
 from aztec_gddt.structure import AZTEC_MODEL_BLOCKS
@@ -18,6 +19,12 @@ from tqdm.auto import tqdm  # type: ignore
 from joblib import Parallel, delayed  # type: ignore
 import logging
 from aztec_gddt import DEFAULT_LOGGER
+import boto3  # type: ignore
+import os
+from glob import glob
+
+CLOUD_BUCKET_NAME = 'aztec-gddt'
+
 logger = logging.getLogger(DEFAULT_LOGGER)
 
 
@@ -111,7 +118,9 @@ def psuu_exploratory_run(N_sweep_samples=-1,
                          output_path='',
                          timestep_tensor_prefix='',
                          N_sequencer=10,
-                         N_prover=10) -> Optional[DataFrame]:
+                         N_prover=10,
+                         base_folder="",
+                         cloud_stream=True) -> Optional[DataFrame]:
     """Function which runs the cadCAD simulations
 
     Returns:
@@ -172,7 +181,7 @@ def psuu_exploratory_run(N_sweep_samples=-1,
         19475312,
         19543729,
         19640128
-        ]
+    ]
 
     N_RANDOM_SAMPLES_CENSORSHIP_TS = max(
         N_SAMPLES_CENSORSHIP_TS - len(CHERRY_PICKED_BLOCK_NUMBERS), 0)
@@ -194,11 +203,11 @@ def psuu_exploratory_run(N_sweep_samples=-1,
     CENSORSHIP_SERIES_LIST = []
     for block_no in ALL_BLOCK_NUMBERS:
         ts = build_censor_series_from_role(data=censorship_data,
-                                        censor_list=CENSORING_BUILDERS,
-                                        start_time=block_no,
-                                        num_timesteps=N_timesteps * SAFETY_MARGIN,
-                                        role='builder',
-                                        start_time_is_block_no=True)
+                                           censor_list=CENSORING_BUILDERS,
+                                           start_time=block_no,
+                                           num_timesteps=N_timesteps * SAFETY_MARGIN,
+                                           role='builder',
+                                           start_time_is_block_no=True)
         CENSORSHIP_SERIES_LIST.append(ts)
 
     # HACK: if min duration is `inf`, it will be dynamically set to the max duration
@@ -272,8 +281,8 @@ def psuu_exploratory_run(N_sweep_samples=-1,
 
     param_df = pd.DataFrame(sweep_params_cartesian_product)
     for kwargs in inf_to_max_duration_cols:
-        param_df.loc[:, kwargs['min_col']] = param_df.apply( # type: ignore
-            inf_to_max_duration, axis='columns', **kwargs).astype(int) # type: ignore
+        param_df.loc[:, kwargs['min_col']] = param_df.apply(  # type: ignore
+            inf_to_max_duration, axis='columns', **kwargs).astype(int)  # type: ignore
 
     sweep_params_cartesian_product = param_df.to_dict(orient='list')
 
@@ -312,11 +321,26 @@ def psuu_exploratory_run(N_sweep_samples=-1,
             sim_df = sim_run(*sim_args, exec_mode='single', assign_params=assign_params,
                              supress_cadCAD_print=supress_cadCAD_print)
             output_filename = Path(output_path) / \
-                f'{timestep_tensor_prefix}_{i_chunk}.pkl.zip'
+                f'{timestep_tensor_prefix}-{i_chunk}.pkl.zip'
             sim_df['simulation'] = i_chunk
             logger.debug(
                 f"n_groups: {sim_df.groupby(['simulation', 'run', 'subset']).ngroups}")
+
             sim_df.to_pickle(output_filename)
+            agg_df = timestep_tensor_to_trajectory_tensor(sim_df)
+            agg_output_filename = Path(output_path) / \
+                f"trajectory_tensor-{i_chunk}.csv.zip"
+            agg_df.to_csv(agg_output_filename)
+            if cloud_stream:
+                session = boto3.Session()
+                s3 = session.client("s3")
+                s3.upload_file(str(agg_output_filename),
+                               CLOUD_BUCKET_NAME,
+                               str(Path(base_folder) / f"trajectory_tensor-{i_chunk}.pkl.zip"))
+                s3.upload_file(output_filename,
+                               CLOUD_BUCKET_NAME,
+                               str(Path(base_folder) / f'{timestep_tensor_prefix}-{i_chunk}.pkl.zip'))
+                os.remove(str(output_filename))
 
         args = enumerate(split_dicts)
         if parallelize_jobs:
@@ -340,6 +364,19 @@ def psuu_exploratory_run(N_sweep_samples=-1,
         f"PSuU Exploratory Run finished at {end_start_time}, ({end_start_time - sim_start_time} since sim start)")
     logger.info(
         f"PSuU Exploratory Run Performance Numbers; Duration (s): {duration:,.2f}, Measurements Per Second: {N_measurements/duration:,.2f} M/s, Measurements per Job * Second: {N_measurements/(duration * N_jobs):,.2f} M/(J*s)")
+
+    if cloud_stream:
+        files = glob(str(Path(output_path) / f"trajectory_tensor-*.csv.zip"))
+        dfs = []
+        for file in files:
+            dfs.append(pd.read_csv(file).reset_index())
+        agg_df = pd.concat(dfs)
+        agg_df.to_pickle(str(Path(output_path) / f"trajectory_tensor.csv.zip"))
+        session = boto3.Session()
+        s3 = session.client("s3")
+        s3.upload_file(str(Path(output_path) / f"trajectory_tensor.csv.zip"),
+                        CLOUD_BUCKET_NAME,
+                        str(Path(base_folder) / f"trajectory_tensor.csv.zip"))
 
     if 'sim_df' in locals():
         return sim_df

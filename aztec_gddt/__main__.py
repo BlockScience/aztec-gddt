@@ -83,9 +83,10 @@ def main(process: bool,
                          parallelize_jobs=~no_parallelize,
                          supress_cadCAD_print=True,
                          output_path=str(output_path),
-                         timestep_tensor_prefix=timestep_tensor_prefix)
+                         timestep_tensor_prefix=timestep_tensor_prefix,
+                         base_folder=folder,
+                         cloud_stream=upload_to_cloud)
     
-
     if upload_to_cloud:
         files: list[str] = os.listdir(output_path)
         for f in files:
