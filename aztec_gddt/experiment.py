@@ -160,7 +160,7 @@ def psuu_exploratory_run(N_sweep_samples=-1,
 
     sweep_params = {k: [v] for k, v in SINGLE_RUN_PARAMS.items()}
 
-    N_SAMPLES_CENSORSHIP_TS = 50
+    N_SAMPLES_CENSORSHIP_TS = 100
 
     CENSORING_BUILDERS = ['beaverbuild.org', 'rsync-builder.xyz', 'Flashbots',
                           'BuildAI (https://buildai.net)', 'Gambit Labs', 'boba-builder.com',
