@@ -344,8 +344,10 @@ def psuu_exploratory_run(N_sweep_samples=-1,
 
         args = enumerate(split_dicts)
         if parallelize_jobs:
-            Parallel(n_jobs=processes)(delayed(run_chunk)(i_chunk, sweep_params) for (
-                i_chunk, sweep_params) in tqdm(args, desc='Simulation Chunks', total=len(split_dicts)))
+            Parallel(n_jobs=processes)(
+                delayed(run_chunk)(i_chunk, sweep_params)
+                for (i_chunk, sweep_params) in tqdm(args, desc='Simulation Chunks', total=len(split_dicts))
+            )
         else:
             for (i_chunk, sweep_params) in tqdm(args):
                 sim_args = (initial_state,
@@ -375,8 +377,8 @@ def psuu_exploratory_run(N_sweep_samples=-1,
         session = boto3.Session()
         s3 = session.client("s3")
         s3.upload_file(str(Path(output_path) / f"trajectory_tensor.csv.zip"),
-                        CLOUD_BUCKET_NAME,
-                        str(Path(base_folder) / f"trajectory_tensor.csv.zip"))
+                       CLOUD_BUCKET_NAME,
+                       str(Path(base_folder) / f"trajectory_tensor.csv.zip"))
 
     if 'sim_df' in locals():
         return sim_df
