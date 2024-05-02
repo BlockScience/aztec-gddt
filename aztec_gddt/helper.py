@@ -64,7 +64,7 @@ def bernoulli_trial(probability: float) -> bool:
     return hit
 
 
-def max_phase_duration(p: AztecModelParams) -> L1Blocks:
+def total_phase_duration(p: AztecModelParams) -> L1Blocks:
     return (p['phase_duration_proposal_max_blocks'] +
             p['phase_duration_reveal_max_blocks'] +
             p['phase_duration_commit_bond_max_blocks'] +
@@ -77,4 +77,7 @@ def rewards_to_sequencer(p: AztecModelParams) -> Percentage:
 
 def trial_probability(n_trials: int,
                       sample_probability: Probability = 0.99) -> Probability:
+    """
+    Calculates the probability for an individual trial. 
+    """
     return 1 - (1 - sample_probability) ** (1 / n_trials)
