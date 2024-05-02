@@ -408,13 +408,16 @@ def p_commit_bond(
                 expected_rewards = params['daily_block_reward']
                 expected_rewards *= rewards_to_sequencer(params)
                 expected_rewards /= expected_l2_blocks_per_day
+                assert expected_rewards > 0, "COMMIT_BOND: Expected rewards should be positive."
 
                 expected_costs: float = params["op_cost_sequencer"]
                 expected_costs += fee
                 expected_costs += SAFETY_BUFFER
                 expected_costs *= params['gwei_to_tokens']
+                assert expected_costs == 0, "COMMIT_BOND: Expected costs should be 0."
 
                 payoff_reveal = expected_rewards - expected_costs
+                assert payoff_reveal >= 0, "COMMIT_BOND: Payoff reveal should occur."
 
                 if payoff_reveal >= 0:
 
