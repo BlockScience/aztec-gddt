@@ -436,16 +436,10 @@ def p_commit_bond(
                     gas_fee_l1_acceptable = True #XXX: Temporary economic assumption
                     
                     time_l1 = state["time_l1"]
-                    # block_is_uncensored = not(
-                    #                           params["censorship_series_builder"][time_l1]
-                    #                           or params["censorship_series_validator"][time_l1]
-                    #                           )
-
-                    builder_censors = bernoulli_trial(probability = params['censorship_probability_builder'])
-                    validator_censors = bernoulli_trial(probability = params['censorship_probability_validator'])
                     block_is_uncensored = not(
-                                            builder_censors or validator_censors
-                                            )
+                                              params["censorship_series_builder"][time_l1]
+                                              or params["censorship_series_validator"][time_l1]
+                                              )
                     
                     if (agent_decides_to_reveal_commit_bond 
                         and gas_fee_l1_acceptable
@@ -601,15 +595,11 @@ def p_reveal_content(
                 
                 gas_fee_l1_acceptable = True
 
-                # time_l1 = state["time_l1"]
-                # block_is_uncensored = not(
-                #                           params["censorship_series_builder"][time_l1]
-                #                           or params["censorship_series_validator"][time_l1]
-                #                           )
-
-                builder_censors = bernoulli_trial(probability = params['censorship_probability_builder'])
-                validator_censors = bernoulli_trial(probability = params['censorship_probability_validator'])
-                block_is_uncensored = not(builder_censors or validator_censors)
+                time_l1 = state["time_l1"]
+                block_is_uncensored = not(
+                                          params["censorship_series_builder"][time_l1]
+                                          or params["censorship_series_validator"][time_l1]
+                                          )
 
                 if (
                     agent_expects_profit
@@ -743,16 +733,10 @@ def p_submit_proof(
                 gas_fee_l1_acceptable = True #XXX: Assume gas fee is acceptable. 
 
                 time_l1 = state["time_l1"]
-                # block_is_uncensored = not(
-                #                           params["censorship_series_builder"][time_l1]
-                #                           or params["censorship_series_validator"][time_l1]
-                #                           )
-
-                builder_censors = bernoulli_trial(probability = params['censorship_probability_builder'])
-                validator_censors = bernoulli_trial(probability = params['censorship_probability_validator'])
                 block_is_uncensored = not(
-                                         builder_censors or validator_censors
-                                         )
+                                          params["censorship_series_builder"][time_l1]
+                                          or params["censorship_series_validator"][time_l1]
+                                          )
 
                 if (
                     agent_decides_to_reveal_rollup_proof 
@@ -923,16 +907,10 @@ def s_transactions_new_proposals(
                     gas_fee_l1_acceptable = True #XXX: Temporary economic assumption
 
                     time_l1 = state["time_l1"]
-                    # block_is_uncensored = not(
-                    #         params["censorship_series_builder"][time_l1]
-                    #         or params["censorship_series_validator"][time_l1]
-                    #         )
-
-                    builder_censors = bernoulli_trial(probability = params['censorship_probability_builder'])
-                    validator_censors = bernoulli_trial(probability = params['censorship_probability_validator'])
                     block_is_uncensored = not(
-                                            builder_censors or validator_censors
-                                            )
+                            params["censorship_series_builder"][time_l1]
+                            or params["censorship_series_validator"][time_l1]
+                            )
 
                     if (gas_fee_l1_acceptable
                         and block_is_uncensored
