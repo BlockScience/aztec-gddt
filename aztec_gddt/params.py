@@ -164,6 +164,8 @@ initial_time = floor(0.25 * TIMESTEPS)  # Assumption: 25% of timesteps
 final_time = floor(0.25 * TIMESTEPS)  # Assumption: 25% of timesteps
 
 
+zero_timeseries = np.zeros(TIMESTEPS)
+
 single_shock_gas_fee_l1_time_series = np.zeros(TIMESTEPS)
 single_shock_gas_fee_blob_time_series = np.zeros(TIMESTEPS)
 

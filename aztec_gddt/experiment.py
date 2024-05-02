@@ -173,8 +173,8 @@ def psuu_exploratory_run(N_sweep_samples=-1,
         gas_estimators=[DEFAULT_DETERMINISTIC_GAS_ESTIMATOR],
         tx_estimators=[DEFAULT_DETERMINISTIC_TX_ESTIMATOR],
         slash_params=[SLASH_PARAMS],
-        gas_fee_l1_time_series=GAS_FEE_L1_TIME_SERIES_LIST,
-        gas_fee_blob_time_series=GAS_FEE_BLOB_TIME_SERIES_LIST,
+        gas_fee_l1_time_series=[zero_timeseries],
+        gas_fee_blob_time_series=[zero_timeseries],
     )
 
     sweep_params = {**sweep_params, **sweep_params_upd}  # type: ignore
