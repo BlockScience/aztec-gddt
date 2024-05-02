@@ -420,8 +420,6 @@ def p_commit_bond(
                 payoff_reveal = expected_rewards - expected_costs
                 assert payoff_reveal >= 0, "COMMIT_BOND: Payoff reveal should occur."
 
-                payoff_reveal = 100 # XXX: Make sure payoff_reveal is positive. 
-
                 if payoff_reveal >= 0:
 
                     # If duration is not expired, do  a trial to see if bond is commited
