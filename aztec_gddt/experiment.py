@@ -379,7 +379,7 @@ def psuu_exploratory_run(N_sweep_samples=-1,
         for file in files:
             dfs.append(pd.read_csv(file).reset_index())
         agg_df = pd.concat(dfs)
-        agg_df.to_pickle(str(Path(output_path) / f"trajectory_tensor.csv.zip"))
+        agg_df.to_csv(str(Path(output_path) / f"trajectory_tensor.csv.zip"))
         session = boto3.Session()
         s3 = session.client("s3")
         s3.upload_file(str(Path(output_path) / f"trajectory_tensor.csv.zip"),
