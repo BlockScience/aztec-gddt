@@ -350,15 +350,15 @@ SINGLE_RUN_PARAMS = AztecModelParams(
     # Phase Durations
     # Assumption: Sweeping sets upper bound and lower bound per upper bound for fixed / dynamic
     phase_duration_proposal_min_blocks=0,
-    phase_duration_proposal_max_blocks=10,  # Assumption
+    phase_duration_proposal_max_blocks=3,  # Assumption
     phase_duration_reveal_min_blocks=0,  # Assumption
-    phase_duration_reveal_max_blocks=10,  # Assumption
+    phase_duration_reveal_max_blocks=3,  # Assumption
     phase_duration_commit_bond_min_blocks=0,  # Assumption
-    phase_duration_commit_bond_max_blocks=10,  # Assumption
+    phase_duration_commit_bond_max_blocks=3,  # Assumption
     phase_duration_rollup_min_blocks=0,  # Assumption
-    phase_duration_rollup_max_blocks=30,  # Assumption
+    phase_duration_rollup_max_blocks=3,  # Assumption
     phase_duration_race_min_blocks=0,  # Assumption
-    phase_duration_race_max_blocks=30,  # Assumption
+    phase_duration_race_max_blocks=2,  # Assumption
 
     stake_activation_period=40,  # Assumption: Currently not impactful
     unstake_cooldown_period=40,  # Assumption: Currently not impactful
