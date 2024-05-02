@@ -238,6 +238,7 @@ class AztecModelState(TypedDict):
     cumm_block_rewards: Tokens
     cumm_fee_cashback: Tokens
     cumm_burn: Tokens
+    is_censored: bool
 
     token_supply: TokenSupply
 

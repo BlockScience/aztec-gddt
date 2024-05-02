@@ -103,6 +103,7 @@ INITIAL_STATE = AztecModelState(
     cumm_fee_cashback=INITIAL_CUMM_CASHBACK,
     cumm_burn=INITIAL_CUMM_BURN,
     token_supply=INITIAL_SUPPLY,
+    is_censored=False
 )
 
 INITIAL_STATE['token_supply'] = TokenSupply.from_state(INITIAL_STATE)
