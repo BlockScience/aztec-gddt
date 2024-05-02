@@ -399,22 +399,28 @@ def p_commit_bond(
                 # NOTE: Costs now include gas fees and safety buffer.
                 gas: Gas = params["gas_estimators"].commitment_bond(state)
                 fee = gas * state["gas_fee_l1"]
+
                 # Assumption: Agents have extra costs / profit considerations and need a safety buffer
                 SAFETY_BUFFER = params['safety_factor_commit_bond'] * fee
 
                 expected_l2_blocks_per_day = params['l1_blocks_per_day'] / \
-                    max_phase_duration(params)
+                    total_phase_duration(params)
 
-                expected_rewards = params['daily_block_reward']
-                expected_rewards *= rewards_to_sequencer(params)
-                expected_rewards /= expected_l2_blocks_per_day
+                # expected_rewards = params['daily_block_reward']
+                # expected_rewards *= rewards_to_sequencer(params)
+                # expected_rewards /= expected_l2_blocks_per_day
+                expected_rewards = 1 #XXX: Temporary to ignore economic assumptions. 
+                assert expected_rewards > 0, "COMMIT_BOND: Expected rewards should be positive."
 
-                expected_costs: float = params["op_cost_sequencer"]
-                expected_costs += fee
-                expected_costs += SAFETY_BUFFER
-                expected_costs *= params['gwei_to_tokens']
+                # expected_costs: float = params["op_cost_sequencer"]
+                # expected_costs += fee
+                # expected_costs += SAFETY_BUFFER
+                # expected_costs *= params['gwei_to_tokens']
+                expected_costs = 0 #XXX: Temporary to ignore economic assumptions. 
+                assert expected_costs == 0, "COMMIT_BOND: Expected costs should be 0."
 
                 payoff_reveal = expected_rewards - expected_costs
+                assert payoff_reveal >= 0, "COMMIT_BOND: Payoff should not be negative."
 
                 if payoff_reveal >= 0:
 
@@ -423,9 +429,11 @@ def p_commit_bond(
                         probability=trial_probability(params['phase_duration_commit_bond_max_blocks'],
                                                       params['final_probability'])
                     )
-                    gas_fee_l1_acceptable = (
-                        state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
-                    )
+                    # gas_fee_l1_acceptable = (
+                    #     state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
+                    # )
+
+                    gas_fee_l1_acceptable = True #XXX: Temporary economic assumption
                     
                     time_l1 = state["time_l1"]
                     block_is_uncensored = not(
@@ -548,30 +556,44 @@ def p_reveal_content(
                 # Assumption: Agents have extra costs / profit considerations and need a safety buffer
                 SAFETY_BUFFER = params['safety_factor_reveal_content'] * fee 
                 expected_l2_blocks_per_day = params['l1_blocks_per_day'] / \
-                    max_phase_duration(params)
+                    total_phase_duration(params)
 
-                expected_rewards = params['daily_block_reward']
-                expected_rewards *= rewards_to_sequencer(params)
-                expected_rewards /= expected_l2_blocks_per_day
+                # expected_rewards = params['daily_block_reward']
+                # expected_rewards *= rewards_to_sequencer(params)
+                # expected_rewards /= expected_l2_blocks_per_day
+                expected_rewards = 1 #XXX: Temporary to ignore economic assumptions. 
+                assert expected_rewards >= 0, "REVEAL_CONTENT: Expected rewards should be positive."
 
-                expected_costs: float = params["op_cost_sequencer"]
-                expected_costs += fee
-                expected_costs += SAFETY_BUFFER
-                expected_costs *= params['gwei_to_tokens']
+                
+                # expected_costs: float = params["op_cost_sequencer"]
+                # expected_costs += fee
+                # expected_costs += SAFETY_BUFFER
+                # expected_costs *= params['gwei_to_tokens']
+                expected_costs = 0 #XXX: Temporary to ignore economic assumptions. 
+                assert expected_costs == 0, "REVEAL_CONTENT: Expected costs should be zero."
+
 
                 payoff_reveal = expected_rewards - expected_costs
 
                 agent_expects_profit = payoff_reveal >= 0
+                assert agent_expects_profit, "REVEAL_CONTENT: Agent should be expecting profit."
+
                 agent_decides_to_reveal_block_content = bernoulli_trial(
                     probability=trial_probability(params['phase_duration_reveal_max_blocks'],
                                                   params['final_probability'])
                 )
-                gas_fee_blob_acceptable = (
-                    state["gas_fee_blob"] <= params["blob_gas_threshold_for_tx"]
-                )
-                gas_fee_l1_acceptable = (
-                    state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
-                )
+
+                # gas_fee_blob_acceptable = (
+                #     state["gas_fee_blob"] <= params["blob_gas_threshold_for_tx"]
+                # )
+
+                gas_fee_blob_acceptable = True
+
+                # gas_fee_l1_acceptable = (
+                #     state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
+                # )
+                
+                gas_fee_l1_acceptable = True
 
                 time_l1 = state["time_l1"]
                 block_is_uncensored = not(
@@ -680,28 +702,35 @@ def p_submit_proof(
                 # Assumption: Agents have extra costs / profit considerations and need a safety buffer
                 SAFETY_BUFFER = params['safety_factor_rollup_proof'] * fee
                 expected_l2_blocks_per_day = params['l1_blocks_per_day'] / \
-                    max_phase_duration(params)
+                    total_phase_duration(params)
 
-                expected_rewards = params['daily_block_reward']
-                expected_rewards *= params['rewards_to_provers']
-                expected_rewards /= expected_l2_blocks_per_day
+                # expected_rewards = params['daily_block_reward']
+                # expected_rewards *= params['rewards_to_provers']
+                # expected_rewards /= expected_l2_blocks_per_day
+                expected_rewards = 1
+                assert expected_rewards >= 0, "SUBMIT PROOF: Expected rewards should be positive."
 
-                expected_costs: float = params["op_cost_prover"]
-                expected_costs += fee
-                expected_costs += SAFETY_BUFFER
-                expected_costs *= params['gwei_to_tokens']
+                # expected_costs: float = params["op_cost_prover"]
+                # expected_costs += fee
+                # expected_costs += SAFETY_BUFFER
+                # expected_costs *= params['gwei_to_tokens']
+                expected_costs = 0
+                assert expected_costs == 0, "SUBMIT PROOF: Expected costs should be zero."
 
                 payoff_reveal = expected_rewards - expected_costs
 
                 agent_expects_profit = payoff_reveal >= 0
+                assert agent_expects_profit, "SUBMIT_PROOF: Agent should expect profit."
 
                 agent_decides_to_reveal_rollup_proof = bernoulli_trial(
                     probability=trial_probability(params['phase_duration_rollup_max_blocks'],
                                                   params['final_probability'])
                 )
-                gas_fee_l1_acceptable = (
-                    state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
-                )
+
+                # gas_fee_l1_acceptable = (
+                #     state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
+                # )
+                gas_fee_l1_acceptable = True #XXX: Assume gas fee is acceptable. 
 
                 time_l1 = state["time_l1"]
                 block_is_uncensored = not(
@@ -759,6 +788,9 @@ def p_race_mode(
     new_transactions: list[TransactionL1] = list()
 
     max_phase_duration = params["phase_duration_race_max_blocks"]
+    
+    # NOTE: Logic of race mode is different.
+    # No check here for L1 censorship.
 
     if process is None:
         pass
@@ -868,17 +900,17 @@ def s_transactions_new_proposals(
                     size = params["tx_estimators"].proposal_average_size(state)
                     public_share = 0.5  # Assumption: Share of public function calls 
 
-                    gas_fee_l1_acceptable = (
-                    state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
-                    )
+                    # gas_fee_l1_acceptable = (
+                    # state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
+                    # )
+
+                    gas_fee_l1_acceptable = True #XXX: Temporary economic assumption
 
                     time_l1 = state["time_l1"]
                     block_is_uncensored = not(
                             params["censorship_series_builder"][time_l1]
                             or params["censorship_series_validator"][time_l1]
                             )
-
-
 
                     if (gas_fee_l1_acceptable
                         and block_is_uncensored
@@ -1027,7 +1059,7 @@ def p_block_reward(
         # Assumption: this assumes that the average L2 block duration
         # will be the max L2 block duration
         expected_l2_blocks_per_day = params['l1_blocks_per_day'] / \
-            max_phase_duration(params)
+            total_phase_duration(params)
         reward = params['daily_block_reward'] / expected_l2_blocks_per_day
     else:
         reward = 0

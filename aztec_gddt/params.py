@@ -288,7 +288,37 @@ def build_censor_series_from_role(data: pd.DataFrame,
     censored_series = indexed_data[role].apply(lambda x: x in censor_list).to_list()
 
     return censored_series
+    
 
+def build_censor_params(data: pd.DataFrame, 
+                        censoring_builders: List[str],
+                        censoring_validators: List[str],
+                        start_time: int = None,
+                        num_timesteps:int = 1000):
+
+    practical_num_timesteps = L1_BUFFER * num_timesteps
+
+    if start_time is None:
+        data_length = len(data)
+        start_time = random.randint(0, data_length - (practical_num_timesteps + 1))
+    
+    # XXX: Currently doubling number of timesteps due to weird out-of-range errors on long runs. 
+
+    censorship_builder_data = build_censor_series_from_role(data = data,
+                                                           censor_list = censoring_builders,
+                                                           start_time = start_time,
+                                                           num_timesteps = practical_num_timesteps,
+                                                           role = 'builder')
+    censorship_validator_data = build_censor_series_from_role(data = data,
+                                                           censor_list = censoring_validators,
+                                                           start_time = start_time,
+                                                           num_timesteps = practical_num_timesteps,
+                                                           role = 'validator')
+
+    censorship_info_dict = {"censorship_series_builder": [censorship_builder_data],
+                   "censorship_series_validator": [censorship_validator_data]}
+
+    return censorship_info_dict
 
 
 
@@ -349,32 +379,3 @@ SINGLE_RUN_PARAMS = AztecModelParams(
     past_gas_weight_fraction = 0.9
 )
 
-def build_censor_params(data: pd.DataFrame, 
-                        censoring_builders: List[str],
-                        censoring_validators: List[str],
-                        start_time: int = None,
-                        num_timesteps:int = 1000):
-
-    practical_num_timesteps = L1_BUFFER * num_timesteps
-
-    if start_time is None:
-        data_length = len(data)
-        start_time = random.randint(0, data_length - (practical_num_timesteps + 1))
-    
-    # XXX: Currently doubling number of timesteps due to weird out-of-range errors on long runs. 
-
-    censorship_builder_data = build_censor_series_from_role(data = data,
-                                                           censor_list = censoring_builders,
-                                                           start_time = start_time,
-                                                           num_timesteps = practical_num_timesteps,
-                                                           role = 'builder')
-    censorship_validator_data = build_censor_series_from_role(data = data,
-                                                           censor_list = censoring_validators,
-                                                           start_time = start_time,
-                                                           num_timesteps = practical_num_timesteps,
-                                                           role = 'validator')
-
-    censorship_info_dict = {"censorship_series_builder": [censorship_builder_data],
-                   "censorship_series_validator": [censorship_validator_data]}
-
-    return censorship_info_dict
