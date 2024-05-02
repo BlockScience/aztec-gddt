@@ -158,11 +158,11 @@ def psuu_exploratory_run(N_sweep_samples=-1,
                                     # Phase Durations
                                         phase_duration_proposal_min_blocks=[0, 3],
                                         phase_duration_proposal_max_blocks=[3, 12], 
-                                        phase_duration_reveal_min_blocks = [0],
+                                        phase_duration_reveal_min_blocks = [0, 3],
                                         phase_duration_reveal_max_blocks = [3, 24], 
-                                        phase_duration_commit_bond_min_blocks = [0],
+                                        phase_duration_commit_bond_min_blocks = [0, 3],
                                         phase_duration_commit_bond_max_blocks=[3, 12], 
-                                        phase_duration_rollup_min_blocks = [0],
+                                        phase_duration_rollup_min_blocks = [0, 3],
                                         phase_duration_rollup_max_blocks=[15, 80],
                                         phase_duration_race_min_blocks = [0, 3],
                                         phase_duration_race_max_blocks=[3, 6], 
@@ -175,8 +175,8 @@ def psuu_exploratory_run(N_sweep_samples=-1,
                                         slash_params=[SLASH_PARAMS],
                                         gas_fee_l1_time_series=GAS_FEE_L1_TIME_SERIES_LIST,
                                         gas_fee_blob_time_series=GAS_FEE_BLOB_TIME_SERIES_LIST,
-                                        censorship_probability_builder = [0.0, 0.1],
-                                        censorship_probability_validator = [0.0, 0.1]
+                                        censorship_probability_builder = [0.0, 0.6, 0.8],
+                                        censorship_probability_validator = [0.0]
                                         )  
     
     sweep_params = {**sweep_params, **sweep_params_upd} # type: ignore
