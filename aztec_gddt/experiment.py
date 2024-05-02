@@ -175,6 +175,8 @@ def psuu_exploratory_run(N_sweep_samples=-1,
                                         slash_params=[SLASH_PARAMS],
                                         gas_fee_l1_time_series=GAS_FEE_L1_TIME_SERIES_LIST,
                                         gas_fee_blob_time_series=GAS_FEE_BLOB_TIME_SERIES_LIST,
+                                        censorship_probability_builder = [0.0, 0.1],
+                                        censorship_probability_validator = [0.0, 0.1]
                                         )  
     
     sweep_params = {**sweep_params, **sweep_params_upd} # type: ignore
