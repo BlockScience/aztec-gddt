@@ -577,9 +577,11 @@ def p_reveal_content(
                                                   params['final_probability'])
                 )
 
-                gas_fee_blob_acceptable = (
-                    state["gas_fee_blob"] <= params["blob_gas_threshold_for_tx"]
-                )
+                # gas_fee_blob_acceptable = (
+                #     state["gas_fee_blob"] <= params["blob_gas_threshold_for_tx"]
+                # )
+
+                gas_fee_blob_acceptable = True
 
                 # gas_fee_l1_acceptable = (
                 #     state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
