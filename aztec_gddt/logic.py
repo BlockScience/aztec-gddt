@@ -556,19 +556,25 @@ def p_reveal_content(
                 expected_rewards = params['daily_block_reward']
                 expected_rewards *= rewards_to_sequencer(params)
                 expected_rewards /= expected_l2_blocks_per_day
+                assert expected_rewards >= 0, "REVEAL_CONTENT: Expected rewards should be positive."
 
                 expected_costs: float = params["op_cost_sequencer"]
                 expected_costs += fee
                 expected_costs += SAFETY_BUFFER
                 expected_costs *= params['gwei_to_tokens']
+                assert expected_costs == 0, "REVEAL_CONTENT: Expected costs should be zero."
+
 
                 payoff_reveal = expected_rewards - expected_costs
 
                 agent_expects_profit = payoff_reveal >= 0
+                assert agent_expects_profit, "REVEAL_CONTENT: Agent should be expecting profit."
+
                 agent_decides_to_reveal_block_content = bernoulli_trial(
                     probability=trial_probability(params['phase_duration_reveal_max_blocks'],
                                                   params['final_probability'])
                 )
+
                 gas_fee_blob_acceptable = (
                     state["gas_fee_blob"] <= params["blob_gas_threshold_for_tx"]
                 )
