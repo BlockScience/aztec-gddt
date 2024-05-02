@@ -435,11 +435,7 @@ def p_commit_bond(
 
                     gas_fee_l1_acceptable = True #XXX: Temporary economic assumption
                     
-                    time_l1 = state["time_l1"]
-                    block_is_uncensored = not(
-                                              params["censorship_series_builder"][time_l1]
-                                              or params["censorship_series_validator"][time_l1]
-                                              )
+                    block_is_uncensored = check_for_censorship(params, state)
                     
                     if (agent_decides_to_reveal_commit_bond 
                         and gas_fee_l1_acceptable
@@ -595,11 +591,7 @@ def p_reveal_content(
                 
                 gas_fee_l1_acceptable = True
 
-                time_l1 = state["time_l1"]
-                block_is_uncensored = not(
-                                          params["censorship_series_builder"][time_l1]
-                                          or params["censorship_series_validator"][time_l1]
-                                          )
+                block_is_uncensored = check_for_censorship(params, state)
 
                 if (
                     agent_expects_profit
@@ -732,11 +724,7 @@ def p_submit_proof(
                 # )
                 gas_fee_l1_acceptable = True #XXX: Assume gas fee is acceptable. 
 
-                time_l1 = state["time_l1"]
-                block_is_uncensored = not(
-                                          params["censorship_series_builder"][time_l1]
-                                          or params["censorship_series_validator"][time_l1]
-                                          )
+                block_is_uncensored = check_for_censorship(params, state)
 
                 if (
                     agent_decides_to_reveal_rollup_proof 
@@ -749,13 +737,14 @@ def p_submit_proof(
                     updated_process.phase = SelectionPhase.finalized
                     updated_process.duration_in_current_phase = 0
                     transactions = state["transactions"]
+
                     commit_bond_id = updated_process.tx_commitment_bond
-                    commit_bond: CommitmentBond = transactions.get(
+                    commit_bond: CommitmentBond = transactions.get(  # type: ignore
                         commit_bond_id, None)  # type: ignore
                     who = commit_bond.prover_uuid
-                    gas: Gas = params['gas_estimators'].rollup_proof(
-                        state)  # TODO: Check?
-                    fee: Gwei = gas * state['gas_fee_l1']
+                    gas: Gas = params['gas_estimators'].rollup_proof(  # type: ignore
+                        state) # type: ignore
+                    fee: Gwei = gas * state['gas_fee_l1'] # type: ignore
 
                     tx = RollupProof(
                         who=who, when=state["time_l1"], uuid=uuid4(), gas=gas, fee=fee
@@ -906,11 +895,7 @@ def s_transactions_new_proposals(
 
                     gas_fee_l1_acceptable = True #XXX: Temporary economic assumption
 
-                    time_l1 = state["time_l1"]
-                    block_is_uncensored = not(
-                            params["censorship_series_builder"][time_l1]
-                            or params["censorship_series_validator"][time_l1]
-                            )
+                    block_is_uncensored = check_for_censorship(params, state)
 
                     if (gas_fee_l1_acceptable
                         and block_is_uncensored

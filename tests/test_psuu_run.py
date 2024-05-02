@@ -5,7 +5,7 @@ import pytest as pt
 import pandera as pa
 
 
-@pt.fixture(scope="module", params=[(10, 2, 1_000), (500, 1, 20)])
+@pt.fixture(scope="module", params=[(10, 2, 1_000), (250, 2, 20)])
 def sim_df(request) -> pd.DataFrame:
     (N_sweep_samples, N_samples, N_timesteps) = request.param
     return psuu_exploratory_run(N_sweep_samples=N_sweep_samples,

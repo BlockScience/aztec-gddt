@@ -44,12 +44,16 @@ def get_timestep_files_from_info(data_directory: Path,
     return files_to_use
 
 
-def timestep_file_to_trajectory(path: str) -> pd.DataFrame:
-    df_per_timestep = pd.read_pickle(path)
-    df_to_use = m.process_df(df_per_timestep)
+
+def timestep_tensor_to_trajectory_tensor(sim_df: pd.DataFrame) -> pd.DataFrame:
+    df_to_use = m.process_df(sim_df)
     df_per_trajectory: pd.DataFrame = pt.extract_df(df_to_use,
                                                     trajectory_kpis=KPIs)
     return df_per_trajectory
+
+def timestep_file_to_trajectory(path: str) -> pd.DataFrame:
+    df_per_timestep = pd.read_pickle(path)
+    return timestep_tensor_to_trajectory_tensor(df_per_timestep)
 
 
 def process_timestep_files_to_csv(per_timestep_tensor_paths: list[str],

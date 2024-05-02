@@ -83,28 +83,9 @@ def main(process: bool,
                          parallelize_jobs=~no_parallelize,
                          supress_cadCAD_print=True,
                          output_path=str(output_path),
-                         timestep_tensor_prefix=timestep_tensor_prefix)
-    
-
-    if upload_to_cloud:
-        files: list[str] = os.listdir(output_path)
-        for f in files:
-            s3.upload_file(str(output_path / f),
-                           CLOUD_BUCKET_NAME,
-                           str(Path(folder) / f))
-
-    if process is True:
-        traj_file_name = "trajectory_tensor.csv.zip"
-        traj_output_path = str(output_path / traj_file_name)
-        tt.process_folder_files(
-            output_path, timestep_tensor_prefix, traj_output_path)
-        
-        if upload_to_cloud:
-            s3.upload_file(str(traj_output_path),
-                           CLOUD_BUCKET_NAME,
-                           str(Path(folder) / traj_file_name))
-    else:
-        pass
+                         timestep_tensor_prefix=timestep_tensor_prefix,
+                         base_folder=folder,
+                         cloud_stream=upload_to_cloud)
 
 
 if __name__ == "__main__":

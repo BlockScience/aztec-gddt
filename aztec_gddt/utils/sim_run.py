@@ -83,7 +83,7 @@ def sim_run(
         exec_context = ExecutionContext(
             _exec_mode, additional_objs={"deepcopy_off": True}
         )
-        executor = Executor(exec_context=exec_context, configs=configs)
+        executor = Executor(exec_context=exec_context, configs=configs, supress_print=True)
 
         # Execute the cadCAD experiment
         (records, tensor_field, _) = executor.execute()
