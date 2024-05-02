@@ -311,8 +311,12 @@ class AztecModelParams(TypedDict):
     rewards_to_provers: Percentage
     rewards_to_relay: Percentage
 
-    censorship_series_builder: Optional[Sequence] 
-    censorship_series_validator: Optional[Sequence]
+#    NOTE: Temporarily removing the censorship series approach. 
+ #   censorship_series_builder: Optional[Sequence] 
+ #   censorship_series_validator: Optional[Sequence]
+
+    censorship_probability_builder: Probability
+    censorship_probability_validator: Probability
 
     gas_estimators: L1GasEstimators
     tx_estimators: UserTransactionEstimators
