@@ -191,8 +191,6 @@ def psuu_exploratory_run(N_sweep_samples=-1,
     DENCUN_BLOCK_NUMBER = 19426589
 
     local_path = 'data/auxiliary/eth_builder_validator_data_cleaned.parquet.gz'
-    has_local_path = os.path.isfile(local_path)
-    assert has_local_path, "Expected to find data on local machine."
 
     if os.path.isfile(local_path):
         print("Reading locally.")
