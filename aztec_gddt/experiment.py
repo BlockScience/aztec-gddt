@@ -205,7 +205,7 @@ def psuu_exploratory_run(N_sweep_samples=-1,
     assert censorship_data['slot'].duplicated().sum() == 0, "There are unexpected duplicate slot entries in the data."
     assert censorship_data['block_number'].duplicated().sum() == 0, "There are unexpected duplicate block number entries in the data."
     assert len(censorship_data) == censorship_data['slot'].nunique(), "Number of slots should be the same as number of entries in data."
-    assert censorship_data['slot'].nuinique() == censorship_data['block_number'].nunique(), "Number of slots should be the same as number of blocks in data."
+    assert censorship_data['slot'].nunique() == censorship_data['block_number'].nunique(), "Number of slots should be the same as number of blocks in data."
 
     # Begin logic for processing data into time series for sweep
 
