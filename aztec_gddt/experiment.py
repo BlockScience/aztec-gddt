@@ -187,14 +187,27 @@ def psuu_exploratory_run(N_sweep_samples=-1,
         N_SAMPLES_CENSORSHIP_TS - len(CHERRY_PICKED_BLOCK_NUMBERS), 0)
 
     # XXX: only take into consideration points after DENCUN
+    
+    DENCUN_BLOCK_NUMBER = 19426589
 
     local_path = 'data/auxiliary/eth_builder_validator_data.parquet.gz'
     if os.path.isfile(local_path):
         censorship_data = pd.read_parquet(
-            local_path).query(f"slot > 8626718")
+            local_path).query(f"block_number >{DENCUN_BLOCK_NUMBER}")
     else:
         censorship_data = pd.read_parquet(
-            's3://aztec-gddt/aux-data/eth_builder_validator_data.parquet.gz').query(f"slot > 8626718")
+            's3://aztec-gddt/aux-data/eth_builder_validator_data.parquet.gz').query(f"block_number > {DENCUN_BLOCK_NUMBER}")
+
+    # Check that data has no unexpected issues
+
+    assert censorship_data.isna().sum().sum() == 0, "The data should have no missing values."
+    assert censorship_data.duplicated().sum() == 0, "The data should have no missing values."
+    assert censorship_data['slot'].duplicated().sum() == 0, "There are unexpected duplicate slot entries in the data."
+    assert censorship_data['block_number'].duplicated().sum() == 0, "There are unexpected duplicate block number entries in the data."
+    assert len(censorship_data) == censorship_data['slot'].nunique(), "Number of slots should be the same as number of entries in data."
+    assert censorship_data['slot'].nunique() == censorship_data['block_number'].nunique(), "Number of slots should be the same as number of blocks in data."
+
+    # Begin logic for processing data into time series for sweep
 
     # XXX: check to see if data has missing or duplicated values
     assert censorship_data.duplicated().sum == 0, "Data contains duplicates. It should not."
