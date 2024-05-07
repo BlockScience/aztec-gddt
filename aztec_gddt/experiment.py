@@ -206,7 +206,7 @@ def psuu_exploratory_run(N_sweep_samples=-1,
     assert censorship_data.isna().sum().sum() == 0, "The data should have no missing values."
 
     num_repeats = censorship_data.duplicated().sum()
-    assert num_repeats == 0, f"There are {num_repeats} missing values."
+    assert num_repeats == 0, f"There are {num_repeats} duplicated values."
     
     assert censorship_data['block_number'].duplicated().sum() == 0, "There are unexpected duplicate block number entries in the data."
     
