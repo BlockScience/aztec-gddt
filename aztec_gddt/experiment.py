@@ -196,6 +196,11 @@ def psuu_exploratory_run(N_sweep_samples=-1,
         censorship_data = pd.read_parquet(
             's3://aztec-gddt/aux-data/eth_builder_validator_data.parquet.gz').query(f"slot > 8626718")
 
+    # XXX: check to see if data has missing or duplicated values
+    assert censorship_data.duplicated().sum == 0, "Data contains duplicates. It should not."
+    assert censorship_data.isna().sum().sum() == 0, "Data has missing values. It should not. "
+
+    # Begin logic for sampling time series
     SAFETY_MARGIN = 7
     SAMPLED_BLOCK_NUMBERS = (censorship_data
                              .block_number
