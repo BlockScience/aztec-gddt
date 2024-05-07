@@ -196,6 +196,17 @@ def psuu_exploratory_run(N_sweep_samples=-1,
         censorship_data = pd.read_parquet(
             's3://aztec-gddt/aux-data/eth_builder_validator_data.parquet.gz').query(f"slot > 8626718")
 
+    # Check that data has no unexpected issues
+
+    assert censorship_data.isna().sum().sum() == 0, "The data should have no missing values."
+    assert censorship_data.duplicated().sum() == 0, "The data should have no missing values."
+    assert censorship_data['slot'].duplicated().sum() == 0, "There are unexpected duplicate slot entries in the data."
+    assert censorship_data['block_number'].duplicated().sum() == 0, "There are unexpected duplicate block number entries in the data."
+    assert len(censorship_data) == censorship_data['slot'].nunique(), "Number of slots should be the same as number of entries in data."
+    assert censorship_data['slot'].nuinique() == censorship_data['block_number'].nunique(), "Number of slots should be the same as number of blocks in data."
+
+    # Begin logic for processing data into time series for sweep
+
     SAFETY_MARGIN = 7
     SAMPLED_BLOCK_NUMBERS = (censorship_data
                              .block_number
