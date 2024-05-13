@@ -11,24 +11,9 @@
             "id": "929a7d406d832493",
             "type": "leaf",
             "state": {
-              "type": "canvas",
-              "state": {
-                "file": "Sub-Canvases/PSUBs.canvas",
-                "viewState": {
-                  "x": 609.5863950663467,
-                  "y": 482.7737019680102,
-                  "zoom": -1.1697137838426035
-                }
-              }
-            }
-          },
-          {
-            "id": "1ffde2710ecb2466",
-            "type": "leaf",
-            "state": {
               "type": "markdown",
               "state": {
-                "file": "Templates/PSUB Policies Data.md",
+                "file": "Templates/Policy Template.md",
                 "mode": "source",
                 "source": false
               }
@@ -100,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Sub-Canvases/PSUBs.canvas",
+                "file": "Templates/Policy Template.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -117,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Sub-Canvases/PSUBs.canvas",
+                "file": "Templates/Policy Template.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -140,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Sub-Canvases/PSUBs.canvas"
+                "file": "Templates/Policy Template.md"
               }
             }
           }
@@ -163,38 +148,39 @@
   },
   "active": "929a7d406d832493",
   "lastOpenFiles": [
-    "Dataviews/Exogenous Processes State Update Mechanisms.md",
-    "Templates/PSUB Policies Data.md",
-    "Dataviews/Exogenous Processes Policies.md",
-    "Dataviews/Agent Actions State Update Mechanisms.md",
-    "Dataviews/Agent Actions Policies.md",
-    "State Update Mechanisms/s_agent_restake.md",
-    "PSUBs/Evolve Block Process PSUB.md",
+    "Policies/p_submit_proof.md",
+    "Templates/Policy Template.md",
     "Sub-Canvases/PSUBs.canvas",
-    "Dataviews/Time Tracking State Update Mechanisms.md",
-    "Dataviews/Time Tracking Policies.md",
-    "Templates/PSUB State Updates Data.md",
-    "PSUBs/Time Tracking PSUB.md",
-    "Templates/PSUB Template.md",
-    "Dataviews",
-    "README (ACTUALLY PLEASE README).md",
     "Model Canvas.canvas",
-    "PSUBs/Agent Actions PSUB.md",
-    "State Update Mechanisms/s_transactions_new_proposals.md",
+    "State Update Mechanisms/s_transactions.md",
+    "Dataviews/Evolve Block Process State Update Mechanisms.md",
+    "Dataviews/Evolve Block Process Policies.md",
+    "PSUBs/Evolve Block Process PSUB.md",
+    "State Update Mechanisms/s_is_censored_lambda_function.md",
+    "State Update Mechanisms/s_agent_transfer.md",
+    "State Update Mechanisms/s_slashes_to_prover.md",
+    "State Update Mechanisms/s_slashes_to_sequencer.md",
+    "State Update Mechanisms/s_advance_blocks.md",
+    "State Update Mechanisms/s_process.md",
+    "Policies/p_race_mode.md",
+    "Policies/p_reveal_content.md",
+    "Policies/p_commit_bond.md",
+    "Policies/p_select_proposal.md",
+    "Policies/p_init_process.md",
+    "Dataviews/Time Tracking State Update Mechanisms.md",
     "Policies/p_evolve_time.md",
-    "State Update Mechanisms/s_gas_fee_l1.md",
+    "Templates/PSUB Policies Data.md",
+    "PSUBs/Time Tracking PSUB.md",
+    "PSUBs/Agent Actions PSUB.md",
+    "Dataviews/Exogenous Processes State Update Mechanisms.md",
+    "Dataviews/Time Tracking Policies.md",
+    "PSUBs/Payouts PSUB.md",
+    "Dataviews/Exogenous Processes Policies.md",
+    "Dataviews",
     "State Update Mechanisms",
     "Policies",
-    "State Update Mechanisms/s_current_process_time.md",
-    "State Update Mechanisms/s_delta_blocks.md",
-    "State Update Mechanisms/s_block_time.md",
-    "PSUBs/Exogenous Processes PSUB.md",
-    "State Update Mechanisms/s_gas_fee_blob.md",
-    "PSUBs/Payouts PSUB.md",
-    "PSUBs/Metrics PSUB.md",
     "Templates",
     "Sub-Canvases",
-    "PSUBs/Meta Stuff PSUB.md",
     "PSUBs"
   ]
 }
