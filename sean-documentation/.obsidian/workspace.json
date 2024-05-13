@@ -11,14 +11,11 @@
             "id": "929a7d406d832493",
             "type": "leaf",
             "state": {
-              "type": "canvas",
+              "type": "markdown",
               "state": {
-                "file": "Sub-Canvases/PSUBs.canvas",
-                "viewState": {
-                  "x": 2214.9971152747253,
-                  "y": 215.13055935455523,
-                  "zoom": -0.6718876327894931
-                }
+                "file": "State Update Mechanisms/s_current_process_time.md",
+                "mode": "source",
+                "source": false
               }
             }
           }
@@ -88,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Payouts State Update Mechanisms.md",
+                "file": "State Update Mechanisms/s_current_process_time.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -105,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Payouts State Update Mechanisms.md",
+                "file": "State Update Mechanisms/s_current_process_time.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -128,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Payouts State Update Mechanisms.md"
+                "file": "State Update Mechanisms/s_current_process_time.md"
               }
             }
           }
@@ -151,35 +148,34 @@
   },
   "active": "929a7d406d832493",
   "lastOpenFiles": [
-    "Payouts State Update Mechanisms.md",
-    "Payouts Policies.md",
-    "PSUBs/Payouts PSUB.md",
-    "s_cumm_fee_cashback_lambda_function.md",
-    "s_agents_rewards.md",
-    "s_total_rewards_relays.md",
-    "s_total_rewards_sequencers.md",
-    "s_total_rewards_provers.md",
-    "p_fee_from_users.md",
-    "p_fee_cashback.md",
-    "p_block_reward.md",
+    "Sub-Canvases/PSUBs.canvas",
+    "State Update Mechanisms/s_delta_blocks.md",
+    "State Update Mechanisms/s_block_time.md",
     "Templates/Policy Template.md",
+    "Policies/p_evolve_time.md",
+    "Model Canvas.canvas",
+    "State Update Mechanisms/s_agents_rewards.md",
+    "Dataviews/Payouts State Update Mechanisms.md",
+    "Policies/p_block_reward.md",
+    "Dataviews/Payouts Policies.md",
+    "PSUBs/Payouts PSUB.md",
+    "State Update Mechanisms/s_cumm_fee_cashback_lambda_function.md",
+    "State Update Mechanisms/s_total_rewards_relays.md",
+    "State Update Mechanisms/s_total_rewards_sequencers.md",
+    "State Update Mechanisms/s_total_rewards_provers.md",
+    "Policies/p_fee_from_users.md",
+    "Policies/p_fee_cashback.md",
     "Templates/PSUB Template.md",
     "Policies/p_commit_bond.md",
     "Policies/p_commit_bond Flow.canvas",
-    "Sub-Canvases/PSUBs.canvas",
     "Policies/p_select_proposal.md",
     "Policies/p_init_process.md",
     "Policies/p_submit_proof.md",
-    "Model Canvas.canvas",
     "State Update Mechanisms/s_transactions.md",
     "Dataviews/Evolve Block Process State Update Mechanisms.md",
     "Dataviews/Evolve Block Process Policies.md",
     "PSUBs/Evolve Block Process PSUB.md",
     "State Update Mechanisms/s_is_censored_lambda_function.md",
-    "State Update Mechanisms/s_agent_transfer.md",
-    "State Update Mechanisms/s_slashes_to_prover.md",
-    "State Update Mechanisms/s_slashes_to_sequencer.md",
-    "State Update Mechanisms/s_advance_blocks.md",
     "Dataviews",
     "State Update Mechanisms",
     "Policies",

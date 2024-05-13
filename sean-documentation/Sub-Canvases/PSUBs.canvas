@@ -16,8 +16,8 @@
 		{"id":"e4bdacf45e0ab8ea","type":"file","file":"Dataviews/Agent Actions Policies.md","x":470,"y":240,"width":400,"height":400},
 		{"id":"b8319c0231ba36a9","type":"file","file":"Dataviews/Evolve Block Process Policies.md","x":1040,"y":240,"width":400,"height":400},
 		{"id":"75239b598255bb25","type":"file","file":"Dataviews/Evolve Block Process State Update Mechanisms.md","x":1040,"y":760,"width":400,"height":400},
-		{"id":"1c1a876752e2b8d3","x":1640,"y":240,"width":400,"height":400,"type":"file","file":"Payouts Policies.md"},
-		{"id":"b292342972bc259b","x":1640,"y":760,"width":400,"height":400,"type":"file","file":"Payouts State Update Mechanisms.md"}
+		{"id":"1c1a876752e2b8d3","x":1640,"y":240,"width":400,"height":400,"type":"file","file":"Dataviews/Payouts Policies.md"},
+		{"id":"b292342972bc259b","x":1640,"y":760,"width":400,"height":400,"type":"file","file":"Dataviews/Payouts State Update Mechanisms.md"}
 	],
 	"edges":[
 		{"id":"5dd687ea0706d313","fromNode":"3375de924a051f66","fromSide":"right","toNode":"3252de168b53be3b","toSide":"left"},
