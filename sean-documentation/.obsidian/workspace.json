@@ -13,11 +13,11 @@
             "state": {
               "type": "canvas",
               "state": {
-                "file": "Policies/p_commit_bond Flow.canvas",
+                "file": "Sub-Canvases/PSUBs.canvas",
                 "viewState": {
-                  "x": 0,
-                  "y": 0,
-                  "zoom": 0
+                  "x": 2214.9971152747253,
+                  "y": 215.13055935455523,
+                  "zoom": -0.6718876327894931
                 }
               }
             }
@@ -88,7 +88,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Policies/p_commit_bond Flow.canvas",
+                "file": "Payouts State Update Mechanisms.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -105,7 +105,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Policies/p_commit_bond Flow.canvas",
+                "file": "Payouts State Update Mechanisms.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -128,7 +128,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Policies/p_commit_bond Flow.canvas"
+                "file": "Payouts State Update Mechanisms.md"
               }
             }
           }
@@ -151,13 +151,25 @@
   },
   "active": "929a7d406d832493",
   "lastOpenFiles": [
+    "Payouts State Update Mechanisms.md",
+    "Payouts Policies.md",
+    "PSUBs/Payouts PSUB.md",
+    "s_cumm_fee_cashback_lambda_function.md",
+    "s_agents_rewards.md",
+    "s_total_rewards_relays.md",
+    "s_total_rewards_sequencers.md",
+    "s_total_rewards_provers.md",
+    "p_fee_from_users.md",
+    "p_fee_cashback.md",
+    "p_block_reward.md",
+    "Templates/Policy Template.md",
+    "Templates/PSUB Template.md",
     "Policies/p_commit_bond.md",
     "Policies/p_commit_bond Flow.canvas",
     "Sub-Canvases/PSUBs.canvas",
     "Policies/p_select_proposal.md",
     "Policies/p_init_process.md",
     "Policies/p_submit_proof.md",
-    "Templates/Policy Template.md",
     "Model Canvas.canvas",
     "State Update Mechanisms/s_transactions.md",
     "Dataviews/Evolve Block Process State Update Mechanisms.md",
@@ -168,17 +180,6 @@
     "State Update Mechanisms/s_slashes_to_prover.md",
     "State Update Mechanisms/s_slashes_to_sequencer.md",
     "State Update Mechanisms/s_advance_blocks.md",
-    "State Update Mechanisms/s_process.md",
-    "Policies/p_race_mode.md",
-    "Policies/p_reveal_content.md",
-    "Dataviews/Time Tracking State Update Mechanisms.md",
-    "Policies/p_evolve_time.md",
-    "Templates/PSUB Policies Data.md",
-    "PSUBs/Time Tracking PSUB.md",
-    "PSUBs/Agent Actions PSUB.md",
-    "Dataviews/Exogenous Processes State Update Mechanisms.md",
-    "Dataviews/Time Tracking Policies.md",
-    "PSUBs/Payouts PSUB.md",
     "Dataviews",
     "State Update Mechanisms",
     "Policies",

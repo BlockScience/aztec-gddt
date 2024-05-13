@@ -2,6 +2,7 @@
 
 - Bond amount and commit duration are taken in as parameters
 
+![[p_commit_bond Flow.canvas|p_commit_bond Flow]]
 
 ## Code
 
