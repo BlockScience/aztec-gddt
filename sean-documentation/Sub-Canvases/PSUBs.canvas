@@ -20,8 +20,10 @@
 		{"id":"b292342972bc259b","type":"file","file":"Dataviews/Payouts State Update Mechanisms.md","x":1640,"y":760,"width":400,"height":400},
 		{"id":"06006f2e2f2a017c","type":"file","file":"Dataviews/Dynamically Evolve Time Policies.md","x":2160,"y":240,"width":400,"height":400},
 		{"id":"d9b279da9f04d30f","type":"file","file":"Dataviews/Dynamically Evolve Time State Update Mechanisms.md","x":2160,"y":760,"width":400,"height":400},
-		{"id":"121f6be20c39a433","x":2740,"y":240,"width":400,"height":400,"type":"file","file":"Metrics Policies.md"},
-		{"id":"0f8d310f1d0d0100","x":2740,"y":760,"width":400,"height":400,"type":"file","file":"Metrics State Update Mechanisms.md"}
+		{"id":"121f6be20c39a433","type":"file","file":"Dataviews/Metrics Policies.md","x":2740,"y":240,"width":400,"height":400},
+		{"id":"0f8d310f1d0d0100","type":"file","file":"Dataviews/Metrics State Update Mechanisms.md","x":2740,"y":760,"width":400,"height":400},
+		{"id":"e92d8ef9868b0c30","x":3300,"y":240,"width":400,"height":400,"type":"file","file":"Dataviews/Meta Policies.md"},
+		{"id":"94e47ee011114560","x":3300,"y":760,"width":400,"height":400,"type":"file","file":"Dataviews/Meta State Update Mechanisms.md"}
 	],
 	"edges":[
 		{"id":"5dd687ea0706d313","fromNode":"3375de924a051f66","fromSide":"right","toNode":"3252de168b53be3b","toSide":"left"},
@@ -44,6 +46,8 @@
 		{"id":"ef8c2dba75c40eb4","fromNode":"c96d88482045c408","fromSide":"bottom","toNode":"06006f2e2f2a017c","toSide":"top"},
 		{"id":"5abae173adbc8aa0","fromNode":"06006f2e2f2a017c","fromSide":"bottom","toNode":"d9b279da9f04d30f","toSide":"top"},
 		{"id":"d8f10006f3987759","fromNode":"c23cc59761f9c26e","fromSide":"bottom","toNode":"121f6be20c39a433","toSide":"top"},
-		{"id":"ae8e9f8624f0ea4c","fromNode":"121f6be20c39a433","fromSide":"bottom","toNode":"0f8d310f1d0d0100","toSide":"top"}
+		{"id":"ae8e9f8624f0ea4c","fromNode":"121f6be20c39a433","fromSide":"bottom","toNode":"0f8d310f1d0d0100","toSide":"top"},
+		{"id":"77a1f06b50121fc0","fromNode":"02788d70fc2784ce","fromSide":"bottom","toNode":"e92d8ef9868b0c30","toSide":"top"},
+		{"id":"9edb38b679d48719","fromNode":"e92d8ef9868b0c30","fromSide":"bottom","toNode":"94e47ee011114560","toSide":"top"}
 	]
 }
