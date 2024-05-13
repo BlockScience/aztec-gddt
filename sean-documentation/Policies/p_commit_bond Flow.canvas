@@ -1,0 +1,13 @@
+{
+	"nodes":[
+		{"id":"472a33a1d1647f03","x":-140,"y":-280,"width":240,"height":100,"type":"text","text":"if process.phase == SelectionPhase.pending_commit_bond"},
+		{"id":"717334b1eb4613b6","x":-145,"y":-100,"width":250,"height":60,"type":"text","text":"if remaining_time < 0:"},
+		{"id":"ecf26a783ab6573e","x":-320,"y":60,"width":240,"height":200,"type":"text","text":"1. Enter race mode\n2. Slash the leading sequencer by params[\"slash_params\"] by appending a new burn Transfer to the transfers array"},
+		{"id":"b6c3584c935172b2","x":80,"y":60,"width":250,"height":60,"type":"text","text":""}
+	],
+	"edges":[
+		{"id":"642374750fc62de9","fromNode":"472a33a1d1647f03","fromSide":"bottom","toNode":"717334b1eb4613b6","toSide":"top","label":"True"},
+		{"id":"cd823c7e5025403d","fromNode":"717334b1eb4613b6","fromSide":"bottom","toNode":"ecf26a783ab6573e","toSide":"top","label":"True"},
+		{"id":"d1b7c4499fb7321a","fromNode":"717334b1eb4613b6","fromSide":"bottom","toNode":"b6c3584c935172b2","toSide":"top","label":"False"}
+	]
+}

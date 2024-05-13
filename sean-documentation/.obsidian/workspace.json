@@ -11,11 +11,14 @@
             "id": "929a7d406d832493",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "canvas",
               "state": {
-                "file": "Policies/p_select_proposal.md",
-                "mode": "source",
-                "source": false
+                "file": "Policies/p_commit_bond Flow.canvas",
+                "viewState": {
+                  "x": 0,
+                  "y": 0,
+                  "zoom": 0
+                }
               }
             }
           }
@@ -85,7 +88,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Policies/p_select_proposal.md",
+                "file": "Policies/p_commit_bond Flow.canvas",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +105,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Policies/p_select_proposal.md",
+                "file": "Policies/p_commit_bond Flow.canvas",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +128,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Policies/p_select_proposal.md"
+                "file": "Policies/p_commit_bond Flow.canvas"
               }
             }
           }
@@ -148,10 +151,13 @@
   },
   "active": "929a7d406d832493",
   "lastOpenFiles": [
+    "Policies/p_commit_bond.md",
+    "Policies/p_commit_bond Flow.canvas",
+    "Sub-Canvases/PSUBs.canvas",
+    "Policies/p_select_proposal.md",
     "Policies/p_init_process.md",
     "Policies/p_submit_proof.md",
     "Templates/Policy Template.md",
-    "Sub-Canvases/PSUBs.canvas",
     "Model Canvas.canvas",
     "State Update Mechanisms/s_transactions.md",
     "Dataviews/Evolve Block Process State Update Mechanisms.md",
@@ -165,8 +171,6 @@
     "State Update Mechanisms/s_process.md",
     "Policies/p_race_mode.md",
     "Policies/p_reveal_content.md",
-    "Policies/p_commit_bond.md",
-    "Policies/p_select_proposal.md",
     "Dataviews/Time Tracking State Update Mechanisms.md",
     "Policies/p_evolve_time.md",
     "Templates/PSUB Policies Data.md",
@@ -175,7 +179,6 @@
     "Dataviews/Exogenous Processes State Update Mechanisms.md",
     "Dataviews/Time Tracking Policies.md",
     "PSUBs/Payouts PSUB.md",
-    "Dataviews/Exogenous Processes Policies.md",
     "Dataviews",
     "State Update Mechanisms",
     "Policies",
