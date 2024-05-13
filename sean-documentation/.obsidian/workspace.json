@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "State Update Mechanisms/s_current_process_time_dynamical.md",
+                "file": "Policies/p_fee_from_users.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "State Update Mechanisms/s_current_process_time_dynamical.md",
+                "file": "Policies/p_fee_from_users.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "State Update Mechanisms/s_current_process_time_dynamical.md",
+                "file": "Policies/p_fee_from_users.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "State Update Mechanisms/s_current_process_time_dynamical.md"
+                "file": "Policies/p_fee_from_users.md"
               }
             }
           }
@@ -149,6 +149,9 @@
   "active": "929a7d406d832493",
   "lastOpenFiles": [
     "Sub-Canvases/PSUBs.canvas",
+    "Policies/p_block_reward.md",
+    "Policies/p_fee_cashback.md",
+    "State Update Mechanisms/s_current_process_time_dynamical.md",
     "State Update Mechanisms/s_reset_advance.md",
     "State Update Mechanisms/s_delta_blocks.md",
     "State Update Mechanisms/s_block_time.md",
@@ -172,9 +175,6 @@
     "State Update Mechanisms/s_gas_fee_l1.md",
     "PSUBs/Dynamically Evolve Time PSUB.md",
     "Dataviews/Dynamically Evolve Time Policies.md",
-    "State Update Mechanisms/s_current_process_time_dynamical.md",
-    "Dataviews/Dynamically Evolve Time State Update Mechanisms.md",
-    "State Update Mechanisms/s_current_process_time.md",
     "Policies/p_commit_bond Flow.canvas",
     "Dataviews",
     "State Update Mechanisms",
