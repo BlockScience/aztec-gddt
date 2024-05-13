@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "State Update Mechanisms/s_agent_restake.md",
+                "file": "PSUBs/Metrics PSUB.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "State Update Mechanisms/s_agent_restake.md",
+                "file": "PSUBs/Metrics PSUB.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "State Update Mechanisms/s_agent_restake.md",
+                "file": "PSUBs/Metrics PSUB.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "State Update Mechanisms/s_agent_restake.md"
+                "file": "PSUBs/Metrics PSUB.md"
               }
             }
           }
@@ -148,7 +148,13 @@
   },
   "active": "929a7d406d832493",
   "lastOpenFiles": [
+    "s_finalized_blocks_count_lambda_function.md",
+    "PSUBs/Metrics PSUB.md",
+    "s_token_supply.md",
     "Sub-Canvases/PSUBs.canvas",
+    "Metrics State Update Mechanisms.md",
+    "Metrics Policies.md",
+    "State Update Mechanisms/s_agent_restake.md",
     "State Update Mechanisms/s_transactions_new_proposals.md",
     "State Update Mechanisms/s_gas_fee_blob.md",
     "State Update Mechanisms/s_gas_fee_l1.md",
@@ -170,11 +176,6 @@
     "Dataviews/Payouts Policies.md",
     "PSUBs/Payouts PSUB.md",
     "State Update Mechanisms/s_cumm_fee_cashback_lambda_function.md",
-    "State Update Mechanisms/s_total_rewards_relays.md",
-    "State Update Mechanisms/s_total_rewards_sequencers.md",
-    "State Update Mechanisms/s_total_rewards_provers.md",
-    "Policies/p_fee_from_users.md",
-    "Policies/p_fee_cashback.md",
     "Policies/p_commit_bond Flow.canvas",
     "Dataviews",
     "State Update Mechanisms",

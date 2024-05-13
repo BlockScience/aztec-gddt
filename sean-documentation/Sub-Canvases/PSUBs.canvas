@@ -18,8 +18,10 @@
 		{"id":"75239b598255bb25","type":"file","file":"Dataviews/Evolve Block Process State Update Mechanisms.md","x":1040,"y":760,"width":400,"height":400},
 		{"id":"1c1a876752e2b8d3","type":"file","file":"Dataviews/Payouts Policies.md","x":1640,"y":240,"width":400,"height":400},
 		{"id":"b292342972bc259b","type":"file","file":"Dataviews/Payouts State Update Mechanisms.md","x":1640,"y":760,"width":400,"height":400},
-		{"id":"06006f2e2f2a017c","x":2160,"y":240,"width":400,"height":400,"type":"file","file":"Dataviews/Dynamically Evolve Time Policies.md"},
-		{"id":"d9b279da9f04d30f","x":2160,"y":760,"width":400,"height":400,"type":"file","file":"Dataviews/Dynamically Evolve Time State Update Mechanisms.md"}
+		{"id":"06006f2e2f2a017c","type":"file","file":"Dataviews/Dynamically Evolve Time Policies.md","x":2160,"y":240,"width":400,"height":400},
+		{"id":"d9b279da9f04d30f","type":"file","file":"Dataviews/Dynamically Evolve Time State Update Mechanisms.md","x":2160,"y":760,"width":400,"height":400},
+		{"id":"121f6be20c39a433","x":2740,"y":240,"width":400,"height":400,"type":"file","file":"Metrics Policies.md"},
+		{"id":"0f8d310f1d0d0100","x":2740,"y":760,"width":400,"height":400,"type":"file","file":"Metrics State Update Mechanisms.md"}
 	],
 	"edges":[
 		{"id":"5dd687ea0706d313","fromNode":"3375de924a051f66","fromSide":"right","toNode":"3252de168b53be3b","toSide":"left"},
@@ -40,6 +42,8 @@
 		{"id":"bf9f5942ab34d521","fromNode":"0498e305e3d9bb4c","fromSide":"bottom","toNode":"1c1a876752e2b8d3","toSide":"top"},
 		{"id":"d5f9dbefa7c2d3ea","fromNode":"1c1a876752e2b8d3","fromSide":"bottom","toNode":"b292342972bc259b","toSide":"top"},
 		{"id":"ef8c2dba75c40eb4","fromNode":"c96d88482045c408","fromSide":"bottom","toNode":"06006f2e2f2a017c","toSide":"top"},
-		{"id":"5abae173adbc8aa0","fromNode":"06006f2e2f2a017c","fromSide":"bottom","toNode":"d9b279da9f04d30f","toSide":"top"}
+		{"id":"5abae173adbc8aa0","fromNode":"06006f2e2f2a017c","fromSide":"bottom","toNode":"d9b279da9f04d30f","toSide":"top"},
+		{"id":"d8f10006f3987759","fromNode":"c23cc59761f9c26e","fromSide":"bottom","toNode":"121f6be20c39a433","toSide":"top"},
+		{"id":"ae8e9f8624f0ea4c","fromNode":"121f6be20c39a433","fromSide":"bottom","toNode":"0f8d310f1d0d0100","toSide":"top"}
 	]
 }
