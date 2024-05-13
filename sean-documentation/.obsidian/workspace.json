@@ -1,0 +1,162 @@
+{
+  "main": {
+    "id": "0f3c466c6fe289ec",
+    "type": "split",
+    "children": [
+      {
+        "id": "907b89b3135ad495",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "929a7d406d832493",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "PSUBs/Agent Actions PSUB.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "8cdfd62031cdc1c9",
+    "type": "split",
+    "children": [
+      {
+        "id": "f2bd55d3c9b656b6",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "23ade1c13fc775e5",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "690c8fc49e6cd425",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "7699c1301e7a9865",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "903e8a0959cb2521",
+    "type": "split",
+    "children": [
+      {
+        "id": "f351f374d87e9278",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "ed7e55ebf09a854b",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "PSUBs/Agent Actions PSUB.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "4d1bb117f9d4c6b9",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "PSUBs/Agent Actions PSUB.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "8cbfe6afa554d72f",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "9f98c38435e26d3b",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "PSUBs/Agent Actions PSUB.md"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false
+    }
+  },
+  "active": "929a7d406d832493",
+  "lastOpenFiles": [
+    "PSUBs/Time Tracking PSUB.md",
+    "PSUBs/Payouts PSUB.md",
+    "PSUBs.canvas",
+    "PSUBs/Meta Stuff PSUB.md",
+    "PSUBs/Metrics PSUB.md",
+    "PSUBs/Dynamically Evolve Time PSUB.md",
+    "PSUBs/Agent Actions PSUB.md",
+    "PSUBs/Exogenous Processes PSUB.md",
+    "PSUBs",
+    "PSUBs/Model Canvas.canvas"
+  ]
+}
