@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "State Update Mechanisms/s_erase_history.md",
+                "file": "State Update Mechanisms/s_finalized_blocks_count_lambda_function.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "State Update Mechanisms/s_erase_history.md",
+                "file": "State Update Mechanisms/s_finalized_blocks_count_lambda_function.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "State Update Mechanisms/s_erase_history.md",
+                "file": "State Update Mechanisms/s_finalized_blocks_count_lambda_function.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "State Update Mechanisms/s_erase_history.md"
+                "file": "State Update Mechanisms/s_finalized_blocks_count_lambda_function.md"
               }
             }
           }
@@ -149,9 +149,10 @@
   "active": "929a7d406d832493",
   "lastOpenFiles": [
     "Sub-Canvases/PSUBs.canvas",
+    "State Update Mechanisms/s_token_supply.md",
+    "State Update Mechanisms/s_erase_history.md",
     "Dataviews/Meta State Update Mechanisms.md",
     "Dataviews/Meta Policies.md",
-    "State Update Mechanisms/s_erase_history.md",
     "PSUBs/Meta Stuff PSUB.md",
     "Dataviews/Metrics Policies.md",
     "State Update Mechanisms/s_finalized_blocks_count_lambda_function.md",
@@ -160,7 +161,6 @@
     "State Update Mechanisms/s_agent_restake.md",
     "State Update Mechanisms/s_cumm_fee_cashback_lambda_function.md",
     "PSUBs/Metrics PSUB.md",
-    "State Update Mechanisms/s_token_supply.md",
     "Dataviews/Metrics State Update Mechanisms.md",
     "State Update Mechanisms/s_transactions_new_proposals.md",
     "State Update Mechanisms/s_gas_fee_blob.md",
