@@ -11,14 +11,11 @@
             "id": "929a7d406d832493",
             "type": "leaf",
             "state": {
-              "type": "canvas",
+              "type": "markdown",
               "state": {
-                "file": "Sub-Canvases/PSUBs.canvas",
-                "viewState": {
-                  "x": 731.553108645701,
-                  "y": 682.502629854191,
-                  "zoom": -0.6797592495702508
-                }
+                "file": "State Update Mechanisms/s_agent_restake.md",
+                "mode": "source",
+                "source": false
               }
             }
           }
@@ -88,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Sub-Canvases/PSUBs.canvas",
+                "file": "State Update Mechanisms/s_agent_restake.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -105,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Sub-Canvases/PSUBs.canvas",
+                "file": "State Update Mechanisms/s_agent_restake.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -128,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Sub-Canvases/PSUBs.canvas"
+                "file": "State Update Mechanisms/s_agent_restake.md"
               }
             }
           }
@@ -151,8 +148,8 @@
   },
   "active": "929a7d406d832493",
   "lastOpenFiles": [
-    "State Update Mechanisms/s_transactions_new_proposals.md",
     "Sub-Canvases/PSUBs.canvas",
+    "State Update Mechanisms/s_transactions_new_proposals.md",
     "State Update Mechanisms/s_gas_fee_blob.md",
     "State Update Mechanisms/s_gas_fee_l1.md",
     "PSUBs/Dynamically Evolve Time PSUB.md",
@@ -178,7 +175,6 @@
     "State Update Mechanisms/s_total_rewards_provers.md",
     "Policies/p_fee_from_users.md",
     "Policies/p_fee_cashback.md",
-    "Templates/PSUB Template.md",
     "Policies/p_commit_bond Flow.canvas",
     "Dataviews",
     "State Update Mechanisms",
