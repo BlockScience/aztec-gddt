@@ -1,6 +1,7 @@
 ## Summary
 
 - Bond amount and commit duration are taken in as parameters
+- The canvas below shows the entire flow of it
 
 ![[p_commit_bond Flow.canvas|p_commit_bond Flow]]
 

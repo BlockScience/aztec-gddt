@@ -1,6 +1,13 @@
 ## Summary
 
-- 
+- If pending rollup proof is the current phase and the remaining time is less than 0, create a skipped block, create a slash of the bond amount and slash the prover, else:
+- Get gas from gas estimators for content reveal, pull fee from state, set up safety buffer as params['safety_factor_rollup_proof'] * fee
+- expected_l2_blocks_per_day = params['l1_blocks_per_day'] / total_phase_duration(params)
+- expected_rewards = 1, expected_costs = 0, payoff_reveal = expected_rewards - expected_costs
+- Bernoulli trial is used to determine if the agent decides to reveal the rollup proof
+- gas_fee_l1_acceptable = True # Assume gas fee is acceptable. 
+- block_is_uncensored = check_for_censorship(params, state)
+- If agent_decides_to_reveal_rollup_proof and gas_fee_l1_acceptable and agent_expects_profit and block_is_uncensored, create the finalized phase and rollup proof transaction
 
 ## Code
 

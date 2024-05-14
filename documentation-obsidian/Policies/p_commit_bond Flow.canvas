@@ -1,0 +1,32 @@
+{
+	"nodes":[
+		{"id":"472a33a1d1647f03","type":"text","text":"if process.phase == SelectionPhase.pending_commit_bond","x":-140,"y":-280,"width":240,"height":100},
+		{"id":"717334b1eb4613b6","type":"text","text":"if remaining_time < 0:","x":-145,"y":-100,"width":250,"height":60},
+		{"id":"ecf26a783ab6573e","type":"text","text":"1. Enter race mode\n2. Slash the leading sequencer by params[\"slash_params\"] by appending a new burn Transfer to the transfers array","x":-320,"y":60,"width":240,"height":200},
+		{"id":"b6c3584c935172b2","type":"text","text":"1. gas: Gas = params[\"gas_estimators\"].commitment_bond(state)\n2. fee = gas * state[\"gas_fee_l1\"]\n3. SAFETY_BUFFER = params['safety_factor_commit_bond'] * fee\n4. expected_rewards = 1, expected_costs = 0, payoff_reveal = expected_rewards - expected_costs\n5. if payoff_reveal > 0....","x":80,"y":60,"width":780,"height":200},
+		{"id":"118e1ad834c924b6","type":"text","text":"1. agent_decides_to_reveal_commit_bond is determined by Bernoulli trial\n2. gas_fee_l1_acceptable = True\n3. block_is_uncensored = check_for_censorship(params, state)\n4. if agent_decides_to_reveal_commit_bond and gas_fee_l1_acceptable and block_is_uncensored....","x":80,"y":380,"width":780,"height":180},
+		{"id":"fbb77ef622b945bf","type":"text","text":"1. proving_market_is_used = bernoulli_trial(\n                            params[\"proving_marketplace_usage_probability\"]\n                        )\n2. proving_market_is_used == True?....","x":80,"y":660,"width":780,"height":180},
+		{"id":"809acde06f6702f5","type":"text","text":"1. Filter provers by finding only agents that are provers and also have a balance greater than the bond amount\n2. Length of provers > 0?","x":-45,"y":1020,"width":485,"height":120},
+		{"id":"3445888a97719a5e","type":"text","text":"","x":780,"y":1020,"width":250,"height":60},
+		{"id":"dc0d38eadc2260fc","type":"text","text":"1. Randomly select a prover","x":-200,"y":1280,"width":340,"height":140},
+		{"id":"417288226fea6337","type":"text","text":"1. lead_seq.balance >= bond_amount? ....","x":315,"y":1280,"width":265,"height":140},
+		{"id":"f7d700c2b4da2136","type":"text","text":"1. prover = updated_process.leading_sequencer","x":180,"y":1540,"width":320,"height":100},
+		{"id":"8bba6426511e2956","type":"text","text":"1. prover = None","x":530,"y":1540,"width":250,"height":100},
+		{"id":"2bab09fe707f5c9b","type":"text","text":"1. advance_blocks = remaining_time\n2. Set phase to pending reeal\n3. Create a commitment bond transaction and append it","x":-180,"y":1800,"width":440,"height":160}
+	],
+	"edges":[
+		{"id":"642374750fc62de9","fromNode":"472a33a1d1647f03","fromSide":"bottom","toNode":"717334b1eb4613b6","toSide":"top","label":"True"},
+		{"id":"cd823c7e5025403d","fromNode":"717334b1eb4613b6","fromSide":"bottom","toNode":"ecf26a783ab6573e","toSide":"top","label":"True"},
+		{"id":"d1b7c4499fb7321a","fromNode":"717334b1eb4613b6","fromSide":"bottom","toNode":"b6c3584c935172b2","toSide":"top","label":"False"},
+		{"id":"dc8f6d997cb75f1a","fromNode":"b6c3584c935172b2","fromSide":"bottom","toNode":"118e1ad834c924b6","toSide":"top","label":"True"},
+		{"id":"8e884edd30b91999","fromNode":"118e1ad834c924b6","fromSide":"bottom","toNode":"fbb77ef622b945bf","toSide":"top","label":"True"},
+		{"id":"108d429e46788747","fromNode":"fbb77ef622b945bf","fromSide":"bottom","toNode":"809acde06f6702f5","toSide":"top","label":"True"},
+		{"id":"a000b89be60bb6e1","fromNode":"fbb77ef622b945bf","fromSide":"bottom","toNode":"3445888a97719a5e","toSide":"top","label":"False"},
+		{"id":"ef45a45b59a53cf2","fromNode":"809acde06f6702f5","fromSide":"bottom","toNode":"dc0d38eadc2260fc","toSide":"top","label":"True"},
+		{"id":"8f27dbf5ea2ce839","fromNode":"809acde06f6702f5","fromSide":"bottom","toNode":"417288226fea6337","toSide":"top","label":"False"},
+		{"id":"baaaa37ad6b7f46c","fromNode":"417288226fea6337","fromSide":"bottom","toNode":"f7d700c2b4da2136","toSide":"top"},
+		{"id":"479fd687e02afd25","fromNode":"417288226fea6337","fromSide":"bottom","toNode":"8bba6426511e2956","toSide":"top"},
+		{"id":"7e61339c4da9d228","fromNode":"dc0d38eadc2260fc","fromSide":"bottom","toNode":"2bab09fe707f5c9b","toSide":"top"},
+		{"id":"8c0e0a350c867b0b","fromNode":"f7d700c2b4da2136","fromSide":"bottom","toNode":"2bab09fe707f5c9b","toSide":"top"}
+	]
+}

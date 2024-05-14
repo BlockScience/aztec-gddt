@@ -4,21 +4,18 @@
     "type": "split",
     "children": [
       {
-        "id": "907b89b3135ad495",
+        "id": "4307a91c30a5a4a8",
         "type": "tabs",
         "children": [
           {
-            "id": "929a7d406d832493",
+            "id": "a1ca9805a505cca0",
             "type": "leaf",
             "state": {
-              "type": "canvas",
+              "type": "markdown",
               "state": {
-                "file": "Sub-Canvases/PSUBs.canvas",
-                "viewState": {
-                  "x": 1985.612514365269,
-                  "y": 1072.419891247997,
-                  "zoom": -0.14511669912167396
-                }
+                "file": "Policies/p_commit_bond.md",
+                "mode": "source",
+                "source": false
               }
             }
           }
@@ -88,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Sub-Canvases/PSUBs.canvas",
+                "file": "Policies/p_commit_bond.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -105,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Sub-Canvases/PSUBs.canvas",
+                "file": "Policies/p_commit_bond.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -128,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Sub-Canvases/PSUBs.canvas"
+                "file": "Policies/p_commit_bond.md"
               }
             }
           }
@@ -149,11 +146,25 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "929a7d406d832493",
+  "active": "a1ca9805a505cca0",
   "lastOpenFiles": [
-    "State Update Mechanisms/s_agents_rewards.md",
     "Sub-Canvases/PSUBs.canvas",
+    "Policies/p_commit_bond Flow.canvas",
+    "Policies/p_reveal_content.md",
+    "State Update Mechanisms/s_total_rewards_provers.md",
+    "Policies/p_submit_proof.md",
+    "Policies/p_race_mode.md",
+    "State Update Mechanisms/s_process.md",
+    "State Update Mechanisms/s_transactions.md",
+    "State Update Mechanisms/s_slashes_to_sequencer.md",
+    "State Update Mechanisms/s_slashes_to_prover.md",
+    "State Update Mechanisms/s_is_censored_lambda_function.md",
+    "State Update Mechanisms/s_agent_transfer.md",
+    "State Update Mechanisms/s_advance_blocks.md",
+    "State Update Mechanisms/s_cumm_block_rewards_lambda_function.md",
+    "State Update Mechanisms/s_total_rewards_relays.md",
     "State Update Mechanisms/s_total_rewards_sequencers.md",
+    "State Update Mechanisms/s_agents_rewards.md",
     "Policies/p_fee_from_users.md",
     "Policies/p_block_reward.md",
     "Policies/p_fee_cashback.md",
@@ -165,20 +176,6 @@
     "Model Canvas.canvas",
     "State Update Mechanisms/s_finalized_blocks_count_lambda_function.md",
     "State Update Mechanisms/s_token_supply.md",
-    "State Update Mechanisms/s_erase_history.md",
-    "Dataviews/Meta State Update Mechanisms.md",
-    "Dataviews/Meta Policies.md",
-    "PSUBs/Meta Stuff PSUB.md",
-    "Dataviews/Metrics Policies.md",
-    "State Update Mechanisms/s_advance_blocks.md",
-    "State Update Mechanisms/s_agent_restake.md",
-    "State Update Mechanisms/s_cumm_fee_cashback_lambda_function.md",
-    "PSUBs/Metrics PSUB.md",
-    "Dataviews/Metrics State Update Mechanisms.md",
-    "State Update Mechanisms/s_transactions_new_proposals.md",
-    "State Update Mechanisms/s_gas_fee_blob.md",
-    "State Update Mechanisms/s_gas_fee_l1.md",
-    "Policies/p_commit_bond Flow.canvas",
     "Dataviews",
     "State Update Mechanisms",
     "Policies",
