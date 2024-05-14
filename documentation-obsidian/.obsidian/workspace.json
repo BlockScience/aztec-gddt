@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Policies/p_reveal_content.md",
+                "file": "Policies/p_commit_bond.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Policies/p_reveal_content.md",
+                "file": "Policies/p_commit_bond.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Policies/p_reveal_content.md",
+                "file": "Policies/p_commit_bond.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Policies/p_reveal_content.md"
+                "file": "Policies/p_commit_bond.md"
               }
             }
           }
@@ -149,6 +149,8 @@
   "active": "a1ca9805a505cca0",
   "lastOpenFiles": [
     "Sub-Canvases/PSUBs.canvas",
+    "Policies/p_commit_bond Flow.canvas",
+    "Policies/p_reveal_content.md",
     "State Update Mechanisms/s_total_rewards_provers.md",
     "Policies/p_submit_proof.md",
     "Policies/p_race_mode.md",
@@ -174,8 +176,6 @@
     "Model Canvas.canvas",
     "State Update Mechanisms/s_finalized_blocks_count_lambda_function.md",
     "State Update Mechanisms/s_token_supply.md",
-    "State Update Mechanisms/s_erase_history.md",
-    "Policies/p_commit_bond Flow.canvas",
     "Dataviews",
     "State Update Mechanisms",
     "Policies",
