@@ -4,28 +4,16 @@
     "type": "split",
     "children": [
       {
-        "id": "907b89b3135ad495",
+        "id": "4307a91c30a5a4a8",
         "type": "tabs",
         "children": [
           {
-            "id": "929a7d406d832493",
+            "id": "a1ca9805a505cca0",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Policies/p_submit_proof.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "a4ceddccc3670469",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "State Update Mechanisms/s_total_rewards_provers.md",
+                "file": "Policies/p_reveal_content.md",
                 "mode": "source",
                 "source": false
               }
@@ -97,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Policies/p_submit_proof.md",
+                "file": "Policies/p_reveal_content.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -114,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Policies/p_submit_proof.md",
+                "file": "Policies/p_reveal_content.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -137,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Policies/p_submit_proof.md"
+                "file": "Policies/p_reveal_content.md"
               }
             }
           }
@@ -158,15 +146,16 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "929a7d406d832493",
+  "active": "a1ca9805a505cca0",
   "lastOpenFiles": [
     "Sub-Canvases/PSUBs.canvas",
+    "State Update Mechanisms/s_total_rewards_provers.md",
+    "Policies/p_submit_proof.md",
     "Policies/p_race_mode.md",
     "State Update Mechanisms/s_process.md",
     "State Update Mechanisms/s_transactions.md",
     "State Update Mechanisms/s_slashes_to_sequencer.md",
     "State Update Mechanisms/s_slashes_to_prover.md",
-    "State Update Mechanisms/s_total_rewards_provers.md",
     "State Update Mechanisms/s_is_censored_lambda_function.md",
     "State Update Mechanisms/s_agent_transfer.md",
     "State Update Mechanisms/s_advance_blocks.md",
@@ -186,7 +175,6 @@
     "State Update Mechanisms/s_finalized_blocks_count_lambda_function.md",
     "State Update Mechanisms/s_token_supply.md",
     "State Update Mechanisms/s_erase_history.md",
-    "Dataviews/Meta State Update Mechanisms.md",
     "Policies/p_commit_bond Flow.canvas",
     "Dataviews",
     "State Update Mechanisms",
