@@ -11,9 +11,24 @@
             "id": "929a7d406d832493",
             "type": "leaf",
             "state": {
+              "type": "canvas",
+              "state": {
+                "file": "Sub-Canvases/PSUBs.canvas",
+                "viewState": {
+                  "x": 1818.1950084007321,
+                  "y": 607.1141667362955,
+                  "zoom": -0.5722472037695653
+                }
+              }
+            }
+          },
+          {
+            "id": "a4ceddccc3670469",
+            "type": "leaf",
+            "state": {
               "type": "markdown",
               "state": {
-                "file": "State Update Mechanisms/s_agents_rewards.md",
+                "file": "State Update Mechanisms/s_total_rewards_provers.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +100,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "State Update Mechanisms/s_agents_rewards.md",
+                "file": "Sub-Canvases/PSUBs.canvas",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +117,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "State Update Mechanisms/s_agents_rewards.md",
+                "file": "Sub-Canvases/PSUBs.canvas",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +140,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "State Update Mechanisms/s_agents_rewards.md"
+                "file": "Sub-Canvases/PSUBs.canvas"
               }
             }
           }
@@ -148,9 +163,12 @@
   },
   "active": "929a7d406d832493",
   "lastOpenFiles": [
+    "State Update Mechanisms/s_cumm_block_rewards_lambda_function.md",
     "Sub-Canvases/PSUBs.canvas",
-    "State Update Mechanisms/s_agents_rewards.md",
+    "State Update Mechanisms/s_total_rewards_relays.md",
+    "State Update Mechanisms/s_total_rewards_provers.md",
     "State Update Mechanisms/s_total_rewards_sequencers.md",
+    "State Update Mechanisms/s_agents_rewards.md",
     "Policies/p_fee_from_users.md",
     "Policies/p_block_reward.md",
     "Policies/p_fee_cashback.md",
@@ -169,12 +187,9 @@
     "Dataviews/Metrics Policies.md",
     "State Update Mechanisms/s_advance_blocks.md",
     "State Update Mechanisms/s_agent_restake.md",
-    "State Update Mechanisms/s_cumm_fee_cashback_lambda_function.md",
     "PSUBs/Metrics PSUB.md",
     "Dataviews/Metrics State Update Mechanisms.md",
     "State Update Mechanisms/s_transactions_new_proposals.md",
-    "State Update Mechanisms/s_gas_fee_blob.md",
-    "State Update Mechanisms/s_gas_fee_l1.md",
     "Policies/p_commit_bond Flow.canvas",
     "Dataviews",
     "State Update Mechanisms",

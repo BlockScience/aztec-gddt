@@ -31,4 +31,4 @@
 [[s_total_rewards_sequencers]]
 [[s_total_rewards_relays]]
 [[s_agents_rewards]]
-[[s_cumm_fee_cashback_lambda_function]]
+[[s_cumm_block_rewards_lambda_function]]
