@@ -1,4 +1,6 @@
 ```dataview
-table file.name as Linked_File from "State Update Mechanisms"
-WHERE contains(file.inlinks, [[Time Tracking PSUB]])
+table file.lists.text AS Summary from "State Update Mechanisms"
+WHERE contains(file.inlinks, [[Payouts PSUB]])
 ```
+
+
