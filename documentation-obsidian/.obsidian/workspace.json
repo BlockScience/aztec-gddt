@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Policies/p_commit_bond.md",
+                "file": "Templates/PSUB Policies Data.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Policies/p_commit_bond.md",
+                "file": "Templates/PSUB Policies Data.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Policies/p_commit_bond.md",
+                "file": "Templates/PSUB Policies Data.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Policies/p_commit_bond.md"
+                "file": "Templates/PSUB Policies Data.md"
               }
             }
           }
@@ -148,11 +148,21 @@
   },
   "active": "a1ca9805a505cca0",
   "lastOpenFiles": [
+    "Policies/p_block_reward.md",
+    "Templates/PSUB Policies Data.md",
+    "Policies/p_fee_cashback.md",
+    "Policies/p_fee_from_users.md",
+    "Policies/p_evolve_time.md",
+    "Templates/PSUB State Updates Data.md",
+    "Templates/Policy Template.md",
     "Sub-Canvases/PSUBs.canvas",
+    "Policies/p_submit_proof.md",
+    "Policies/p_select_proposal.md",
+    "Policies/p_init_process.md",
     "Policies/p_commit_bond Flow.canvas",
+    "Policies/p_commit_bond.md",
     "Policies/p_reveal_content.md",
     "State Update Mechanisms/s_total_rewards_provers.md",
-    "Policies/p_submit_proof.md",
     "Policies/p_race_mode.md",
     "State Update Mechanisms/s_process.md",
     "State Update Mechanisms/s_transactions.md",
@@ -165,17 +175,8 @@
     "State Update Mechanisms/s_total_rewards_relays.md",
     "State Update Mechanisms/s_total_rewards_sequencers.md",
     "State Update Mechanisms/s_agents_rewards.md",
-    "Policies/p_fee_from_users.md",
-    "Policies/p_block_reward.md",
-    "Policies/p_fee_cashback.md",
     "State Update Mechanisms/s_current_process_time_dynamical.md",
-    "State Update Mechanisms/s_reset_advance.md",
-    "State Update Mechanisms/s_delta_blocks.md",
-    "State Update Mechanisms/s_block_time.md",
-    "Policies/p_evolve_time_dynamical.md",
     "Model Canvas.canvas",
-    "State Update Mechanisms/s_finalized_blocks_count_lambda_function.md",
-    "State Update Mechanisms/s_token_supply.md",
     "Dataviews",
     "State Update Mechanisms",
     "Policies",
