@@ -11,14 +11,11 @@
             "id": "929a7d406d832493",
             "type": "leaf",
             "state": {
-              "type": "canvas",
+              "type": "markdown",
               "state": {
-                "file": "Sub-Canvases/PSUBs.canvas",
-                "viewState": {
-                  "x": 1818.1950084007321,
-                  "y": 607.1141667362955,
-                  "zoom": -0.5722472037695653
-                }
+                "file": "State Update Mechanisms/s_agent_transfer.md",
+                "mode": "source",
+                "source": false
               }
             }
           },
@@ -100,7 +97,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Sub-Canvases/PSUBs.canvas",
+                "file": "State Update Mechanisms/s_agent_transfer.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -117,7 +114,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Sub-Canvases/PSUBs.canvas",
+                "file": "State Update Mechanisms/s_agent_transfer.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -140,7 +137,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Sub-Canvases/PSUBs.canvas"
+                "file": "State Update Mechanisms/s_agent_transfer.md"
               }
             }
           }
@@ -163,8 +160,9 @@
   },
   "active": "929a7d406d832493",
   "lastOpenFiles": [
-    "State Update Mechanisms/s_cumm_block_rewards_lambda_function.md",
     "Sub-Canvases/PSUBs.canvas",
+    "State Update Mechanisms/s_advance_blocks.md",
+    "State Update Mechanisms/s_cumm_block_rewards_lambda_function.md",
     "State Update Mechanisms/s_total_rewards_relays.md",
     "State Update Mechanisms/s_total_rewards_provers.md",
     "State Update Mechanisms/s_total_rewards_sequencers.md",
@@ -185,7 +183,6 @@
     "Dataviews/Meta Policies.md",
     "PSUBs/Meta Stuff PSUB.md",
     "Dataviews/Metrics Policies.md",
-    "State Update Mechanisms/s_advance_blocks.md",
     "State Update Mechanisms/s_agent_restake.md",
     "PSUBs/Metrics PSUB.md",
     "Dataviews/Metrics State Update Mechanisms.md",
