@@ -11,14 +11,11 @@
             "id": "929a7d406d832493",
             "type": "leaf",
             "state": {
-              "type": "canvas",
+              "type": "markdown",
               "state": {
-                "file": "Sub-Canvases/PSUBs.canvas",
-                "viewState": {
-                  "x": 1985.612514365269,
-                  "y": 1072.419891247997,
-                  "zoom": -0.14511669912167396
-                }
+                "file": "State Update Mechanisms/s_agents_rewards.md",
+                "mode": "source",
+                "source": false
               }
             }
           }
@@ -88,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Sub-Canvases/PSUBs.canvas",
+                "file": "State Update Mechanisms/s_agents_rewards.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -105,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Sub-Canvases/PSUBs.canvas",
+                "file": "State Update Mechanisms/s_agents_rewards.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -128,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Sub-Canvases/PSUBs.canvas"
+                "file": "State Update Mechanisms/s_agents_rewards.md"
               }
             }
           }
@@ -151,8 +148,8 @@
   },
   "active": "929a7d406d832493",
   "lastOpenFiles": [
-    "State Update Mechanisms/s_agents_rewards.md",
     "Sub-Canvases/PSUBs.canvas",
+    "State Update Mechanisms/s_agents_rewards.md",
     "State Update Mechanisms/s_total_rewards_sequencers.md",
     "Policies/p_fee_from_users.md",
     "Policies/p_block_reward.md",
