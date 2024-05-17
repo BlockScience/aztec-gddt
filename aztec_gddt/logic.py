@@ -1314,3 +1314,13 @@ def s_agent_restake(
             v.staked_amount += amount_to_stake
 
     return ("agents", new_agents)
+
+
+s_finalized_blocks_count_lambda_function = lambda _1, _2, _3, s, _5: (
+    "finalized_blocks_count",
+    (
+        s["finalized_blocks_count"] + 1
+        if s["current_process"].phase == SelectionPhase.finalized
+        else s["finalized_blocks_count"]
+    ),
+)
