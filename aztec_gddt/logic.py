@@ -1278,7 +1278,8 @@ def s_erase_history(
     signal: SignalEvolveProcess,
 ):
     """
-    Logic for token supply.
+    This substep is a hack for legacy cadCAD that makes it so that substep states do not get
+    saved in favor of just the ending timestep state, thus saving large amounts of space
     """
 
     for t, timestep_state in enumerate(history):
