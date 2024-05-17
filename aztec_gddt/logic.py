@@ -166,8 +166,6 @@ def s_current_process_time(_1, _2, _3, state: AztecModelState, signal: SignalTim
     if updated_process is not None:
         # type: ignore
         updated_process.duration_in_current_phase += signal.get("delta_blocks", 0)
-    else:
-        pass
 
     return ("current_process", updated_process)
 
@@ -301,9 +299,7 @@ def p_select_proposal(
 
     remaining_time = max_phase_duration - process.duration_in_current_phase
     if remaining_time < 0:
-        raw_proposals: dict[TxUUID, Proposal] = proposals_from_tx(
-            state["transactions"]
-        )
+        raw_proposals: dict[TxUUID, Proposal] = proposals_from_tx(state["transactions"])
 
         proposals = {
             k: p
@@ -637,11 +633,6 @@ def p_reveal_content(
                     new_transactions.append(tx)
                     updated_process.tx_content_reveal = tx.uuid
 
-                else:
-                    pass
-        else:
-            pass
-
     return {
         "update_process": updated_process,
         "new_transactions": new_transactions,
@@ -766,11 +757,6 @@ def p_submit_proof(
                     new_transactions.append(tx)
                     updated_process.tx_rollup_proof = tx.uuid
 
-                else:
-                    pass  # Nothing changes if no valid rollup
-        else:
-            pass
-
     return {
         "update_process": updated_process,
         "new_transactions": new_transactions,
@@ -846,8 +832,6 @@ def p_race_mode(
                 updated_process.tx_content_reveal = tx_2.uuid
                 updated_process.phase = SelectionPhase.finalized
                 updated_process.duration_in_current_phase = 0
-        else:
-            pass
 
     return {"update_process": updated_process, "new_transactions": new_transactions}
 
@@ -929,14 +913,6 @@ def s_transactions_new_proposals(
                         )
 
                         new_proposals[tx_uuid] = new_proposal
-                    else:
-                        pass
-                else:
-                    pass
-        else:
-            new_proposals = dict()
-    else:
-        new_proposals = dict()
 
     new_transactions = {**new_transactions, **new_proposals}
     return ("transactions", new_transactions)

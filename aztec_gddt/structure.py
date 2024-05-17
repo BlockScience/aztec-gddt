@@ -115,8 +115,7 @@ for block in [b for b in AZTEC_MODEL_BLOCKS if b.get("ignore", False) != True]:
             _block["variables"][variable] = add_suf(variable)
         elif suf == replace_suf:
             _block["variables"][variable] = replace_suf(variable)
-        else:
-            pass
+
     blocks.append(_block)
 
 AZTEC_MODEL_BLOCKS = [
