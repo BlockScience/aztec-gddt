@@ -862,57 +862,61 @@ def s_transactions_new_proposals(
     new_transactions = state["transactions"].copy()
     current_process: Process | None = state["current_process"]
     new_proposals: dict[TxUUID, Proposal] = dict()
-    if current_process is not None:
-        if current_process.phase == SelectionPhase.pending_proposals:
-            current_proposers: set[AgentUUID] = {
-                p.who
-                for p in new_transactions.values()
-                if p.when >= current_process.current_phase_init_time
-            }
-            potential_proposers: set[AgentUUID] = {
-                u.uuid
-                for u in state["agents"].values()
-                if u.uuid not in current_proposers
-                and u.is_sequencer
-                and u.staked_amount >= params["minimum_stake"]
-            }
 
-            for potential_proposer in potential_proposers:
-                if bernoulli_trial(
-                    trial_probability(
-                        params["phase_duration_proposal_max_blocks"],
-                        params["final_probability"],
-                    )
-                ):
+    if current_process is None:
+        return ("transactions", new_transactions)
+    if current_process.phase != SelectionPhase.pending_proposals:
+        return ("transactions", new_transactions)
 
-                    tx_uuid = uuid4()
-                    gas: Gas = params["gas_estimators"].proposal(state)
-                    fee: Gwei = gas * state["gas_fee_l1"]
-                    score = uniform.rvs()  # Assumption: score is always uniform
-                    size = params["tx_estimators"].proposal_average_size(state)
-                    public_share = 0.5  # Assumption: Share of public function calls
+    current_proposers: set[AgentUUID] = {
+        p.who
+        for p in new_transactions.values()
+        if p.when >= current_process.current_phase_init_time
+    }
+    potential_proposers: set[AgentUUID] = {
+        u.uuid
+        for u in state["agents"].values()
+        if u.uuid not in current_proposers
+        and u.is_sequencer
+        and u.staked_amount >= params["minimum_stake"]
+    }
 
-                    # gas_fee_l1_acceptable = (
-                    # state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
-                    # )
+    for potential_proposer in potential_proposers:
+        if bernoulli_trial(
+            trial_probability(
+                params["phase_duration_proposal_max_blocks"],
+                params["final_probability"],
+            )
+        ):
 
-                    gas_fee_l1_acceptable = True  # XXX: Temporary economic assumption
+            tx_uuid = uuid4()
+            gas: Gas = params["gas_estimators"].proposal(state)
+            fee: Gwei = gas * state["gas_fee_l1"]
+            score = uniform.rvs()  # Assumption: score is always uniform
+            size = params["tx_estimators"].proposal_average_size(state)
+            public_share = 0.5  # Assumption: Share of public function calls
 
-                    block_is_uncensored = check_for_censorship(params, state)
+            # gas_fee_l1_acceptable = (
+            # state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
+            # )
 
-                    if gas_fee_l1_acceptable and block_is_uncensored:
-                        new_proposal = Proposal(
-                            who=potential_proposer,
-                            when=state["time_l1"],
-                            uuid=tx_uuid,
-                            gas=gas,
-                            fee=fee,
-                            score=score,
-                            size=size,
-                            public_composition=public_share,
-                        )
+            gas_fee_l1_acceptable = True  # XXX: Temporary economic assumption
 
-                        new_proposals[tx_uuid] = new_proposal
+            block_is_uncensored = check_for_censorship(params, state)
+
+            if gas_fee_l1_acceptable and block_is_uncensored:
+                new_proposal = Proposal(
+                    who=potential_proposer,
+                    when=state["time_l1"],
+                    uuid=tx_uuid,
+                    gas=gas,
+                    fee=fee,
+                    score=score,
+                    size=size,
+                    public_composition=public_share,
+                )
+
+                new_proposals[tx_uuid] = new_proposal
 
     new_transactions = {**new_transactions, **new_proposals}
     return ("transactions", new_transactions)
