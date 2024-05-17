@@ -165,8 +165,7 @@ def s_current_process_time(_1, _2, _3, state: AztecModelState, signal: SignalTim
     updated_process: Process | None = copy(state["current_process"])
     if updated_process is not None:
         # type: ignore
-        updated_process.duration_in_current_phase += signal.get(
-            "delta_blocks", 0)
+        updated_process.duration_in_current_phase += signal.get("delta_blocks", 0)
     else:
         pass
 
@@ -206,19 +205,27 @@ def value_from_param_timeseries_suf(
     return value
 
 
-def s_gas_fee_l1(p: AztecModelParams, _2, _3, s, _5): 
+def s_gas_fee_l1(p: AztecModelParams, _2, _3, s, _5):
     key = "gas_fee_l1"
-    random_value =  value_from_param_timeseries_suf(p, s, "gas_fee_l1_time_series", key)
+    random_value = value_from_param_timeseries_suf(p, s, "gas_fee_l1_time_series", key)
     past_value = s[key]
-    value = round(p['past_gas_weight_fraction'] * past_value + (1 - p['past_gas_weight_fraction']) * random_value)
+    value = round(
+        p["past_gas_weight_fraction"] * past_value
+        + (1 - p["past_gas_weight_fraction"]) * random_value
+    )
     return (key, value)
 
 
-def s_gas_fee_blob(p: AztecModelParams, _2, _3, s, _5): 
+def s_gas_fee_blob(p: AztecModelParams, _2, _3, s, _5):
     key = "gas_fee_blob"
-    random_value =  value_from_param_timeseries_suf(p, s, "gas_fee_blob_time_series", key)
+    random_value = value_from_param_timeseries_suf(
+        p, s, "gas_fee_blob_time_series", key
+    )
     past_value = s[key]
-    value = round(p['past_gas_weight_fraction'] * past_value + (1 - p['past_gas_weight_fraction']) * random_value)
+    value = round(
+        p["past_gas_weight_fraction"] * past_value
+        + (1 - p["past_gas_weight_fraction"]) * random_value
+    )
     return (key, value)
 
 
@@ -315,12 +322,14 @@ def p_select_proposal(
                     state["transactions"]
                 )
 
-                proposals = {k: p for k, p in raw_proposals.items()
-                             if p.when >= process.current_phase_init_time}
+                proposals = {
+                    k: p
+                    for k, p in raw_proposals.items()
+                    if p.when >= process.current_phase_init_time
+                }
 
                 if len(proposals) > 0:
-                    number_uncles: int = min(
-                        len(proposals) - 1, params["uncle_count"])
+                    number_uncles: int = min(len(proposals) - 1, params["uncle_count"])
 
                     ranked_proposals: list[Proposal] = sorted(
                         proposals.values(), key=lambda p: p.score, reverse=True
@@ -329,7 +338,7 @@ def p_select_proposal(
                     winner_proposal: Proposal = ranked_proposals[0]
                     if len(ranked_proposals) > 1:
                         uncle_proposals: list[Proposal] = ranked_proposals[
-                            1: number_uncles + 1
+                            1 : number_uncles + 1
                         ]
                     else:
                         uncle_proposals = []
@@ -343,8 +352,7 @@ def p_select_proposal(
                     updated_process.phase = SelectionPhase.pending_commit_bond
                     updated_process.duration_in_current_phase = 0
                     updated_process.leading_sequencer = winner_proposal.who
-                    updated_process.uncle_sequencers = [
-                        p.who for p in uncle_proposals]
+                    updated_process.uncle_sequencers = [p.who for p in uncle_proposals]
                     updated_process.tx_winning_proposal = winner_proposal.uuid
                 else:
                     updated_process = copy(process)
@@ -401,22 +409,25 @@ def p_commit_bond(
                 fee = gas * state["gas_fee_l1"]
 
                 # Assumption: Agents have extra costs / profit considerations and need a safety buffer
-                SAFETY_BUFFER = params['safety_factor_commit_bond'] * fee
+                SAFETY_BUFFER = params["safety_factor_commit_bond"] * fee
 
-                expected_l2_blocks_per_day = params['l1_blocks_per_day'] / \
-                    total_phase_duration(params)
+                expected_l2_blocks_per_day = params[
+                    "l1_blocks_per_day"
+                ] / total_phase_duration(params)
 
                 # expected_rewards = params['daily_block_reward']
                 # expected_rewards *= rewards_to_sequencer(params)
                 # expected_rewards /= expected_l2_blocks_per_day
-                expected_rewards = 1 #XXX: Temporary to ignore economic assumptions. 
-                assert expected_rewards > 0, "COMMIT_BOND: Expected rewards should be positive."
+                expected_rewards = 1  # XXX: Temporary to ignore economic assumptions.
+                assert (
+                    expected_rewards > 0
+                ), "COMMIT_BOND: Expected rewards should be positive."
 
                 # expected_costs: float = params["op_cost_sequencer"]
                 # expected_costs += fee
                 # expected_costs += SAFETY_BUFFER
                 # expected_costs *= params['gwei_to_tokens']
-                expected_costs = 0 #XXX: Temporary to ignore economic assumptions. 
+                expected_costs = 0  # XXX: Temporary to ignore economic assumptions.
                 assert expected_costs == 0, "COMMIT_BOND: Expected costs should be 0."
 
                 payoff_reveal = expected_rewards - expected_costs
@@ -426,22 +437,26 @@ def p_commit_bond(
 
                     # If duration is not expired, do  a trial to see if bond is commited
                     agent_decides_to_reveal_commit_bond = bernoulli_trial(
-                        probability=trial_probability(params['phase_duration_commit_bond_max_blocks'],
-                                                      params['final_probability'])
+                        probability=trial_probability(
+                            params["phase_duration_commit_bond_max_blocks"],
+                            params["final_probability"],
+                        )
                     )
                     # gas_fee_l1_acceptable = (
                     #     state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
                     # )
 
-                    gas_fee_l1_acceptable = True #XXX: Temporary economic assumption
-                    
+                    gas_fee_l1_acceptable = True  # XXX: Temporary economic assumption
+
                     block_is_uncensored = check_for_censorship(params, state)
-                    
-                    if (agent_decides_to_reveal_commit_bond 
+
+                    if (
+                        agent_decides_to_reveal_commit_bond
                         and gas_fee_l1_acceptable
-                        and block_is_uncensored):
+                        and block_is_uncensored
+                    ):
                         updated_process = copy(process)
-                        lead_seq: Agent = state['agents'][process.leading_sequencer]
+                        lead_seq: Agent = state["agents"][process.leading_sequencer]
                         proposal_uuid = process.tx_winning_proposal
                         proving_market_is_used = bernoulli_trial(
                             params["proving_marketplace_usage_probability"]
@@ -457,12 +472,12 @@ def p_commit_bond(
                             if len(provers) > 0:
                                 prover: AgentUUID = choice(provers)
                             else:
-                                if (lead_seq.balance >= bond_amount):
+                                if lead_seq.balance >= bond_amount:
                                     prover = updated_process.leading_sequencer
                                 else:
                                     prover = None
                         else:
-                            if (lead_seq.balance >= bond_amount):
+                            if lead_seq.balance >= bond_amount:
                                 prover = updated_process.leading_sequencer
                             else:
                                 prover = None
@@ -550,33 +565,40 @@ def p_reveal_content(
                 gas: Gas = params["gas_estimators"].content_reveal(state)
                 fee = gas * state["gas_fee_l1"]
                 # Assumption: Agents have extra costs / profit considerations and need a safety buffer
-                SAFETY_BUFFER = params['safety_factor_reveal_content'] * fee 
-                expected_l2_blocks_per_day = params['l1_blocks_per_day'] / \
-                    total_phase_duration(params)
+                SAFETY_BUFFER = params["safety_factor_reveal_content"] * fee
+                expected_l2_blocks_per_day = params[
+                    "l1_blocks_per_day"
+                ] / total_phase_duration(params)
 
                 # expected_rewards = params['daily_block_reward']
                 # expected_rewards *= rewards_to_sequencer(params)
                 # expected_rewards /= expected_l2_blocks_per_day
-                expected_rewards = 1 #XXX: Temporary to ignore economic assumptions. 
-                assert expected_rewards >= 0, "REVEAL_CONTENT: Expected rewards should be positive."
+                expected_rewards = 1  # XXX: Temporary to ignore economic assumptions.
+                assert (
+                    expected_rewards >= 0
+                ), "REVEAL_CONTENT: Expected rewards should be positive."
 
-                
                 # expected_costs: float = params["op_cost_sequencer"]
                 # expected_costs += fee
                 # expected_costs += SAFETY_BUFFER
                 # expected_costs *= params['gwei_to_tokens']
-                expected_costs = 0 #XXX: Temporary to ignore economic assumptions. 
-                assert expected_costs == 0, "REVEAL_CONTENT: Expected costs should be zero."
-
+                expected_costs = 0  # XXX: Temporary to ignore economic assumptions.
+                assert (
+                    expected_costs == 0
+                ), "REVEAL_CONTENT: Expected costs should be zero."
 
                 payoff_reveal = expected_rewards - expected_costs
 
                 agent_expects_profit = payoff_reveal >= 0
-                assert agent_expects_profit, "REVEAL_CONTENT: Agent should be expecting profit."
+                assert (
+                    agent_expects_profit
+                ), "REVEAL_CONTENT: Agent should be expecting profit."
 
                 agent_decides_to_reveal_block_content = bernoulli_trial(
-                    probability=trial_probability(params['phase_duration_reveal_max_blocks'],
-                                                  params['final_probability'])
+                    probability=trial_probability(
+                        params["phase_duration_reveal_max_blocks"],
+                        params["final_probability"],
+                    )
                 )
 
                 # gas_fee_blob_acceptable = (
@@ -588,7 +610,7 @@ def p_reveal_content(
                 # gas_fee_l1_acceptable = (
                 #     state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
                 # )
-                
+
                 gas_fee_l1_acceptable = True
 
                 block_is_uncensored = check_for_censorship(params, state)
@@ -605,7 +627,7 @@ def p_reveal_content(
                     updated_process.phase = SelectionPhase.pending_rollup_proof
                     updated_process.duration_in_current_phase = 0
 
-                    who = updated_process.leading_sequencer  
+                    who = updated_process.leading_sequencer
                     blob_gas: BlobGas = params["gas_estimators"].content_reveal_blob(
                         state
                     )
@@ -613,7 +635,9 @@ def p_reveal_content(
 
                     tx_count = params["tx_estimators"].transaction_count(state)
                     tx_avg_size = int(
-                        state["transactions"][process.tx_winning_proposal].size / tx_count)  # type: ignore
+                        state["transactions"][process.tx_winning_proposal].size
+                        / tx_count
+                    )  # type: ignore
                     tx_avg_fee_per_size = params[
                         "tx_estimators"
                     ].transaction_average_fee_per_size(state)
@@ -674,7 +698,8 @@ def p_submit_proof(
                 transactions = state["transactions"]
                 commit_bond_id = updated_process.tx_commitment_bond
                 commit_bond: CommitmentBond = transactions.get(
-                    commit_bond_id, None)  # type: ignore
+                    commit_bond_id, None
+                )  # type: ignore
                 who_to_slash = commit_bond.prover_uuid
                 how_much_to_slash = commit_bond.bond_amount
 
@@ -692,22 +717,27 @@ def p_submit_proof(
                 gas: Gas = params["gas_estimators"].content_reveal(state)
                 fee = gas * state["gas_fee_l1"]
                 # Assumption: Agents have extra costs / profit considerations and need a safety buffer
-                SAFETY_BUFFER = params['safety_factor_rollup_proof'] * fee
-                expected_l2_blocks_per_day = params['l1_blocks_per_day'] / \
-                    total_phase_duration(params)
+                SAFETY_BUFFER = params["safety_factor_rollup_proof"] * fee
+                expected_l2_blocks_per_day = params[
+                    "l1_blocks_per_day"
+                ] / total_phase_duration(params)
 
                 # expected_rewards = params['daily_block_reward']
                 # expected_rewards *= params['rewards_to_provers']
                 # expected_rewards /= expected_l2_blocks_per_day
                 expected_rewards = 1
-                assert expected_rewards >= 0, "SUBMIT PROOF: Expected rewards should be positive."
+                assert (
+                    expected_rewards >= 0
+                ), "SUBMIT PROOF: Expected rewards should be positive."
 
                 # expected_costs: float = params["op_cost_prover"]
                 # expected_costs += fee
                 # expected_costs += SAFETY_BUFFER
                 # expected_costs *= params['gwei_to_tokens']
                 expected_costs = 0
-                assert expected_costs == 0, "SUBMIT PROOF: Expected costs should be zero."
+                assert (
+                    expected_costs == 0
+                ), "SUBMIT PROOF: Expected costs should be zero."
 
                 payoff_reveal = expected_rewards - expected_costs
 
@@ -715,20 +745,22 @@ def p_submit_proof(
                 assert agent_expects_profit, "SUBMIT_PROOF: Agent should expect profit."
 
                 agent_decides_to_reveal_rollup_proof = bernoulli_trial(
-                    probability=trial_probability(params['phase_duration_rollup_max_blocks'],
-                                                  params['final_probability'])
+                    probability=trial_probability(
+                        params["phase_duration_rollup_max_blocks"],
+                        params["final_probability"],
+                    )
                 )
 
                 # gas_fee_l1_acceptable = (
                 #     state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
                 # )
-                gas_fee_l1_acceptable = True #XXX: Assume gas fee is acceptable. 
+                gas_fee_l1_acceptable = True  # XXX: Assume gas fee is acceptable.
 
                 block_is_uncensored = check_for_censorship(params, state)
 
                 if (
-                    agent_decides_to_reveal_rollup_proof 
-                    and gas_fee_l1_acceptable 
+                    agent_decides_to_reveal_rollup_proof
+                    and gas_fee_l1_acceptable
                     and agent_expects_profit
                     and block_is_uncensored
                 ):
@@ -740,11 +772,13 @@ def p_submit_proof(
 
                     commit_bond_id = updated_process.tx_commitment_bond
                     commit_bond: CommitmentBond = transactions.get(  # type: ignore
-                        commit_bond_id, None)  # type: ignore
+                        commit_bond_id, None
+                    )  # type: ignore
                     who = commit_bond.prover_uuid
-                    gas: Gas = params['gas_estimators'].rollup_proof(  # type: ignore
-                        state) # type: ignore
-                    fee: Gwei = gas * state['gas_fee_l1'] # type: ignore
+                    gas: Gas = params["gas_estimators"].rollup_proof(  # type: ignore
+                        state
+                    )  # type: ignore
+                    fee: Gwei = gas * state["gas_fee_l1"]  # type: ignore
 
                     tx = RollupProof(
                         who=who, when=state["time_l1"], uuid=uuid4(), gas=gas, fee=fee
@@ -777,7 +811,7 @@ def p_race_mode(
     new_transactions: list[TransactionL1] = list()
 
     max_phase_duration = params["phase_duration_race_max_blocks"]
-    
+
     # NOTE: Logic of race mode is different.
     # No check here for L1 censorship.
 
@@ -796,13 +830,13 @@ def p_race_mode(
                 who = "l1-builder"
                 gas: Gas = params["gas_estimators"].content_reveal(state)
                 fee: Gwei = gas * state["gas_fee_l1"]
-                blob_gas: BlobGas = params["gas_estimators"].content_reveal_blob(
-                    state)
+                blob_gas: BlobGas = params["gas_estimators"].content_reveal_blob(state)
                 blob_fee: Gwei = blob_gas * state["gas_fee_blob"]
 
                 tx_count = params["tx_estimators"].transaction_count(state)
                 tx_avg_size = int(
-                    state["transactions"][process.tx_winning_proposal].size / tx_count)  # type: ignore
+                    state["transactions"][process.tx_winning_proposal].size / tx_count
+                )  # type: ignore
                 tx_avg_fee_per_size = params[
                     "tx_estimators"
                 ].transaction_average_fee_per_size(state)
@@ -867,39 +901,43 @@ def s_transactions_new_proposals(
     new_proposals: dict[TxUUID, Proposal] = dict()
     if current_process is not None:
         if current_process.phase == SelectionPhase.pending_proposals:
-            current_proposers: set[AgentUUID] = {p.who
-                                                 for p in new_transactions.values()
-                                                 if p.when >= current_process.current_phase_init_time}
+            current_proposers: set[AgentUUID] = {
+                p.who
+                for p in new_transactions.values()
+                if p.when >= current_process.current_phase_init_time
+            }
             potential_proposers: set[AgentUUID] = {
                 u.uuid
                 for u in state["agents"].values()
                 if u.uuid not in current_proposers
                 and u.is_sequencer
-                and u.staked_amount >= params['minimum_stake']
+                and u.staked_amount >= params["minimum_stake"]
             }
 
             for potential_proposer in potential_proposers:
-                if bernoulli_trial(trial_probability(params['phase_duration_proposal_max_blocks'],
-                                                     params['final_probability'])):
+                if bernoulli_trial(
+                    trial_probability(
+                        params["phase_duration_proposal_max_blocks"],
+                        params["final_probability"],
+                    )
+                ):
 
                     tx_uuid = uuid4()
                     gas: Gas = params["gas_estimators"].proposal(state)
                     fee: Gwei = gas * state["gas_fee_l1"]
                     score = uniform.rvs()  # Assumption: score is always uniform
                     size = params["tx_estimators"].proposal_average_size(state)
-                    public_share = 0.5  # Assumption: Share of public function calls 
+                    public_share = 0.5  # Assumption: Share of public function calls
 
                     # gas_fee_l1_acceptable = (
                     # state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
                     # )
 
-                    gas_fee_l1_acceptable = True #XXX: Temporary economic assumption
+                    gas_fee_l1_acceptable = True  # XXX: Temporary economic assumption
 
                     block_is_uncensored = check_for_censorship(params, state)
 
-                    if (gas_fee_l1_acceptable
-                        and block_is_uncensored
-                        ):
+                    if gas_fee_l1_acceptable and block_is_uncensored:
                         new_proposal = Proposal(
                             who=potential_proposer,
                             when=state["time_l1"],
@@ -944,8 +982,7 @@ def s_transactions(
         "new_transactions", list()
     )  # type: ignore
 
-    new_tx_dict: dict[TxUUID, TransactionL1] = {
-        tx.uuid: tx for tx in new_tx_list}
+    new_tx_dict: dict[TxUUID, TransactionL1] = {tx.uuid: tx for tx in new_tx_list}
 
     new_transactions = {**state["transactions"].copy(), **new_tx_dict}
 
@@ -970,7 +1007,8 @@ def s_slashes_to_prover(
         [
             transfer
             for transfer in transfers
-            if (transfer.kind == TransferKind.slash_prover) and (transfer.to_prover == True)
+            if (transfer.kind == TransferKind.slash_prover)
+            and (transfer.to_prover == True)
         ]
     )
 
@@ -1030,7 +1068,14 @@ def s_agent_transfer(
             updated_agents[transfer.source].balance -= transfer.amount
             updated_agents[transfer.destination].balance += transfer.amount
         else:
-            raise Exception(f'Transfer logic is undefined for {transfer.kind}')
+            raise Exception(f"Transfer logic is undefined for {transfer.kind}")
+
+        assert (
+            updated_agents[transfer.source].balance >= 0
+        ), "This transfer resulted in a negative balance"
+        assert (
+            updated_agents[transfer.source].staked_amount >= 0
+        ), "This transfer results in a negative staked amount"
 
     return ("agents", updated_agents)
 
@@ -1043,9 +1088,10 @@ def p_block_reward(
 
         # Assumption: this assumes that the average L2 block duration
         # will be the max L2 block duration
-        expected_l2_blocks_per_day = params['l1_blocks_per_day'] / \
-            total_phase_duration(params)
-        reward = params['daily_block_reward'] / expected_l2_blocks_per_day
+        expected_l2_blocks_per_day = params["l1_blocks_per_day"] / total_phase_duration(
+            params
+        )
+        reward = params["daily_block_reward"] / expected_l2_blocks_per_day
     else:
         reward = 0
     return SignalPayout(block_reward=reward)
@@ -1106,8 +1152,7 @@ def s_total_rewards_provers(
 
         if not p.entered_race_mode:
             prover_uuid = txs[p.tx_commitment_bond].prover_uuid  # type: ignore
-            relays = [a_id for (a_id, a)
-                      in state["agents"].items() if a.is_relay]
+            relays = [a_id for (a_id, a) in state["agents"].items() if a.is_relay]
             relay_uuid: AgentUUID = choice(relays)
         else:
             prover_uuid = sequencer_uuid
@@ -1141,8 +1186,7 @@ def s_total_rewards_sequencers(
 
         if not p.entered_race_mode:
             prover_uuid = txs[p.tx_commitment_bond].prover_uuid  # type: ignore
-            relays = [a_id for (a_id, a)
-                      in state["agents"].items() if a.is_relay]
+            relays = [a_id for (a_id, a) in state["agents"].items() if a.is_relay]
             relay_uuid: AgentUUID = choice(relays)
         else:
             prover_uuid = sequencer_uuid
@@ -1178,8 +1222,7 @@ def s_total_rewards_relays(
 
         if not p.entered_race_mode:
             prover_uuid = txs[p.tx_commitment_bond].prover_uuid  # type: ignore
-            relays = [a_id for (a_id, a)
-                      in state["agents"].items() if a.is_relay]
+            relays = [a_id for (a_id, a) in state["agents"].items() if a.is_relay]
             relay_uuid: AgentUUID = choice(relays)
         else:
             prover_uuid = sequencer_uuid
@@ -1210,8 +1253,7 @@ def s_agents_rewards(
 
         if not p.entered_race_mode:
             prover_uuid = txs[p.tx_commitment_bond].prover_uuid  # type: ignore
-            relays = [a_id for (a_id, a)
-                      in state["agents"].items() if a.is_relay]
+            relays = [a_id for (a_id, a) in state["agents"].items() if a.is_relay]
             relay_uuid: AgentUUID = choice(relays)
         else:
             prover_uuid = sequencer_uuid
@@ -1270,16 +1312,15 @@ def s_agent_restake(
     state: AztecModelState,
     signal: SignalEvolveProcess,
 ):
-    new_agents = state['agents'].copy()
+    new_agents = state["agents"].copy()
 
     sequencers = {k: v for k, v in new_agents.items() if v.is_sequencer}
     for k, v in sequencers.items():
-        if v.staked_amount < params['minimum_stake']:
+        if v.staked_amount < params["minimum_stake"]:
             # Assumption: Sequencers top-up from balance with 2 more ETH than necessary
-            max_amount_to_stake = (
-                params['minimum_stake'] - v.staked_amount + 2.0)
+            max_amount_to_stake = params["minimum_stake"] - v.staked_amount + 2.0
             amount_to_stake = min(max_amount_to_stake, v.balance)
             v.balance -= amount_to_stake
             v.staked_amount += amount_to_stake
 
-    return ('agents', new_agents)
+    return ("agents", new_agents)
