@@ -1,5 +1,6 @@
 from aztec_gddt.logic import *
 from aztec_gddt.types import *
+from aztec_gddt.helper import check_for_censorship
 from copy import deepcopy
 
 AZTEC_MODEL_BLOCKS: list[dict] = [
