@@ -21,8 +21,6 @@ class HiddenPrints:
             from tqdm.auto import tqdm
 
             tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)  # type: ignore
-        else:
-            pass
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.is_active:
@@ -31,8 +29,6 @@ class HiddenPrints:
             from tqdm.auto import tqdm
 
             tqdm.__init__ = partialmethod(tqdm.__init__)  # type: ignore
-        else:
-            pass
 
 
 def policy_aggregator(a, b):
@@ -83,7 +79,9 @@ def sim_run(
         exec_context = ExecutionContext(
             _exec_mode, additional_objs={"deepcopy_off": True}
         )
-        executor = Executor(exec_context=exec_context, configs=configs, supress_print=True)
+        executor = Executor(
+            exec_context=exec_context, configs=configs, supress_print=True
+        )
 
         # Execute the cadCAD experiment
         (records, tensor_field, _) = executor.execute()
@@ -97,8 +95,6 @@ def sim_run(
             last_ind = df.substep == max(df.substep)
             rows_to_keep = first_ind | last_ind
             df = df.loc[rows_to_keep].drop(columns=["substep"])
-        else:
-            pass
 
         if assign_params == False:
             pass
