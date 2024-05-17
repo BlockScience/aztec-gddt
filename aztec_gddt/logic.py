@@ -233,7 +233,9 @@ def p_init_process(
     params: AztecModelParams, _2, _3, state: AztecModelState
 ) -> SignalEvolveProcess:
     """
-    Initializes a specific process.
+    Function for starting a new process which is activated is there is no current process,
+    if the current process is in the finalized state or if it is in the skipped state. In those
+    cases the new process will be one in the pending proposals state.
 
     Args:
          params (AztecModelParams): The current parameters of the model.
@@ -244,15 +246,6 @@ def p_init_process(
 
     """
 
-    #######################################
-    ## Logical check to determine if     ##
-    ## a new process will be  initiated. ##
-    ## Checks to see if current phase    ##
-    ## of last process is one of         ##
-    ## pending_rollup_proof, skipped,    ##
-    ## or reorg.                         ##
-    #######################################
-
     if state["current_process"] is None:
         # Assumption: Lack of active process implies a new one being initiated
         do_init_process = True
@@ -260,10 +253,6 @@ def p_init_process(
         # Else, check if the current one is finalized
         do_init_process = state["current_process"].phase == SelectionPhase.finalized
         do_init_process |= state["current_process"].phase == SelectionPhase.skipped
-
-    #######################################
-    ## Logic to create new process       ##
-    #######################################
 
     if do_init_process:
         new_process = Process(
