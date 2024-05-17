@@ -11,64 +11,7 @@ from random import random
 import pickle
 
 from aztec_gddt.types import Agent
-
-
-def generic_policy(_1, _2, _3, _4) -> dict:
-    """
-    Function to generate pass through policy
-
-    Args:
-        _1
-        _2
-        _3
-        _4
-
-    Returns:
-        dict: Empty dictionary
-    """
-    return {}
-
-
-#######################################
-## General system helper functions.  ##
-#######################################
-
-
-def replace_suf(variable: str, default_value=0.0) -> Callable:
-    """Creates replacing function for state update from string
-
-    Args:
-        variable (str): The variable name that is updated
-
-    Returns:
-        function: A function that continues the state across a substep
-    """
-    return lambda _1, _2, _3, state, signal: (
-        variable,
-        signal.get(variable, default_value),
-    )
-
-
-def add_suf(variable: str, default_value=0.0) -> Callable:
-    """
-    Creates replacing function for state update from string
-
-    Args:
-        variable (str): The variable name that is updated
-
-    Returns:
-        function: A function that continues the state across a substep
-    """
-    return lambda _1, _2, _3, state, signal: (
-        variable,
-        signal.get(variable, default_value) + state[variable],
-    )
-
-
-#######################################
-## Overall functions, not attached   ##
-## to any particular phase.          ##
-#######################################
+from .logic_functions.primitive import generic_policy, replace_suf, add_suf
 
 
 def p_evolve_time(
