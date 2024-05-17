@@ -278,8 +278,8 @@ def p_select_proposal(
     params: AztecModelParams, _2, _3, state: AztecModelState
 ) -> SignalEvolveProcess:
     """
-    Select a sequencer from list of eligible sequencers, and
-    determine uncle sequencers.
+    First check if there is a valid process which is pending proposals and if so then
+    select a sequencer from list of eligible sequencers, and determine uncle sequencers.
 
     Args:
         params (AztecModelParams): The current parameters of the model.
@@ -289,68 +289,58 @@ def p_select_proposal(
          Signal: The new process to be considered in the system.
     """
 
-    #######################################
-    ## Decide which processes are valid  ##
-    ## 1. current phase of process must  ##
-    ##    be pending proposals           ##
-    ## 2. the duration is greater than   ##
-    ##    proposal duration.             ##
-    #######################################
     process = state["current_process"]
     updated_process: Optional[Process] = None
 
     max_phase_duration = params["phase_duration_proposal_max_blocks"]
 
     if process is None:
-        pass
-    else:
-        if process.phase == SelectionPhase.pending_proposals:
-            remaining_time = max_phase_duration - process.duration_in_current_phase
-            if remaining_time < 0:
-                raw_proposals: dict[TxUUID, Proposal] = proposals_from_tx(
-                    state["transactions"]
-                )
+        return {"update_process": updated_process}
+    if process.phase != SelectionPhase.pending_proposals:
+        return {"update_process": updated_process}
 
-                proposals = {
-                    k: p
-                    for k, p in raw_proposals.items()
-                    if p.when >= process.current_phase_init_time
-                }
+    remaining_time = max_phase_duration - process.duration_in_current_phase
+    if remaining_time < 0:
+        raw_proposals: dict[TxUUID, Proposal] = proposals_from_tx(
+            state["transactions"]
+        )
 
-                if len(proposals) > 0:
-                    number_uncles: int = min(len(proposals) - 1, params["uncle_count"])
+        proposals = {
+            k: p
+            for k, p in raw_proposals.items()
+            if p.when >= process.current_phase_init_time
+        }
 
-                    ranked_proposals: list[Proposal] = sorted(
-                        proposals.values(), key=lambda p: p.score, reverse=True
-                    )
+        if len(proposals) > 0:
+            number_uncles: int = min(len(proposals) - 1, params["uncle_count"])
 
-                    winner_proposal: Proposal = ranked_proposals[0]
-                    if len(ranked_proposals) > 1:
-                        uncle_proposals: list[Proposal] = ranked_proposals[
-                            1 : number_uncles + 1
-                        ]
-                    else:
-                        uncle_proposals = []
+            ranked_proposals: list[Proposal] = sorted(
+                proposals.values(), key=lambda p: p.score, reverse=True
+            )
 
-                    updated_process = copy(process)
-
-                    # BUG: do this for all phase evolving logic.
-                    # BUG: make sure that this is compatible when the time evolution is dynamical, eg, 1 ts = many blocks
-                    updated_process.current_phase_init_time = state["time_l1"]
-
-                    updated_process.phase = SelectionPhase.pending_commit_bond
-                    updated_process.duration_in_current_phase = 0
-                    updated_process.leading_sequencer = winner_proposal.who
-                    updated_process.uncle_sequencers = [p.who for p in uncle_proposals]
-                    updated_process.tx_winning_proposal = winner_proposal.uuid
-                else:
-                    updated_process = copy(process)
-                    updated_process.phase = SelectionPhase.skipped
-                    updated_process.duration_in_current_phase = 0
+            winner_proposal: Proposal = ranked_proposals[0]
+            if len(ranked_proposals) > 1:
+                uncle_proposals: list[Proposal] = ranked_proposals[
+                    1 : number_uncles + 1
+                ]
             else:
-                pass
+                uncle_proposals = []
+
+            updated_process = copy(process)
+
+            # BUG: do this for all phase evolving logic.
+            # BUG: make sure that this is compatible when the time evolution is dynamical, eg, 1 ts = many blocks
+            updated_process.current_phase_init_time = state["time_l1"]
+
+            updated_process.phase = SelectionPhase.pending_commit_bond
+            updated_process.duration_in_current_phase = 0
+            updated_process.leading_sequencer = winner_proposal.who
+            updated_process.uncle_sequencers = [p.who for p in uncle_proposals]
+            updated_process.tx_winning_proposal = winner_proposal.uuid
         else:
-            pass
+            updated_process = copy(process)
+            updated_process.phase = SelectionPhase.skipped
+            updated_process.duration_in_current_phase = 0
 
     return {"update_process": updated_process}
 
