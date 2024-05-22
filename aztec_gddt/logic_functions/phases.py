@@ -4,6 +4,7 @@ from uuid import uuid4
 from copy import deepcopy, copy
 from random import choice
 from scipy.stats import uniform
+from .functional_parameterizations import determine_profitability
 
 
 def s_gas_fee_l1(p: AztecModelParams, _2, _3, s, _5):
@@ -339,29 +340,11 @@ def p_reveal_content(
                     "l1_blocks_per_day"
                 ] / total_phase_duration(params)
 
-                # expected_rewards = params['daily_block_reward']
-                # expected_rewards *= rewards_to_sequencer(params)
-                # expected_rewards /= expected_l2_blocks_per_day
-                expected_rewards = 1  # XXX: Temporary to ignore economic assumptions.
-                assert (
-                    expected_rewards >= 0
-                ), "REVEAL_CONTENT: Expected rewards should be positive."
-
-                # expected_costs: float = params["op_cost_sequencer"]
-                # expected_costs += fee
-                # expected_costs += SAFETY_BUFFER
-                # expected_costs *= params['gwei_to_tokens']
-                expected_costs = 0  # XXX: Temporary to ignore economic assumptions.
-                assert (
-                    expected_costs == 0
-                ), "REVEAL_CONTENT: Expected costs should be zero."
-
-                payoff_reveal = expected_rewards - expected_costs
+                expected_rewards, expected_costs, payoff_reveal = (
+                    determine_profitability("Reveal Content", params)
+                )
 
                 agent_expects_profit = payoff_reveal >= 0
-                assert (
-                    agent_expects_profit
-                ), "REVEAL_CONTENT: Agent should be expecting profit."
 
                 agent_decides_to_reveal_block_content = bernoulli_trial(
                     probability=trial_probability(
