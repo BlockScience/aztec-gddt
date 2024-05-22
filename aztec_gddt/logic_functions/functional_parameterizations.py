@@ -2,7 +2,14 @@ from typing import Tuple
 
 
 def determine_profitability(phase: str, params: dict) -> Tuple[float, float, bool]:
-    return determine_profitability_always_pass(phase, params)
+    if params["fp_determine_profitability"] == "Always Pass":
+        return determine_profitability_always_pass(phase, params)
+    else:
+        assert (
+            False
+        ), "The param of {} for fp_determine_profitability is not valid".format(
+            params["fp_determine_profitability"]
+        )
 
 
 def determine_profitability_always_pass(
