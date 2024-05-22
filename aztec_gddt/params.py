@@ -134,10 +134,13 @@ steady_gas_fee_blob_time_series = np.array(
 
 
 def steady_state_l1_gas_estimate(state: AztecModelState):
-    if state["timestep"] < len(steady_gas_fee_l1_time_series):
-        return steady_gas_fee_l1_time_series[state["timestep"]]
-    else:
-        return steady_gas_fee_l1_time_series[-1]
+    assert state["time_l1"] < len(
+        steady_gas_fee_l1_time_series
+    ), "The time_l1 of {} is out of bounds for the time series of steady_gas_fee_l1_time_series".format(
+        state["time_l1"]
+    )
+
+    return steady_gas_fee_l1_time_series[state["time_l1"]]
 
 
 def steady_state_blob_gas_estimate(state: AztecModelState):
