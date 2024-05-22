@@ -106,8 +106,10 @@ def value_from_param_timeseries_suf(
 ):
     time_series = params[param_key]
 
-    if state["timestep"] < len(time_series):
-        value = time_series[state["timestep"]]
-    else:
-        value = time_series[-1]
-    return value
+    assert state["time_l1"] < len(
+        time_series
+    ), "The time_l1 of {} is out of bounds for the time series of {}".format(
+        state["time_l1"], param_key
+    )
+
+    return time_series[state["time_l1"]]
