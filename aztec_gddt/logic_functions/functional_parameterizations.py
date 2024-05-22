@@ -33,5 +33,27 @@ def determine_profitability_always_pass(
 
         payoff_reveal = expected_rewards - expected_costs
         return expected_rewards, expected_costs, payoff_reveal
+    elif phase == "Submit Proof":
+        expected_rewards, expected_costs, payoff_reveal = determine_profitability(
+            "Reveal Content", params
+        )
+
+        # expected_rewards = params['daily_block_reward']
+        # expected_rewards *= params['rewards_to_provers']
+        # expected_rewards /= expected_l2_blocks_per_day
+        expected_rewards = 1
+        assert (
+            expected_rewards >= 0
+        ), "SUBMIT PROOF: Expected rewards should be positive."
+
+        # expected_costs: float = params["op_cost_prover"]
+        # expected_costs += fee
+        # expected_costs += SAFETY_BUFFER
+        # expected_costs *= params['gwei_to_tokens']
+        expected_costs = 0
+        assert expected_costs == 0, "SUBMIT PROOF: Expected costs should be zero."
+
+        payoff_reveal = expected_rewards - expected_costs
+        return expected_rewards, expected_costs, payoff_reveal
     else:
         assert False, "Not implemented for phase {}".format(phase)

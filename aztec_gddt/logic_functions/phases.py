@@ -455,27 +455,10 @@ def p_submit_proof(
                     "l1_blocks_per_day"
                 ] / total_phase_duration(params)
 
-                # expected_rewards = params['daily_block_reward']
-                # expected_rewards *= params['rewards_to_provers']
-                # expected_rewards /= expected_l2_blocks_per_day
-                expected_rewards = 1
-                assert (
-                    expected_rewards >= 0
-                ), "SUBMIT PROOF: Expected rewards should be positive."
-
-                # expected_costs: float = params["op_cost_prover"]
-                # expected_costs += fee
-                # expected_costs += SAFETY_BUFFER
-                # expected_costs *= params['gwei_to_tokens']
-                expected_costs = 0
-                assert (
-                    expected_costs == 0
-                ), "SUBMIT PROOF: Expected costs should be zero."
-
-                payoff_reveal = expected_rewards - expected_costs
-
+                expected_rewards, expected_costs, payoff_reveal = (
+                    determine_profitability("Submit Proof", params)
+                )
                 agent_expects_profit = payoff_reveal >= 0
-                assert agent_expects_profit, "SUBMIT_PROOF: Agent should expect profit."
 
                 agent_decides_to_reveal_rollup_proof = bernoulli_trial(
                     probability=trial_probability(
