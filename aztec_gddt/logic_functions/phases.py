@@ -229,19 +229,10 @@ def p_commit_bond(
                     params["final_probability"],
                 )
             )
-            # gas_fee_l1_acceptable = (
-            #     state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
-            # )
-
-            gas_fee_l1_acceptable = True  # XXX: Temporary economic assumption
 
             block_is_uncensored = check_for_censorship(params, state)
 
-            if (
-                agent_decides_to_reveal_commit_bond
-                and gas_fee_l1_acceptable
-                and block_is_uncensored
-            ):
+            if agent_decides_to_reveal_commit_bond and block_is_uncensored:
                 updated_process = copy(process)
                 lead_seq: Agent = state["agents"][process.leading_sequencer]
                 proposal_uuid = process.tx_winning_proposal
@@ -379,25 +370,11 @@ def p_reveal_content(
                     )
                 )
 
-                # gas_fee_blob_acceptable = (
-                #     state["gas_fee_blob"] <= params["blob_gas_threshold_for_tx"]
-                # )
-
-                gas_fee_blob_acceptable = True
-
-                # gas_fee_l1_acceptable = (
-                #     state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
-                # )
-
-                gas_fee_l1_acceptable = True
-
                 block_is_uncensored = check_for_censorship(params, state)
 
                 if (
                     agent_expects_profit
                     and agent_decides_to_reveal_block_content
-                    and gas_fee_blob_acceptable
-                    and gas_fee_l1_acceptable
                     and block_is_uncensored
                 ):
                     updated_process = copy(process)
@@ -524,16 +501,10 @@ def p_submit_proof(
                     )
                 )
 
-                # gas_fee_l1_acceptable = (
-                #     state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
-                # )
-                gas_fee_l1_acceptable = True  # XXX: Assume gas fee is acceptable.
-
                 block_is_uncensored = check_for_censorship(params, state)
 
                 if (
                     agent_decides_to_reveal_rollup_proof
-                    and gas_fee_l1_acceptable
                     and agent_expects_profit
                     and block_is_uncensored
                 ):
@@ -699,15 +670,9 @@ def s_transactions_new_proposals(
             size = params["tx_estimators"].proposal_average_size(state)
             public_share = 0.5  # Assumption: Share of public function calls
 
-            # gas_fee_l1_acceptable = (
-            # state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
-            # )
-
-            gas_fee_l1_acceptable = True  # XXX: Temporary economic assumption
-
             block_is_uncensored = check_for_censorship(params, state)
 
-            if gas_fee_l1_acceptable and block_is_uncensored:
+            if block_is_uncensored:
                 new_proposal = Proposal(
                     who=potential_proposer,
                     when=state["time_l1"],
