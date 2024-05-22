@@ -205,21 +205,9 @@ def p_commit_bond(
             params
         )
 
-        # expected_rewards = params['daily_block_reward']
-        # expected_rewards *= rewards_to_sequencer(params)
-        # expected_rewards /= expected_l2_blocks_per_day
-        expected_rewards = 1  # XXX: Temporary to ignore economic assumptions.
-        assert expected_rewards > 0, "COMMIT_BOND: Expected rewards should be positive."
-
-        # expected_costs: float = params["op_cost_sequencer"]
-        # expected_costs += fee
-        # expected_costs += SAFETY_BUFFER
-        # expected_costs *= params['gwei_to_tokens']
-        expected_costs = 0  # XXX: Temporary to ignore economic assumptions.
-        assert expected_costs == 0, "COMMIT_BOND: Expected costs should be 0."
-
-        payoff_reveal = expected_rewards - expected_costs
-        assert payoff_reveal >= 0, "COMMIT_BOND: Payoff should not be negative."
+        expected_rewards, expected_costs, payoff_reveal = determine_profitability(
+            "Commit Bond", params
+        )
 
         if payoff_reveal >= 0:
 
