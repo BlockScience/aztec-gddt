@@ -19,14 +19,12 @@ def p_evolve_time(
     return {"delta_blocks": params["timestep_in_blocks"]}
 
 
-def p_evolve_time_dynamical(
-    params: AztecModelParams, _2, _3, state: AztecModelState
-) -> SignalTime:
+def p_evolve_time_dynamical(_1, _2, _3, state: AztecModelState) -> SignalTime:
     """
     Policy function giving the change in number of blocks.
 
     Args:
-         params (AztecModelParams): The current parameters of the model.
+         state (AztecModelState): The current state of the model.
 
     Returns:
         Signal:

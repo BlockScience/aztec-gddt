@@ -50,7 +50,7 @@ def sim_run(
     assign_params: Union[bool, set] = True,
     drop_substeps=True,
     exec_mode="local",
-    supress_cadCAD_print=True,
+    supress_cadCAD_print=False,
 ) -> pd.DataFrame:
     """
     Run cadCAD simulations without headaches.

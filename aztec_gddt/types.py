@@ -5,6 +5,7 @@ from math import floor
 import numpy as np
 from pydantic import FiniteFloat
 from pydantic.dataclasses import dataclass
+
 # Units
 
 
@@ -14,7 +15,9 @@ L2Blocks = Annotated[int, "blocks"]  # Number of L2 Blocks (time dimension)
 ContinuousL1Blocks = Annotated[float, "blocks"]  # (time dimension)
 Seconds = Annotated[int, "s"]
 Probability = Annotated[float, "probability"]
-Tokens = Annotated[float, "tokens"]  # Tokens are currently set to ETH via gwei_to_tokens conversion 
+Tokens = Annotated[
+    float, "tokens"
+]  # Tokens are currently set to ETH via gwei_to_tokens conversion
 
 AgentUUID = Annotated[object, "uuid"]
 TxUUID = Annotated[object, "uuid"]
@@ -25,6 +28,7 @@ Gas = Annotated[int, "gas"]
 Gwei = Annotated[int, "gwei"]
 BlobGas = Annotated[int, "blob_gas"]
 Percentage = Annotated[float, "%"]
+FunctionalParameterizationString = str  # A string representing the functional paramterization option to use, i.e. "Basic Function"
 
 
 class L1TransactionType(Enum):
@@ -70,7 +74,6 @@ class TokenSupply:
     @property
     def user(self) -> FiniteFloat:
         return self.circulating + self.staked
-    
 
     @property
     def invariant(self) -> FiniteFloat:
@@ -79,8 +82,12 @@ class TokenSupply:
     @staticmethod
     def from_state(state: "AztecModelState") -> "TokenSupply":
         obj = TokenSupply(
-            circulating=sum(a.balance for a in state["agents"].values() if a.uuid != "burnt"),
-            staked=sum(a.staked_amount for a in state["agents"].values() if a.uuid != "burnt"),
+            circulating=sum(
+                a.balance for a in state["agents"].values() if a.uuid != "burnt"
+            ),
+            staked=sum(
+                a.staked_amount for a in state["agents"].values() if a.uuid != "burnt"
+            ),
             burnt=sum(a.balance for a in state["agents"].values() if a.uuid == "burnt"),
             issued=state["cumm_block_rewards"] + state["cumm_fee_cashback"],
         )
@@ -271,6 +278,7 @@ class SlashParameters:
     failure_to_commit_bond: ETH
     failure_to_reveal_block: ETH
 
+
 class AztecModelParams(TypedDict):
     # random_seed: int #Random seed for simulation model variation.
 
@@ -325,14 +333,12 @@ class AztecModelParams(TypedDict):
     op_cost_sequencer: Gwei
     op_cost_prover: Gwei
 
-
     safety_factor_commit_bond: float
     safety_factor_reveal_content: float
     safety_factor_rollup_proof: float
 
     past_gas_weight_fraction: Percentage
-
-
+    fp_determine_profitability: FunctionalParameterizationString
 
 
 class SignalTime(TypedDict, total=False):
