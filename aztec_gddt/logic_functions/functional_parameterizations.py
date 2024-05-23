@@ -42,35 +42,21 @@ def determine_profitability_always_pass(
         payoff_reveal = expected_rewards - expected_costs
         return expected_rewards, expected_costs, payoff_reveal
     elif phase == "Submit Proof":
-        # expected_rewards = params['daily_block_reward']
-        # expected_rewards *= params['rewards_to_provers']
-        # expected_rewards /= expected_l2_blocks_per_day
         expected_rewards = 1
         assert (
             expected_rewards >= 0
         ), "SUBMIT PROOF: Expected rewards should be positive."
 
-        # expected_costs: float = params["op_cost_prover"]
-        # expected_costs += fee
-        # expected_costs += SAFETY_BUFFER
-        # expected_costs *= params['gwei_to_tokens']
         expected_costs = 0
         assert expected_costs == 0, "SUBMIT PROOF: Expected costs should be zero."
 
         payoff_reveal = expected_rewards - expected_costs
         return expected_rewards, expected_costs, payoff_reveal
     elif phase == "Commit Bond":
-        # expected_rewards = params['daily_block_reward']
-        # expected_rewards *= rewards_to_sequencer(params)
-        # expected_rewards /= expected_l2_blocks_per_day
-        expected_rewards = 1  # XXX: Temporary to ignore economic assumptions.
+        expected_rewards = 1
         assert expected_rewards > 0, "COMMIT_BOND: Expected rewards should be positive."
 
-        # expected_costs: float = params["op_cost_sequencer"]
-        # expected_costs += fee
-        # expected_costs += SAFETY_BUFFER
-        # expected_costs *= params['gwei_to_tokens']
-        expected_costs = 0  # XXX: Temporary to ignore economic assumptions.
+        expected_costs = 0
         assert expected_costs == 0, "COMMIT_BOND: Expected costs should be 0."
 
         payoff_reveal = expected_rewards - expected_costs
@@ -105,21 +91,21 @@ def determine_profitability_op_cost(
         payoff_reveal = expected_rewards - expected_costs
         return expected_rewards, expected_costs, payoff_reveal
     elif phase == "Submit Proof":
-
-        # expected_rewards = params['daily_block_reward']
-        # expected_rewards *= params['rewards_to_provers']
-        # expected_rewards /= expected_l2_blocks_per_day
-        expected_rewards = 1
+        SAFETY_BUFFER = params["safety_factor_rollup_proof"] * fee
+        expected_l2_blocks_per_day = params["l1_blocks_per_day"] / total_phase_duration(
+            params
+        )
+        expected_rewards = params["daily_block_reward"]
+        expected_rewards *= params["rewards_to_provers"]
+        expected_rewards /= expected_l2_blocks_per_day
         assert (
             expected_rewards >= 0
         ), "SUBMIT PROOF: Expected rewards should be positive."
 
-        # expected_costs: float = params["op_cost_prover"]
-        # expected_costs += fee
-        # expected_costs += SAFETY_BUFFER
-        # expected_costs *= params['gwei_to_tokens']
-        expected_costs = 0
-        assert expected_costs == 0, "SUBMIT PROOF: Expected costs should be zero."
+        expected_costs: float = params["op_cost_prover"]
+        expected_costs += fee
+        expected_costs += SAFETY_BUFFER
+        expected_costs *= params["gwei_to_tokens"]
 
         payoff_reveal = expected_rewards - expected_costs
         return expected_rewards, expected_costs, payoff_reveal
