@@ -127,9 +127,6 @@ def p_select_proposal(
                 uncle_proposals = []
 
             updated_process = copy(process)
-
-            # BUG: do this for all phase evolving logic.
-            # BUG: make sure that this is compatible when the time evolution is dynamical, eg, 1 ts = many blocks
             updated_process.current_phase_init_time = state["time_l1"]
 
             updated_process.phase = SelectionPhase.pending_commit_bond
