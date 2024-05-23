@@ -206,7 +206,7 @@ def p_commit_bond(
         )
 
         expected_rewards, expected_costs, payoff_reveal = determine_profitability(
-            "Commit Bond", params
+            "Commit Bond", params, fee
         )
 
         if payoff_reveal >= 0:
@@ -322,14 +322,9 @@ def p_reveal_content(
                 # NOTE: Costs now include gas fees and safety buffer.
                 gas: Gas = params["gas_estimators"].content_reveal(state)
                 fee = gas * state["gas_fee_l1"]
-                # Assumption: Agents have extra costs / profit considerations and need a safety buffer
-                SAFETY_BUFFER = params["safety_factor_reveal_content"] * fee
-                expected_l2_blocks_per_day = params[
-                    "l1_blocks_per_day"
-                ] / total_phase_duration(params)
 
                 expected_rewards, expected_costs, payoff_reveal = (
-                    determine_profitability("Reveal Content", params)
+                    determine_profitability("Reveal Content", params, fee)
                 )
 
                 agent_expects_profit = payoff_reveal >= 0
@@ -444,7 +439,7 @@ def p_submit_proof(
                 ] / total_phase_duration(params)
 
                 expected_rewards, expected_costs, payoff_reveal = (
-                    determine_profitability("Submit Proof", params)
+                    determine_profitability("Submit Proof", params, fee)
                 )
                 agent_expects_profit = payoff_reveal >= 0
 
