@@ -198,13 +198,6 @@ def p_commit_bond(
         gas: Gas = params["gas_estimators"].commitment_bond(state)
         fee = gas * state["gas_fee_l1"]
 
-        # Assumption: Agents have extra costs / profit considerations and need a safety buffer
-        SAFETY_BUFFER = params["safety_factor_commit_bond"] * fee
-
-        expected_l2_blocks_per_day = params["l1_blocks_per_day"] / total_phase_duration(
-            params
-        )
-
         expected_rewards, expected_costs, payoff_reveal = determine_profitability(
             "Commit Bond", params, fee
         )

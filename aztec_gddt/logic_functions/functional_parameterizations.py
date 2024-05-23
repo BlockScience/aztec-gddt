@@ -110,18 +110,20 @@ def determine_profitability_op_cost(
         payoff_reveal = expected_rewards - expected_costs
         return expected_rewards, expected_costs, payoff_reveal
     elif phase == "Commit Bond":
-        # expected_rewards = params['daily_block_reward']
-        # expected_rewards *= rewards_to_sequencer(params)
-        # expected_rewards /= expected_l2_blocks_per_day
-        expected_rewards = 1  # XXX: Temporary to ignore economic assumptions.
+        SAFETY_BUFFER = params["safety_factor_commit_bond"] * fee
+
+        expected_l2_blocks_per_day = params["l1_blocks_per_day"] / total_phase_duration(
+            params
+        )
+        expected_rewards = params["daily_block_reward"]
+        expected_rewards *= rewards_to_sequencer(params)
+        expected_rewards /= expected_l2_blocks_per_day
         assert expected_rewards > 0, "COMMIT_BOND: Expected rewards should be positive."
 
-        # expected_costs: float = params["op_cost_sequencer"]
-        # expected_costs += fee
-        # expected_costs += SAFETY_BUFFER
-        # expected_costs *= params['gwei_to_tokens']
-        expected_costs = 0  # XXX: Temporary to ignore economic assumptions.
-        assert expected_costs == 0, "COMMIT_BOND: Expected costs should be 0."
+        expected_costs: float = params["op_cost_sequencer"]
+        expected_costs += fee
+        expected_costs += SAFETY_BUFFER
+        expected_costs *= params["gwei_to_tokens"]
 
         payoff_reveal = expected_rewards - expected_costs
         return expected_rewards, expected_costs, payoff_reveal
