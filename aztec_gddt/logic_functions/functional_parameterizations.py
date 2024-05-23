@@ -1,15 +1,18 @@
 from typing import Tuple
+from ..types import AztecModelParams, Tokens
 
 
-def determine_profitability(phase: str, params: dict) -> Tuple[float, float, bool]:
+def determine_profitability(
+    phase: str, params: AztecModelParams
+) -> Tuple[Tokens, Tokens, bool]:
     """Function to determine profitability for an agent
 
     Args:
         phase (str): The phase this function is being called in
-        params (dict): The system parameters
+        params (AztecModelParams): The system parameters
 
     Returns:
-        Tuple[float, float, bool]: Returns the expected rewards, expected costs and whether there is a payoff
+        Tuple[Tokens, Tokens, bool]: Returns the expected rewards, expected costs and whether there is a payoff
     """
     if params["fp_determine_profitability"] == "Always Pass":
         return determine_profitability_always_pass(phase, params)
