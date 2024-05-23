@@ -39,7 +39,7 @@ BASE_AGENTS = [
         is_prover=False,
         is_relay=False,
         staked_amount=0.0,  # unit: Tokens
-    )
+    ),
 ]
 
 
@@ -59,8 +59,7 @@ INITIAL_AGENTS: list[Agent] = [
     for i in range(N_INITIAL_AGENTS)
 ]
 
-INITIAL_AGENTS_DICT: dict[AgentUUID, Agent] = {
-    a.uuid: a for a in INITIAL_AGENTS}
+INITIAL_AGENTS_DICT: dict[AgentUUID, Agent] = {a.uuid: a for a in INITIAL_AGENTS}
 
 AGENTS_DICT = {**BASE_AGENTS_DICT, **INITIAL_AGENTS_DICT}
 
@@ -103,10 +102,10 @@ INITIAL_STATE = AztecModelState(
     cumm_fee_cashback=INITIAL_CUMM_CASHBACK,
     cumm_burn=INITIAL_CUMM_BURN,
     token_supply=INITIAL_SUPPLY,
-    is_censored=False
+    is_censored=False,
 )
 
-INITIAL_STATE['token_supply'] = TokenSupply.from_state(INITIAL_STATE)
+INITIAL_STATE["token_supply"] = TokenSupply.from_state(INITIAL_STATE)
 
 #############################################################
 ## Begin: Steady state gas estimators defined              ##
@@ -135,17 +134,24 @@ steady_gas_fee_blob_time_series = np.array(
 
 
 def steady_state_l1_gas_estimate(state: AztecModelState):
-    if state["timestep"] < len(steady_gas_fee_l1_time_series):
-        return steady_gas_fee_l1_time_series[state["timestep"]]
-    else:
-        return steady_gas_fee_l1_time_series[-1]
+    assert state["time_l1"] < len(
+        steady_gas_fee_l1_time_series
+    ), "The time_l1 of {} is out of bounds for the time series of steady_gas_fee_l1_time_series".format(
+        state["time_l1"]
+    )
+
+    return steady_gas_fee_l1_time_series[state["time_l1"]]
 
 
 def steady_state_blob_gas_estimate(state: AztecModelState):
-    if state["timestep"] < len(steady_gas_fee_blob_time_series):
-        return steady_gas_fee_blob_time_series[state["timestep"]]
-    else:
-        return steady_gas_fee_blob_time_series[-1]
+
+    assert state["time_l1"] < len(
+        steady_gas_fee_blob_time_series
+    ), "The time_l1 of {} is out of bounds for the time series of steady_gas_fee_blob_time_series".format(
+        state["time_l1"]
+    )
+
+    return steady_gas_fee_blob_time_series[state["time_l1"]]
 
 
 #############################################################
@@ -165,10 +171,10 @@ initial_time = floor(0.25 * TIMESTEPS)  # Assumption: 25% of timesteps
 final_time = floor(0.25 * TIMESTEPS)  # Assumption: 25% of timesteps
 
 
-zero_timeseries = np.zeros(TIMESTEPS)
+zero_timeseries = np.zeros(TIMESTEPS * 10)
 
-single_shock_gas_fee_l1_time_series = np.zeros(TIMESTEPS)
-single_shock_gas_fee_blob_time_series = np.zeros(TIMESTEPS)
+single_shock_gas_fee_l1_time_series = np.zeros(TIMESTEPS * 10)
+single_shock_gas_fee_blob_time_series = np.zeros(TIMESTEPS * 10)
 
 single_shock_gas_fee_l1_time_series[0:initial_time] = steady_gas_fee_l1_time_series[
     0:initial_time
@@ -176,8 +182,8 @@ single_shock_gas_fee_l1_time_series[0:initial_time] = steady_gas_fee_l1_time_ser
 single_shock_gas_fee_l1_time_series[-final_time:] = steady_gas_fee_l1_time_series[
     -final_time:
 ].copy()
-single_shock_gas_fee_l1_time_series[initial_time: TIMESTEPS - final_time] = (
-    steady_gas_fee_l1_time_series[initial_time: TIMESTEPS - final_time].copy()
+single_shock_gas_fee_l1_time_series[initial_time : TIMESTEPS - final_time] = (
+    steady_gas_fee_l1_time_series[initial_time : TIMESTEPS - final_time].copy()
     + L1_SHOCK_AMOUNT
 )
 
@@ -187,9 +193,8 @@ single_shock_gas_fee_blob_time_series[0:initial_time] = steady_gas_fee_blob_time
 single_shock_gas_fee_blob_time_series[-final_time:] = steady_gas_fee_blob_time_series[
     -final_time:
 ].copy()
-single_shock_gas_fee_blob_time_series[initial_time: TIMESTEPS - final_time] = (
-    steady_gas_fee_blob_time_series[initial_time: TIMESTEPS -
-                                    final_time].copy()
+single_shock_gas_fee_blob_time_series[initial_time : TIMESTEPS - final_time] = (
+    steady_gas_fee_blob_time_series[initial_time : TIMESTEPS - final_time].copy()
     + L1_SHOCK_AMOUNT
 )
 
@@ -222,8 +227,8 @@ intermit_shock_gas_fee_l1_time_series[0:initial_time] = steady_gas_fee_l1_time_s
 intermit_shock_gas_fee_l1_time_series[-final_time:] = steady_gas_fee_l1_time_series[
     -final_time:
 ].copy()
-intermit_shock_gas_fee_l1_time_series[initial_time: TIMESTEPS - final_time] = (
-    steady_gas_fee_l1_time_series[initial_time: TIMESTEPS - final_time].copy()
+intermit_shock_gas_fee_l1_time_series[initial_time : TIMESTEPS - final_time] = (
+    steady_gas_fee_l1_time_series[initial_time : TIMESTEPS - final_time].copy()
     + L1_INTER_SHOCK_SIGNAL
 )
 
@@ -257,7 +262,7 @@ DEFAULT_DETERMINISTIC_GAS_ESTIMATOR = L1GasEstimators(
     commitment_bond=lambda _: 100_000,  # type: ignore
     content_reveal=lambda _: 81_000,  # type: ignore
     content_reveal_blob=lambda _: 500_000,  # type: ignore
-    rollup_proof=lambda _: 700_000  # type: ignore
+    rollup_proof=lambda _: 700_000,  # type: ignore
 )
 
 
@@ -271,71 +276,82 @@ ALWAYS_TRUE_SERIES = {i: True for i in range(0, L1_TIME_SERIES_SIZE)}
 ALWAYS_FALSE_SERIES = {i: False for i in range(0, L1_TIME_SERIES_SIZE)}
 
 
-def build_censor_series_from_role(data: pd.DataFrame,
-                                  role: str,
-                                  censor_list: list[str],
-                                  start_time: int,
-                                  num_timesteps: int = 1000,
-                                  start_time_is_block_no: bool = False) -> dict[L1Blocks, bool]:
+def build_censor_series_from_role(
+    data: pd.DataFrame,
+    role: str,
+    censor_list: list[str],
+    start_time: int,
+    num_timesteps: int = 1000,
+    start_time_is_block_no: bool = False,
+) -> dict[L1Blocks, bool]:
 
     # XXX: this assumes that the DataFrame has a unique, non-missing measurement
     # for each L1 time.
     # L1 Time.
-    sorted_data = data.sort_values(by='date')
+    sorted_data = data.sort_values(by="date")
 
     if censor_list is None:
         censor_list = []
 
     if start_time_is_block_no:
-        relevant_df = sorted_data.query(f"(block_number >= {start_time}) & (block_number < {start_time + num_timesteps})")
-        censored_list = relevant_df[role].apply(
-            lambda x: x in censor_list).to_list()
-        
-        index_range_to_use: List[int] = [x for x in range(
-            0, 0 + num_timesteps)]
-        
+        relevant_df = sorted_data.query(
+            f"(block_number >= {start_time}) & (block_number < {start_time + num_timesteps})"
+        )
+        censored_list = relevant_df[role].apply(lambda x: x in censor_list).to_list()
+
+        index_range_to_use: List[int] = [x for x in range(0, 0 + num_timesteps)]
+
         censored_dict = dict(zip(index_range_to_use, censored_list))
     else:
-        index_range_to_use: List[int] = [x for x in range(
-            start_time, start_time + num_timesteps)]
+        index_range_to_use: List[int] = [
+            x for x in range(start_time, start_time + num_timesteps)
+        ]
 
         indexed_data: pd.DataFrame = sorted_data.iloc[index_range_to_use]
 
-        censored_list: list[bool] = indexed_data[role].apply(
-            lambda x: x in censor_list).to_list()
+        censored_list: list[bool] = (
+            indexed_data[role].apply(lambda x: x in censor_list).to_list()
+        )
 
         censored_dict = dict(zip(index_range_to_use, censored_list))
     return censored_dict
 
 
-def build_censor_params(data: pd.DataFrame,
-                        censoring_builders: List[str],
-                        censoring_validators: List[str],
-                        start_time: int,
-                        num_timesteps: int = 1000):
+def build_censor_params(
+    data: pd.DataFrame,
+    censoring_builders: List[str],
+    censoring_validators: List[str],
+    start_time: int,
+    num_timesteps: int = 1000,
+):
 
     practical_num_timesteps = L1_BUFFER * num_timesteps
 
     if start_time is None:
         data_length = len(data)
-        start_time = random.randint(
-            0, data_length - (practical_num_timesteps + 1))
+        start_time = random.randint(0, data_length - (practical_num_timesteps + 1))
 
     # XXX: Currently doubling number of timesteps due to weird out-of-range errors on long runs.
 
-    censorship_builder_data: dict[L1Blocks, bool] = build_censor_series_from_role(data=data,
-                                                                                  censor_list=censoring_builders,
-                                                                                  start_time=start_time,
-                                                                                  num_timesteps=practical_num_timesteps,
-                                                                                  role='builder')
-    censorship_validator_data: dict[L1Blocks, bool] = build_censor_series_from_role(data=data,
-                                                                                    censor_list=censoring_validators,
-                                                                                    start_time=start_time,
-                                                                                    num_timesteps=practical_num_timesteps,
-                                                                                    role='validator')
+    censorship_builder_data: dict[L1Blocks, bool] = build_censor_series_from_role(
+        data=data,
+        censor_list=censoring_builders,
+        start_time=start_time,
+        num_timesteps=practical_num_timesteps,
+        role="builder",
+    )
+    censorship_validator_data: dict[L1Blocks, bool] = build_censor_series_from_role(
+        data=data,
+        censor_list=censoring_validators,
+        start_time=start_time,
+        num_timesteps=practical_num_timesteps,
+        role="validator",
+    )
 
-    censorship_info_dict = {"censorship_series_builder": [censorship_builder_data],
-                            "censorship_series_validator": [censorship_validator_data]}
+    censorship_info_dict = {
+        "censorship_series_builder": [censorship_builder_data],
+        "censorship_series_validator": [censorship_validator_data],
+    }
 
     return censorship_info_dict
 
@@ -368,7 +384,6 @@ SINGLE_RUN_PARAMS = AztecModelParams(
     phase_duration_rollup_max_blocks=3,  # Assumption
     phase_duration_race_min_blocks=0,  # Assumption
     phase_duration_race_max_blocks=2,  # Assumption
-
     stake_activation_period=40,  # Assumption: Currently not impactful
     unstake_cooldown_period=40,  # Assumption: Currently not impactful
     # Behavioral Parameters
@@ -379,15 +394,12 @@ SINGLE_RUN_PARAMS = AztecModelParams(
     blob_gas_threshold_for_tx=250,
     # Assumption: Global Probability, could instantiate agents with [0, 1]
     proving_marketplace_usage_probability=0.7,
-
     rewards_to_provers=0.3,  # Assumption: Reward Share
     rewards_to_relay=0.01,  # Assumption: Reward Share
-
     # Iniital Assumptions: No Censorship
     censorship_series_builder=ALWAYS_FALSE_SERIES,
     # Iniital Assumption: No Censorship
     censorship_series_validator=ALWAYS_FALSE_SERIES,
-
     gwei_to_tokens=1e-9,
     gas_estimators=DEFAULT_DETERMINISTIC_GAS_ESTIMATOR,
     tx_estimators=DEFAULT_DETERMINISTIC_TX_ESTIMATOR,
@@ -402,5 +414,6 @@ SINGLE_RUN_PARAMS = AztecModelParams(
     safety_factor_commit_bond=0.0,
     safety_factor_reveal_content=0.0,
     safety_factor_rollup_proof=0.0,
-    past_gas_weight_fraction=0.9
+    past_gas_weight_fraction=0.9,
+    fp_determine_profitability="Always Pass",
 )

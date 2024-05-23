@@ -4,6 +4,7 @@ from uuid import uuid4
 from copy import deepcopy, copy
 from random import choice
 from scipy.stats import uniform
+from .functional_parameterizations import determine_profitability
 
 
 def s_gas_fee_l1(p: AztecModelParams, _2, _3, s, _5):
@@ -204,21 +205,9 @@ def p_commit_bond(
             params
         )
 
-        # expected_rewards = params['daily_block_reward']
-        # expected_rewards *= rewards_to_sequencer(params)
-        # expected_rewards /= expected_l2_blocks_per_day
-        expected_rewards = 1  # XXX: Temporary to ignore economic assumptions.
-        assert expected_rewards > 0, "COMMIT_BOND: Expected rewards should be positive."
-
-        # expected_costs: float = params["op_cost_sequencer"]
-        # expected_costs += fee
-        # expected_costs += SAFETY_BUFFER
-        # expected_costs *= params['gwei_to_tokens']
-        expected_costs = 0  # XXX: Temporary to ignore economic assumptions.
-        assert expected_costs == 0, "COMMIT_BOND: Expected costs should be 0."
-
-        payoff_reveal = expected_rewards - expected_costs
-        assert payoff_reveal >= 0, "COMMIT_BOND: Payoff should not be negative."
+        expected_rewards, expected_costs, payoff_reveal = determine_profitability(
+            "Commit Bond", params
+        )
 
         if payoff_reveal >= 0:
 
@@ -229,19 +218,10 @@ def p_commit_bond(
                     params["final_probability"],
                 )
             )
-            # gas_fee_l1_acceptable = (
-            #     state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
-            # )
-
-            gas_fee_l1_acceptable = True  # XXX: Temporary economic assumption
 
             block_is_uncensored = check_for_censorship(params, state)
 
-            if (
-                agent_decides_to_reveal_commit_bond
-                and gas_fee_l1_acceptable
-                and block_is_uncensored
-            ):
+            if agent_decides_to_reveal_commit_bond and block_is_uncensored:
                 updated_process = copy(process)
                 lead_seq: Agent = state["agents"][process.leading_sequencer]
                 proposal_uuid = process.tx_winning_proposal
@@ -348,29 +328,11 @@ def p_reveal_content(
                     "l1_blocks_per_day"
                 ] / total_phase_duration(params)
 
-                # expected_rewards = params['daily_block_reward']
-                # expected_rewards *= rewards_to_sequencer(params)
-                # expected_rewards /= expected_l2_blocks_per_day
-                expected_rewards = 1  # XXX: Temporary to ignore economic assumptions.
-                assert (
-                    expected_rewards >= 0
-                ), "REVEAL_CONTENT: Expected rewards should be positive."
-
-                # expected_costs: float = params["op_cost_sequencer"]
-                # expected_costs += fee
-                # expected_costs += SAFETY_BUFFER
-                # expected_costs *= params['gwei_to_tokens']
-                expected_costs = 0  # XXX: Temporary to ignore economic assumptions.
-                assert (
-                    expected_costs == 0
-                ), "REVEAL_CONTENT: Expected costs should be zero."
-
-                payoff_reveal = expected_rewards - expected_costs
+                expected_rewards, expected_costs, payoff_reveal = (
+                    determine_profitability("Reveal Content", params)
+                )
 
                 agent_expects_profit = payoff_reveal >= 0
-                assert (
-                    agent_expects_profit
-                ), "REVEAL_CONTENT: Agent should be expecting profit."
 
                 agent_decides_to_reveal_block_content = bernoulli_trial(
                     probability=trial_probability(
@@ -379,25 +341,11 @@ def p_reveal_content(
                     )
                 )
 
-                # gas_fee_blob_acceptable = (
-                #     state["gas_fee_blob"] <= params["blob_gas_threshold_for_tx"]
-                # )
-
-                gas_fee_blob_acceptable = True
-
-                # gas_fee_l1_acceptable = (
-                #     state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
-                # )
-
-                gas_fee_l1_acceptable = True
-
                 block_is_uncensored = check_for_censorship(params, state)
 
                 if (
                     agent_expects_profit
                     and agent_decides_to_reveal_block_content
-                    and gas_fee_blob_acceptable
-                    and gas_fee_l1_acceptable
                     and block_is_uncensored
                 ):
                     updated_process = copy(process)
@@ -495,27 +443,10 @@ def p_submit_proof(
                     "l1_blocks_per_day"
                 ] / total_phase_duration(params)
 
-                # expected_rewards = params['daily_block_reward']
-                # expected_rewards *= params['rewards_to_provers']
-                # expected_rewards /= expected_l2_blocks_per_day
-                expected_rewards = 1
-                assert (
-                    expected_rewards >= 0
-                ), "SUBMIT PROOF: Expected rewards should be positive."
-
-                # expected_costs: float = params["op_cost_prover"]
-                # expected_costs += fee
-                # expected_costs += SAFETY_BUFFER
-                # expected_costs *= params['gwei_to_tokens']
-                expected_costs = 0
-                assert (
-                    expected_costs == 0
-                ), "SUBMIT PROOF: Expected costs should be zero."
-
-                payoff_reveal = expected_rewards - expected_costs
-
+                expected_rewards, expected_costs, payoff_reveal = (
+                    determine_profitability("Submit Proof", params)
+                )
                 agent_expects_profit = payoff_reveal >= 0
-                assert agent_expects_profit, "SUBMIT_PROOF: Agent should expect profit."
 
                 agent_decides_to_reveal_rollup_proof = bernoulli_trial(
                     probability=trial_probability(
@@ -524,16 +455,10 @@ def p_submit_proof(
                     )
                 )
 
-                # gas_fee_l1_acceptable = (
-                #     state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
-                # )
-                gas_fee_l1_acceptable = True  # XXX: Assume gas fee is acceptable.
-
                 block_is_uncensored = check_for_censorship(params, state)
 
                 if (
                     agent_decides_to_reveal_rollup_proof
-                    and gas_fee_l1_acceptable
                     and agent_expects_profit
                     and block_is_uncensored
                 ):
@@ -699,15 +624,9 @@ def s_transactions_new_proposals(
             size = params["tx_estimators"].proposal_average_size(state)
             public_share = 0.5  # Assumption: Share of public function calls
 
-            # gas_fee_l1_acceptable = (
-            # state["gas_fee_l1"] <= params["gas_threshold_for_tx"]
-            # )
-
-            gas_fee_l1_acceptable = True  # XXX: Temporary economic assumption
-
             block_is_uncensored = check_for_censorship(params, state)
 
-            if gas_fee_l1_acceptable and block_is_uncensored:
+            if block_is_uncensored:
                 new_proposal = Proposal(
                     who=potential_proposer,
                     when=state["time_l1"],
