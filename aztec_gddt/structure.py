@@ -48,10 +48,7 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
             "slashes_to_sequencers": s_slashes_to_sequencer,
             "slashes_to_provers": s_slashes_to_prover,
             "agents": s_agent_transfer,
-            "is_censored": lambda p, _1, _2, s, _5: (
-                "is_censored",
-                check_for_censorship(p, s),
-            ),
+            "is_censored": s_is_censored,
         },
     },
     {
