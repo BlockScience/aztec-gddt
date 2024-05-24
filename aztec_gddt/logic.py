@@ -13,6 +13,7 @@ from .logic_functions.meta import (
     s_current_process_time,
     s_current_process_time_dynamical,
     s_is_censored,
+    s_cumm_block_rewards,
 )
 from .logic_functions.phases import (
     s_gas_fee_l1,

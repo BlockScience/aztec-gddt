@@ -126,3 +126,10 @@ def s_is_censored(p, _1, _2, s, _5):
         "is_censored",
         check_for_censorship(p, s),
     )
+
+
+def s_cumm_block_rewards(_1, _2, _3, s1, s2):
+    return (
+        "cumm_block_rewards",
+        s2["block_reward"] + s1["cumm_block_rewards"],
+    )
