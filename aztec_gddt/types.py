@@ -339,6 +339,7 @@ class AztecModelParams(TypedDict):
 
     past_gas_weight_fraction: Percentage
     fp_determine_profitability: FunctionalParameterizationString
+    top_up_amount: ETH
 
 
 class SignalTime(TypedDict, total=False):

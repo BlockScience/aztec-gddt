@@ -416,4 +416,5 @@ SINGLE_RUN_PARAMS = AztecModelParams(
     safety_factor_rollup_proof=0.0,
     past_gas_weight_fraction=0.9,
     fp_determine_profitability="Op Cost",
+    top_up_amount=2,
 )

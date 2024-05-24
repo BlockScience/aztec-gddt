@@ -119,3 +119,17 @@ def s_current_process_time_dynamical(
             updated_process.current_phase_init_time += delta_blocks
 
     return ("current_process", updated_process)
+
+
+def s_is_censored(p, _1, _2, s, _5):
+    return (
+        "is_censored",
+        check_for_censorship(p, s),
+    )
+
+
+def s_cumm_block_rewards(_1, _2, _3, s1, s2):
+    return (
+        "cumm_block_rewards",
+        s2["block_reward"] + s1["cumm_block_rewards"],
+    )

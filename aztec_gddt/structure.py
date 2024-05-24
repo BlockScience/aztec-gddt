@@ -48,10 +48,7 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
             "slashes_to_sequencers": s_slashes_to_sequencer,
             "slashes_to_provers": s_slashes_to_prover,
             "agents": s_agent_transfer,
-            "is_censored": lambda p, _1, _2, s, _5: (
-                "is_censored",
-                check_for_censorship(p, s),
-            ),
+            "is_censored": s_is_censored,
         },
     },
     {
@@ -67,10 +64,7 @@ AZTEC_MODEL_BLOCKS: list[dict] = [
             "total_rewards_sequencers": s_total_rewards_sequencers,
             "total_rewards_relays": s_total_rewards_relays,
             "agents": s_agents_rewards,
-            "cumm_block_rewards": lambda _1, _2, _3, s1, s2: (
-                "cumm_block_rewards",
-                s2["block_reward"] + s1["cumm_block_rewards"],
-            ),
+            "cumm_block_rewards": s_cumm_block_rewards,
             #            'cumm_fee_cashback': lambda _1,_2,_3,s1,s2: ('cumm_fee_cashback', s2['fee_cashback'] + s1['cumm_fee_cashback'])
         },
     },
