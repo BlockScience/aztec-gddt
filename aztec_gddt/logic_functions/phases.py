@@ -954,8 +954,10 @@ def s_agent_restake(
     sequencers = {k: v for k, v in new_agents.items() if v.is_sequencer}
     for k, v in sequencers.items():
         if v.staked_amount < params["minimum_stake"]:
-            # Assumption: Sequencers top-up from balance with 2 more ETH than necessary
-            max_amount_to_stake = params["minimum_stake"] - v.staked_amount + 2.0
+            # Assumption: Sequencers top-up from balance with more ETH than necessary
+            max_amount_to_stake = (
+                params["minimum_stake"] - v.staked_amount + params["top_up_amount"]
+            )
             amount_to_stake = min(max_amount_to_stake, v.balance)
             v.balance -= amount_to_stake
             v.staked_amount += amount_to_stake
