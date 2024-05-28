@@ -9,41 +9,49 @@ from typing import List
 # Note: For numpy 1.26 and above, random calls go through a generator.
 rng = np.random.default_rng()
 
-L1_BUFFER = 10  # To check timesteps -> L1_timesteps issue
-TIMESTEPS = 1_000  # Used mostly for single runs
-SAMPLES = 1  # Used mostly for single runs
 
-N_INITIAL_AGENTS = 3
+def create_experiments(
+    TIMESTEPS: int, SAMPLES: int, L1_BUFFER: int = 10, N_INITIAL_AGENTS: int = 3
+):
+    """Function which builds experiments and runs them
 
-BASE_AGENTS = [
-    Agent(
-        uuid="relay",
-        balance=0,
-        is_sequencer=False,
-        is_prover=False,
-        is_relay=True,
-        staked_amount=0.0,  # unit: Tokens
-    ),
-    Agent(
-        uuid="l1-builder",
-        balance=0,  # unit: Tokens
-        is_sequencer=False,
-        is_prover=False,
-        is_relay=False,
-        staked_amount=0.0,  # unit: Tokens
-    ),
-    Agent(
-        uuid="burnt",
-        balance=0,  # unit: Tokens
-        is_sequencer=False,
-        is_prover=False,
-        is_relay=False,
-        staked_amount=0.0,  # unit: Tokens
-    ),
-]
+    Args:
+        TIMESTEPS (int): The number of timesteps to use in a simulation
+        SAMPLES (int): The number of samples (monte carlo) to take
+        L1_BUFFER (int, optional): The number of L1 blocks for exegenous processes
+        as a multiple of timesteps. Defaults to 10.
+        N_INITIAL_AGENTS (int, optional): The number of initial agents. Defaults to 3.
+    """
+    # Build the baseline agents
+    BASE_AGENTS = [
+        Agent(
+            uuid="relay",
+            balance=0,
+            is_sequencer=False,
+            is_prover=False,
+            is_relay=True,
+            staked_amount=0.0,  # unit: Tokens
+        ),
+        Agent(
+            uuid="l1-builder",
+            balance=0,  # unit: Tokens
+            is_sequencer=False,
+            is_prover=False,
+            is_relay=False,
+            staked_amount=0.0,  # unit: Tokens
+        ),
+        Agent(
+            uuid="burnt",
+            balance=0,  # unit: Tokens
+            is_sequencer=False,
+            is_prover=False,
+            is_relay=False,
+            staked_amount=0.0,  # unit: Tokens
+        ),
+    ]
 
+    BASE_AGENTS_DICT = {a.uuid: a for a in BASE_AGENTS}
 
-BASE_AGENTS_DICT = {a.uuid: a for a in BASE_AGENTS}
 
 # Note: Used mostly for single runs
 INITIAL_AGENTS: list[Agent] = [
