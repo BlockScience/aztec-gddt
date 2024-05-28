@@ -11,7 +11,13 @@ rng = np.random.default_rng()
 
 
 def create_experiments(
-    TIMESTEPS: int, SAMPLES: int, L1_BUFFER: int = 10, N_INITIAL_AGENTS: int = 3
+    TIMESTEPS: int,
+    SAMPLES: int,
+    L1_BUFFER: int = 10,
+    N_INITIAL_AGENTS: int = 3,
+    INITIAL_CUMM_REWARDS: Tokens = 200.0,
+    INITIAL_CUMM_CASHBACK: Tokens = 00.0,
+    INITIAL_CUMM_BURN: Tokens = 50.0,
 ):
     """Function which builds experiments and runs them
 
@@ -21,6 +27,9 @@ def create_experiments(
         L1_BUFFER (int, optional): The number of L1 blocks for exegenous processes
         as a multiple of timesteps. Defaults to 10.
         N_INITIAL_AGENTS (int, optional): The number of initial agents. Defaults to 3.
+        INITIAL_CUMM_REWARDS (Tokens, optional): The initial cummulative rewards. Defaults to 200.0.
+        INITIAL_CUMM_CASHBACK (Tokens, optional): The initial cummulative cashback. Defaults to 00.0.
+        INITIAL_CUMM_BURN (Tokens, optional): The initial cummualitive burn. Defaults to 50.0.
     """
     # Build the baseline agents
     BASE_AGENTS = [
@@ -52,36 +61,31 @@ def create_experiments(
 
     BASE_AGENTS_DICT = {a.uuid: a for a in BASE_AGENTS}
 
+    # Note: Used mostly for single runs
+    INITIAL_AGENTS: list[Agent] = [
+        Agent(
+            uuid=uuid4(),
+            # balance=max(norm.rvs(50, 20), 1),
+            balance=100,
+            is_sequencer=True,
+            is_prover=True,
+            is_relay=False,
+            staked_amount=50,
+        )
+        for i in range(N_INITIAL_AGENTS)
+    ]
 
-# Note: Used mostly for single runs
-INITIAL_AGENTS: list[Agent] = [
-    Agent(
-        uuid=uuid4(),
-        # balance=max(norm.rvs(50, 20), 1),
-        balance=100,
-        is_sequencer=True,
-        is_prover=True,
-        is_relay=False,
-        staked_amount=50,
+    INITIAL_AGENTS_DICT: dict[AgentUUID, Agent] = {a.uuid: a for a in INITIAL_AGENTS}
+
+    AGENTS_DICT = {**BASE_AGENTS_DICT, **INITIAL_AGENTS_DICT}
+
+    # Define Initial supply
+    INITIAL_SUPPLY = TokenSupply(
+        circulating=sum(a.balance for a in INITIAL_AGENTS),
+        staked=sum(a.staked_amount for a in INITIAL_AGENTS),
+        burnt=INITIAL_CUMM_BURN,
+        issued=INITIAL_CUMM_REWARDS + INITIAL_CUMM_CASHBACK,
     )
-    for i in range(N_INITIAL_AGENTS)
-]
-
-INITIAL_AGENTS_DICT: dict[AgentUUID, Agent] = {a.uuid: a for a in INITIAL_AGENTS}
-
-AGENTS_DICT = {**BASE_AGENTS_DICT, **INITIAL_AGENTS_DICT}
-
-
-INITIAL_CUMM_REWARDS = 200.0  # Assumption # unit: Tokens
-INITIAL_CUMM_CASHBACK = 00.0  # Assumption # unit: Tokens
-INITIAL_CUMM_BURN = 50.0  # Assumption # unit: Tokens
-
-INITIAL_SUPPLY = TokenSupply(
-    circulating=sum(a.balance for a in INITIAL_AGENTS),
-    staked=sum(a.staked_amount for a in INITIAL_AGENTS),
-    burnt=INITIAL_CUMM_BURN,
-    issued=INITIAL_CUMM_REWARDS + INITIAL_CUMM_CASHBACK,
-)
 
 
 SLASH_PARAMS = SlashParameters(
