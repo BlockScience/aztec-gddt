@@ -18,6 +18,8 @@ def create_experiments(
     INITIAL_CUMM_REWARDS: Tokens = 200.0,
     INITIAL_CUMM_CASHBACK: Tokens = 00.0,
     INITIAL_CUMM_BURN: Tokens = 50.0,
+    failure_to_commit_bond_slash_amount: Tokens = 2,
+    failure_to_reveal_block_slash_amount: Tokens = 1,
 ):
     """Function which builds experiments and runs them
 
@@ -87,37 +89,37 @@ def create_experiments(
         issued=INITIAL_CUMM_REWARDS + INITIAL_CUMM_CASHBACK,
     )
 
+    SLASH_PARAMS = SlashParameters(
+        failure_to_commit_bond=failure_to_commit_bond_slash_amount,
+        failure_to_reveal_block=failure_to_reveal_block_slash_amount,
+    )
 
-SLASH_PARAMS = SlashParameters(
-    failure_to_commit_bond=2, failure_to_reveal_block=1  # Assumption # unit: Tokens
-)
+    INITIAL_STATE = AztecModelState(
+        timestep=0,
+        substep=0,
+        time_l1=0,
+        delta_l1_blocks=0,
+        advance_l1_blocks=0,
+        slashes_to_provers=0.0,
+        slashes_to_sequencers=0.0,
+        total_rewards_provers=0.0,  # unit: Tokens
+        total_rewards_relays=0.0,  # unit: Tokens
+        total_rewards_sequencers=0.0,  # unit: Tokens
+        agents=AGENTS_DICT,
+        current_process=None,  # Note: Used to start without an ongoing L2 block process
+        transactions=dict(),
+        gas_fee_l1=50,  # unit: Gwei # Assumption
+        gas_fee_blob=30,  # unit: Gwei # Assumption: In reality likely much lower, but must be tuned. Goes per MB, not per blob currently
+        finalized_blocks_count=0,
+        cumm_block_rewards=INITIAL_CUMM_REWARDS,
+        cumm_fee_cashback=INITIAL_CUMM_CASHBACK,
+        cumm_burn=INITIAL_CUMM_BURN,
+        token_supply=INITIAL_SUPPLY,
+        is_censored=False,
+    )
 
+    INITIAL_STATE["token_supply"] = TokenSupply.from_state(INITIAL_STATE)
 
-INITIAL_STATE = AztecModelState(
-    timestep=0,
-    substep=0,
-    time_l1=0,
-    delta_l1_blocks=0,
-    advance_l1_blocks=0,
-    slashes_to_provers=0.0,
-    slashes_to_sequencers=0.0,
-    total_rewards_provers=0.0,  # unit: Tokens
-    total_rewards_relays=0.0,  # unit: Tokens
-    total_rewards_sequencers=0.0,  # unit: Tokens
-    agents=AGENTS_DICT,
-    current_process=None,  # Note: Used to start without an ongoing L2 block process
-    transactions=dict(),
-    gas_fee_l1=50,  # unit: Gwei # Assumption
-    gas_fee_blob=30,  # unit: Gwei # Assumption: In reality likely much lower, but must be tuned. Goes per MB, not per blob currently
-    finalized_blocks_count=0,
-    cumm_block_rewards=INITIAL_CUMM_REWARDS,
-    cumm_fee_cashback=INITIAL_CUMM_CASHBACK,
-    cumm_burn=INITIAL_CUMM_BURN,
-    token_supply=INITIAL_SUPPLY,
-    is_censored=False,
-)
-
-INITIAL_STATE["token_supply"] = TokenSupply.from_state(INITIAL_STATE)
 
 #############################################################
 ## Begin: Steady state gas estimators defined              ##
