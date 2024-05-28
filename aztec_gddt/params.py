@@ -20,6 +20,10 @@ def create_experiments(
     INITIAL_CUMM_BURN: Tokens = 50.0,
     failure_to_commit_bond_slash_amount: Tokens = 2,
     failure_to_reveal_block_slash_amount: Tokens = 1,
+    MEAN_STEADY_STATE_L1: Gwei = 50,
+    DEVIATION_STEADY_STATE_L1: Gwei = 5,
+    MEAN_STEADY_STATE_BLOB: Gwei = 30,
+    DEVIATION_STEADY_STATE_BLOB: Gwei = 5,
 ):
     """Function which builds experiments and runs them
 
@@ -120,34 +124,26 @@ def create_experiments(
 
     INITIAL_STATE["token_supply"] = TokenSupply.from_state(INITIAL_STATE)
 
+    # Define steady
 
-#############################################################
-## Begin: Steady state gas estimators defined              ##
-#############################################################
-
-MEAN_STEADY_STATE_L1 = 50  # type: Gwei
-DEVIATION_STEADY_STATE_L1 = 5
-MEAN_STEADY_STATE_BLOB = 30  # type: Gwei
-DEVIATION_STEADY_STATE_BLOB = 5
-
-# Note: Rounding is needed to address the fact that Gas is an integer type.
-steady_gas_fee_l1_time_series = np.array(
-    [
-        max(floor(el), 10)
-        for el in rng.standard_normal(TIMESTEPS) * DEVIATION_STEADY_STATE_L1
-        + MEAN_STEADY_STATE_L1  # DEVIATION_STEADY_STATE_L1
-    ]
-)
-steady_gas_fee_blob_time_series = np.array(
-    [
-        max(floor(el), 10)
-        for el in rng.standard_normal(TIMESTEPS) * DEVIATION_STEADY_STATE_BLOB
-        + MEAN_STEADY_STATE_BLOB
-    ]
-)
+    # Note: Rounding is needed to address the fact that Gas is an integer type.
+    steady_gas_fee_l1_time_series = np.array(
+        [
+            max(floor(el), 10)
+            for el in rng.standard_normal(TIMESTEPS) * DEVIATION_STEADY_STATE_L1
+            + MEAN_STEADY_STATE_L1  # DEVIATION_STEADY_STATE_L1
+        ]
+    )
+    steady_gas_fee_blob_time_series = np.array(
+        [
+            max(floor(el), 10)
+            for el in rng.standard_normal(TIMESTEPS) * DEVIATION_STEADY_STATE_BLOB
+            + MEAN_STEADY_STATE_BLOB
+        ]
+    )
 
 
-def steady_state_l1_gas_estimate(state: AztecModelState):
+def steady_state_l1_gas_estimate(state: AztecModelState, steady_gas_fee_l1_time_series):
     assert state["time_l1"] < len(
         steady_gas_fee_l1_time_series
     ), "The time_l1 of {} is out of bounds for the time series of steady_gas_fee_l1_time_series".format(
@@ -157,7 +153,9 @@ def steady_state_l1_gas_estimate(state: AztecModelState):
     return steady_gas_fee_l1_time_series[state["time_l1"]]
 
 
-def steady_state_blob_gas_estimate(state: AztecModelState):
+def steady_state_blob_gas_estimate(
+    state: AztecModelState, steady_gas_fee_blob_time_series
+):
 
     assert state["time_l1"] < len(
         steady_gas_fee_blob_time_series
@@ -167,10 +165,6 @@ def steady_state_blob_gas_estimate(state: AztecModelState):
 
     return steady_gas_fee_blob_time_series[state["time_l1"]]
 
-
-#############################################################
-## End: Steady state gas estimators defined                ##
-#############################################################
 
 #############################################################
 ## Begin: single shock gas estimators defined              ##
