@@ -10,6 +10,29 @@ from typing import List
 rng = np.random.default_rng()
 
 
+def steady_state_l1_gas_estimate(state: AztecModelState, steady_gas_fee_l1_time_series):
+    assert state["time_l1"] < len(
+        steady_gas_fee_l1_time_series
+    ), "The time_l1 of {} is out of bounds for the time series of steady_gas_fee_l1_time_series".format(
+        state["time_l1"]
+    )
+
+    return steady_gas_fee_l1_time_series[state["time_l1"]]
+
+
+def steady_state_blob_gas_estimate(
+    state: AztecModelState, steady_gas_fee_blob_time_series
+):
+
+    assert state["time_l1"] < len(
+        steady_gas_fee_blob_time_series
+    ), "The time_l1 of {} is out of bounds for the time series of steady_gas_fee_blob_time_series".format(
+        state["time_l1"]
+    )
+
+    return steady_gas_fee_blob_time_series[state["time_l1"]]
+
+
 def create_experiments(
     TIMESTEPS: int,
     SAMPLES: int,
@@ -24,6 +47,8 @@ def create_experiments(
     DEVIATION_STEADY_STATE_L1: Gwei = 5,
     MEAN_STEADY_STATE_BLOB: Gwei = 30,
     DEVIATION_STEADY_STATE_BLOB: Gwei = 5,
+    L1_SHOCK_AMOUNT: Gwei = 150,
+    BLOB_SHOCK_AMOUNT: Gwei = 150,
 ):
     """Function which builds experiments and runs them
 
@@ -142,73 +167,39 @@ def create_experiments(
         ]
     )
 
+    # NOTE: ideally, this should be mapped either to relative timesteps or L1 time rather than fixed timesteps
+    # so that the scenarios are invariant to number
 
-def steady_state_l1_gas_estimate(state: AztecModelState, steady_gas_fee_l1_time_series):
-    assert state["time_l1"] < len(
-        steady_gas_fee_l1_time_series
-    ), "The time_l1 of {} is out of bounds for the time series of steady_gas_fee_l1_time_series".format(
-        state["time_l1"]
+    initial_time = floor(0.25 * TIMESTEPS)  # Assumption: 25% of timesteps
+    final_time = floor(0.25 * TIMESTEPS)  # Assumption: 25% of timesteps
+
+    zero_timeseries = np.zeros(TIMESTEPS * L1_BUFFER)
+
+    single_shock_gas_fee_l1_time_series = np.zeros(TIMESTEPS * L1_BUFFER)
+    single_shock_gas_fee_blob_time_series = np.zeros(TIMESTEPS * L1_BUFFER)
+
+    single_shock_gas_fee_l1_time_series[0:initial_time] = steady_gas_fee_l1_time_series[
+        0:initial_time
+    ].copy()
+    single_shock_gas_fee_l1_time_series[-final_time:] = steady_gas_fee_l1_time_series[
+        -final_time:
+    ].copy()
+    single_shock_gas_fee_l1_time_series[initial_time : TIMESTEPS - final_time] = (
+        steady_gas_fee_l1_time_series[initial_time : TIMESTEPS - final_time].copy()
+        + L1_SHOCK_AMOUNT
     )
 
-    return steady_gas_fee_l1_time_series[state["time_l1"]]
-
-
-def steady_state_blob_gas_estimate(
-    state: AztecModelState, steady_gas_fee_blob_time_series
-):
-
-    assert state["time_l1"] < len(
-        steady_gas_fee_blob_time_series
-    ), "The time_l1 of {} is out of bounds for the time series of steady_gas_fee_blob_time_series".format(
-        state["time_l1"]
+    single_shock_gas_fee_blob_time_series[0:initial_time] = (
+        steady_gas_fee_blob_time_series[0:initial_time].copy()
+    )
+    single_shock_gas_fee_blob_time_series[-final_time:] = (
+        steady_gas_fee_blob_time_series[-final_time:].copy()
+    )
+    single_shock_gas_fee_blob_time_series[initial_time : TIMESTEPS - final_time] = (
+        steady_gas_fee_blob_time_series[initial_time : TIMESTEPS - final_time].copy()
+        + L1_SHOCK_AMOUNT
     )
 
-    return steady_gas_fee_blob_time_series[state["time_l1"]]
-
-
-#############################################################
-## Begin: single shock gas estimators defined              ##
-#############################################################
-
-
-# NOTE: ideally, this should be mapped either to relative timesteps or L1 time rather than fixed timesteps
-# so that the scenarios are invariant to number
-L1_SHOCK_AMOUNT = 150  # type: Gwei
-BLOB_SHOCK_AMOUNT = 150  # type: Gwei
-initial_time = floor(0.25 * TIMESTEPS)  # Assumption: 25% of timesteps
-final_time = floor(0.25 * TIMESTEPS)  # Assumption: 25% of timesteps
-
-
-zero_timeseries = np.zeros(TIMESTEPS * 10)
-
-single_shock_gas_fee_l1_time_series = np.zeros(TIMESTEPS * 10)
-single_shock_gas_fee_blob_time_series = np.zeros(TIMESTEPS * 10)
-
-single_shock_gas_fee_l1_time_series[0:initial_time] = steady_gas_fee_l1_time_series[
-    0:initial_time
-].copy()
-single_shock_gas_fee_l1_time_series[-final_time:] = steady_gas_fee_l1_time_series[
-    -final_time:
-].copy()
-single_shock_gas_fee_l1_time_series[initial_time : TIMESTEPS - final_time] = (
-    steady_gas_fee_l1_time_series[initial_time : TIMESTEPS - final_time].copy()
-    + L1_SHOCK_AMOUNT
-)
-
-single_shock_gas_fee_blob_time_series[0:initial_time] = steady_gas_fee_blob_time_series[
-    0:initial_time
-].copy()
-single_shock_gas_fee_blob_time_series[-final_time:] = steady_gas_fee_blob_time_series[
-    -final_time:
-].copy()
-single_shock_gas_fee_blob_time_series[initial_time : TIMESTEPS - final_time] = (
-    steady_gas_fee_blob_time_series[initial_time : TIMESTEPS - final_time].copy()
-    + L1_SHOCK_AMOUNT
-)
-
-#############################################################
-## End: single shock gas estimators defined                ##
-#############################################################
 
 #############################################################
 ## Begin: intermittent shock gas estimators defined        ##
