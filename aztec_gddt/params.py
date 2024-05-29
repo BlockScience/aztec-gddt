@@ -341,6 +341,19 @@ def create_experiments(
     ALWAYS_FALSE_SERIES = {i: False for i in range(0, L1_TIME_SERIES_SIZE)}
 
     params = deepcopy(params_starting)
+    # Initial Assumptions: No Censorship
+    params.censorship_series_builder = ALWAYS_FALSE_SERIES
+    # Inital Assumption: No Censorship
+    params.censorship_series_validator = ALWAYS_FALSE_SERIES
+
+    params.gas_estimators = DEFAULT_DETERMINISTIC_GAS_ESTIMATOR
+    params.tx_estimators = DEFAULT_DETERMINISTIC_TX_ESTIMATOR
+
+    params.slash_params = SLASH_PARAMS
+    params.gas_fee_l1_time_series = GAS_FEE_L1_TIME_SERIES_LIST[-1]
+    params.gas_fee_blob_time_series = GAS_FEE_BLOB_TIME_SERIES_LIST[-1]
+
+    return params
 
 
 BASE_RUN_PARAMS = AztecModelParams(
@@ -378,16 +391,14 @@ BASE_RUN_PARAMS = AztecModelParams(
     proving_marketplace_usage_probability=0.7,
     rewards_to_provers=0.3,  # Assumption: Reward Share
     rewards_to_relay=0.01,  # Assumption: Reward Share
-    # Iniital Assumptions: No Censorship
-    censorship_series_builder=ALWAYS_FALSE_SERIES,
-    # Iniital Assumption: No Censorship
-    censorship_series_validator=ALWAYS_FALSE_SERIES,
+    censorship_series_builder=None,
+    censorship_series_validator=None,
     gwei_to_tokens=1e-9,
-    gas_estimators=DEFAULT_DETERMINISTIC_GAS_ESTIMATOR,
-    tx_estimators=DEFAULT_DETERMINISTIC_TX_ESTIMATOR,
-    slash_params=SLASH_PARAMS,
-    gas_fee_l1_time_series=GAS_FEE_L1_TIME_SERIES_LIST[-1],
-    gas_fee_blob_time_series=GAS_FEE_BLOB_TIME_SERIES_LIST[-1],
+    gas_estimators=None,
+    tx_estimators=None,
+    slash_params=None,
+    gas_fee_l1_time_series=None,
+    gas_fee_blob_time_series=None,
     commit_bond_amount=16.0,  # unit: Tokens
     # Assumption: Currently all Sequencers have one op_cost constant to evaluate against
     op_cost_sequencer=0,
@@ -401,60 +412,4 @@ BASE_RUN_PARAMS = AztecModelParams(
     top_up_amount=2,
 )
 
-SINGLE_RUN_PARAMS = AztecModelParams(
-    label="default",
-    timestep_in_blocks=1,
-    uncle_count=0,
-    fee_subsidy_fraction=1.0,  # unused
-    # Assumption: Min Stake, where Sequencers try to top-up if they fall below after slashing
-    minimum_stake=30,
-    l1_blocks_per_day=int(24 * 60 * 60 / 12.08),
-    daily_block_reward=32,
-    # Placeholder Logic
-    logic={},
-    # Phase Durations
-    # Assumption: Sweeping sets upper bound and lower bound per upper bound for fixed / dynamic
-    phase_duration_proposal_min_blocks=0,
-    phase_duration_proposal_max_blocks=3,  # Assumption
-    phase_duration_reveal_min_blocks=0,  # Assumption
-    phase_duration_reveal_max_blocks=3,  # Assumption
-    phase_duration_commit_bond_min_blocks=0,  # Assumption
-    phase_duration_commit_bond_max_blocks=3,  # Assumption
-    phase_duration_rollup_min_blocks=0,  # Assumption
-    phase_duration_rollup_max_blocks=3,  # Assumption
-    phase_duration_race_min_blocks=0,  # Assumption
-    phase_duration_race_max_blocks=2,  # Assumption
-    stake_activation_period=40,  # Assumption: Currently not impactful
-    unstake_cooldown_period=40,  # Assumption: Currently not impactful
-    # Behavioral Parameters
-    final_probability=0.99,
-    # Assumption: We want to set a censorship level for gas prices (which we could create a timeseries with too)
-    gas_threshold_for_tx=250,
-    # Assumption: We want to set a censorship level for blob gas prices (which we could create a timeseries with too)
-    blob_gas_threshold_for_tx=250,
-    # Assumption: Global Probability, could instantiate agents with [0, 1]
-    proving_marketplace_usage_probability=0.7,
-    rewards_to_provers=0.3,  # Assumption: Reward Share
-    rewards_to_relay=0.01,  # Assumption: Reward Share
-    # Iniital Assumptions: No Censorship
-    censorship_series_builder=ALWAYS_FALSE_SERIES,
-    # Iniital Assumption: No Censorship
-    censorship_series_validator=ALWAYS_FALSE_SERIES,
-    gwei_to_tokens=1e-9,
-    gas_estimators=DEFAULT_DETERMINISTIC_GAS_ESTIMATOR,
-    tx_estimators=DEFAULT_DETERMINISTIC_TX_ESTIMATOR,
-    slash_params=SLASH_PARAMS,
-    gas_fee_l1_time_series=GAS_FEE_L1_TIME_SERIES_LIST[-1],
-    gas_fee_blob_time_series=GAS_FEE_BLOB_TIME_SERIES_LIST[-1],
-    commit_bond_amount=16.0,  # unit: Tokens
-    # Assumption: Currently all Sequencers have one op_cost constant to evaluate against
-    op_cost_sequencer=0,
-    # Assumption: Currently all Provers have one op_cost constant to evaluate against
-    op_cost_prover=0,
-    safety_factor_commit_bond=0.0,
-    safety_factor_reveal_content=0.0,
-    safety_factor_rollup_proof=0.0,
-    past_gas_weight_fraction=0.9,
-    fp_determine_profitability="Op Cost",
-    top_up_amount=2,
-)
+SINGLE_RUN_PARAMS = (BASE_RUN_PARAMS, 1000, 1)
