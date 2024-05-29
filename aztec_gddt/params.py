@@ -354,7 +354,7 @@ def create_experiments(
     params["gas_fee_l1_time_series"] = GAS_FEE_L1_TIME_SERIES_LIST[-1]
     params["gas_fee_blob_time_series"] = GAS_FEE_BLOB_TIME_SERIES_LIST[-1]
 
-    return params, INITIAL_STATE
+    return params, INITIAL_STATE, BASE_AGENTS_DICT, zero_timeseries
 
 
 BASE_RUN_PARAMS = AztecModelParams(
@@ -414,4 +414,6 @@ BASE_RUN_PARAMS = AztecModelParams(
 )
 TIMESTEPS = 1000
 SAMPLES = 1
-SINGLE_RUN_PARAMS, INITIAL_STATE = create_experiments(BASE_RUN_PARAMS, TIMESTEPS, 1)
+SINGLE_RUN_PARAMS, INITIAL_STATE, BASE_AGENTS_DICT, zero_timeseries = (
+    create_experiments(BASE_RUN_PARAMS, TIMESTEPS, SAMPLES)
+)
