@@ -7,6 +7,7 @@ import random
 from typing import List
 from copy import deepcopy
 
+
 # Note: For numpy 1.26 and above, random calls go through a generator.
 rng = np.random.default_rng()
 
@@ -342,18 +343,18 @@ def create_experiments(
 
     params = deepcopy(params_starting)
     # Initial Assumptions: No Censorship
-    params.censorship_series_builder = ALWAYS_FALSE_SERIES
+    params["censorship_series_builder"] = ALWAYS_FALSE_SERIES
     # Inital Assumption: No Censorship
-    params.censorship_series_validator = ALWAYS_FALSE_SERIES
+    params["censorship_series_validator"] = ALWAYS_FALSE_SERIES
 
-    params.gas_estimators = DEFAULT_DETERMINISTIC_GAS_ESTIMATOR
-    params.tx_estimators = DEFAULT_DETERMINISTIC_TX_ESTIMATOR
+    params["gas_estimators"] = DEFAULT_DETERMINISTIC_GAS_ESTIMATOR
+    params["tx_estimators"] = DEFAULT_DETERMINISTIC_TX_ESTIMATOR
 
-    params.slash_params = SLASH_PARAMS
-    params.gas_fee_l1_time_series = GAS_FEE_L1_TIME_SERIES_LIST[-1]
-    params.gas_fee_blob_time_series = GAS_FEE_BLOB_TIME_SERIES_LIST[-1]
+    params["slash_params"] = SLASH_PARAMS
+    params["gas_fee_l1_time_series"] = GAS_FEE_L1_TIME_SERIES_LIST[-1]
+    params["gas_fee_blob_time_series"] = GAS_FEE_BLOB_TIME_SERIES_LIST[-1]
 
-    return params
+    return params, INITIAL_STATE
 
 
 BASE_RUN_PARAMS = AztecModelParams(
@@ -411,5 +412,6 @@ BASE_RUN_PARAMS = AztecModelParams(
     fp_determine_profitability="Op Cost",
     top_up_amount=2,
 )
-
-SINGLE_RUN_PARAMS = (BASE_RUN_PARAMS, 1000, 1)
+TIMESTEPS = 1000
+SAMPLES = 1
+SINGLE_RUN_PARAMS, INITIAL_STATE = create_experiments(BASE_RUN_PARAMS, TIMESTEPS, 1)
