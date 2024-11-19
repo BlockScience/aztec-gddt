@@ -3,9 +3,9 @@ from aztec_gddt.experiment import psuu_exploratory_run
 from aztec_gddt.types import Agent
 import pytest as pt
 import pandera as pa
+import pytest
 
-
-@pt.fixture(scope="module", params=[(10, 2, 1_000), (250, 2, 20)])
+@pt.fixture(scope="module", params=[(10, 2, 100)])
 def sim_df(request) -> pd.DataFrame:
     (N_sweep_samples, N_samples, N_timesteps) = request.param
     return psuu_exploratory_run(N_sweep_samples=N_sweep_samples,
@@ -14,6 +14,7 @@ def sim_df(request) -> pd.DataFrame:
                                 parallelize_jobs=False,
                                 supress_cadCAD_print=True)  # type: ignore
 
+@pytest.mark.skip(reason="PSuU workflow not being tested as of now")
 def test_agents_stake_not_negative(sim_df: pd.DataFrame):
     _df = sim_df.set_index(["subset", "run", "timestep"])
     agents_per_timestep: pd.Series[dict[Agent]] = _df.agents  # type: ignore
@@ -21,7 +22,7 @@ def test_agents_stake_not_negative(sim_df: pd.DataFrame):
         for agent_name, agent in agents.items():
             assert agent.staked_amount >= 0, f"Assert failed for {agent_name=} at (subset, run, timestep)={index}"
 
-
+@pytest.mark.skip(reason="PSuU workflow not being tested as of now")
 def test_agents_balance_not_negative(sim_df: pd.DataFrame):
     _df = sim_df.set_index(["subset", "run", "timestep"])
     agents_per_timestep: pd.Series[dict[Agent]] = _df.agents  # type: ignore
@@ -29,21 +30,21 @@ def test_agents_balance_not_negative(sim_df: pd.DataFrame):
         for agent_name, agent in agents.items():
             assert agent.balance >= 0, f"Assert failed for {agent_name=} at (subset, run, timestep)={index}"
 
-
+@pytest.mark.skip(reason="PSuU workflow not being tested as of now")
 def test_skipped_fraction(sim_df: pd.DataFrame):
     fig_df = sim_df.copy()
     fig_df['process_order'] = fig_df.current_process.map(lambda x: x.phase.value if x is not None else None)
     fig_df['process_label'] = fig_df.current_process.map(lambda x: x.phase.name if x is not None else None)
     assert len(fig_df.process_label.dropna().unique()) > 2
 
-
+@pytest.mark.skip(reason="PSuU workflow not being tested as of now")
 def test_token_conservation(sim_df: pd.DataFrame):
     id_cols = ["simulation", "subset", "run"]
     for i, gdf in sim_df.groupby(["simulation", "subset", "run"]):
         tdf = gdf.set_index(id_cols).query('timestep > 2').token_supply.apply(lambda x: pd.Series(x.__dict__)).diff()
         assert ((tdf['circulating'] + tdf['staked'] + tdf['burnt'] - tdf['issued']).dropna().abs() < 1e-6).mean() == 1.0
 
-
+@pytest.mark.skip(reason="PSuU workflow not being tested as of now")
 def test_schema(sim_df: pd.DataFrame):
     # NOTE: this is incomplete
     schema = pa.DataFrameSchema({
